@@ -29,7 +29,7 @@ ssh -D 0.0.0.0:1080 user@10.0.0.40
 ```
 ![image](images/ssh-forward-tunnel-dynamic-port.png)
 # 2.0. Reverse Tunnels
-### For remote port forwarding:
+### ☝️ For remote port forwarding:
 - By default, the listening socket on the server can only bind to the `lo` loopback interface (`127.0.0.1`)
 - Set `GatewayPorts yes` in the server's `sshd_config` to enable binding to other interfaces
 ```console
