@@ -38,6 +38,8 @@ python /usr/share/kerberoast/tgsrepcrack.py wordlist.txt 1-40a50000-Offsec@HTTP~
 
 # Pass the Hash
 
+☝️ **Note**: LM hashes are not used from Windows 10 onwards, string of 32 zeros can used to fill the LM hash portion of the pth-winexe command
+
 ## pth-winexe
 - Local account
 ```console
