@@ -1,3 +1,11 @@
+# Attacking Active Directory
+## Lab Environment
+|Server|OS|Function|
+|---|---|---|
+|dc.lab.vx|Windows Server 2016|Domain Controller|
+|svr.lab.vx|Windows Server 2016|Domain Member Server, SQL Server|
+|client.lab.vx|Windows 10 1607|Domain Member Workstation, SQL Server Management Studio|
+
 # Cached Credential Storage and Retrieval
 **On Kali**: Setup web server to host `mimikatz`
 ```console
