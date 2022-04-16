@@ -621,6 +621,7 @@ mimikatz # kerberos::list
 
 - ☝️ **Note**: In event of `ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)` error, check that the user has permissions to write to the present working directory
 - e.g. Attempting to run `C:\Windows\System32\cmd.exe` as a non-admin user works, but attempting to use mimikatz to save tickets to `C:\Windows\System32\` will result in write errors
+
 ```console
 C:\Windows\System32>mimikatz
 
@@ -690,6 +691,7 @@ Unpacking kerberoast (0~git20200516-0kali2) ...
 Setting up kerberoast (0~git20200516-0kali2) ...
 Processing triggers for kali-menu (2021.4.2) ...
 ```
+
 - Upload the dumped KRB_TGS and run the kerberoast brute force script
 ```console
 ┌──(kali㉿kali)-[~]
