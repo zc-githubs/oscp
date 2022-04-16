@@ -3,6 +3,7 @@
 
 |Server|IP Address|OS|Function|
 |---|---|---|---|
+|kali.vx|192.168.17.10|Kali Linux 2022.1|Attacking Machine|
 |dc.lab.vx|192.168.17.141|Windows Server 2016|Domain Controller|
 |svr.lab.vx|192.168.17.151|Windows Server 2016|Domain Member Server, SQL Server|
 |client.lab.vx|192.168.17.161|Windows 10 1607|Domain Member Workstation, SQL Server Management Studio|
@@ -246,7 +247,7 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 
 # 2. Pass the Hash
 
-☝️ **Note**: LM hashes are not used from Windows 10 onwards, string of 32 zeros can used to fill the LM hash portion of the pth-winexe command
+☝️ **Note**: LM hashes are not used from Windows 10 onwards, a string of 32 zeros can used to fill the LM hash portion of the pth-winexe command
 
 ## 2.1. pth-winexe
 - Domain account
@@ -662,44 +663,6 @@ mimikatz # kerberos::list /export
 ```
 
 ### 3.1.3. Creack the ticket to retrieve service account password (brute force)
-- Setup `kerberoast` on Kali Linux
-
-```console
-┌──(kali㉿kali)-[~]
-└─$ sudo apt update
-Get:1 http://mirror.aktkn.sg/kali kali-rolling InRelease [30.6 kB]
-Get:2 http://mirror.aktkn.sg/kali kali-rolling/main amd64 Packages [18.2 MB]
-Get:3 http://mirror.aktkn.sg/kali kali-rolling/main amd64 Contents (deb) [42.0 MB]
-Get:4 http://mirror.aktkn.sg/kali kali-rolling/contrib amd64 Packages [116 kB]
-Get:5 http://mirror.aktkn.sg/kali kali-rolling/contrib amd64 Contents (deb) [155 kB]
-Get:6 http://mirror.aktkn.sg/kali kali-rolling/non-free amd64 Packages [214 kB]
-Get:7 http://mirror.aktkn.sg/kali kali-rolling/non-free amd64 Contents (deb) [1,005 kB]
-Fetched 61.7 MB in 8s (7,592 kB/s)
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-954 packages can be upgraded. Run 'apt list --upgradable' to see them.
-┌──(kali㉿kali)-[~]
-└─$ sudo apt install kerberoast
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-The following NEW packages will be installed:
-  kerberoast
-0 upgraded, 1 newly installed, 0 to remove and 954 not upgraded.
-Need to get 17.5 kB of archives.
-After this operation, 84.0 kB of additional disk space will be used.
-Get:1 http://http.kali.org/kali kali-rolling/main amd64 kerberoast all 0~git20200516-0kali2 [17.5 kB]
-Fetched 17.5 kB in 1s (29.2 kB/s)
-Selecting previously unselected package kerberoast.
-(Reading database ... 292319 files and directories currently installed.)
-Preparing to unpack .../kerberoast_0~git20200516-0kali2_all.deb ...
-Unpacking kerberoast (0~git20200516-0kali2) ...
-Setting up kerberoast (0~git20200516-0kali2) ...
-Processing triggers for kali-menu (2021.4.2) ...
-```
-
-- Run `tgsrepcrack.py` script
 
 ```console
 ┌──(kali㉿kali)-[~]
