@@ -1,4 +1,6 @@
 # Repository for my OSCP preparation
+## Network Scanning
+- <https://joetanx.github.io/oscp/network-scanning>
 ## SSH Port Forwarding
 - <https://joetanx.github.io/oscp/ssh-port-forwarding>
 ## Attacking Active Directory
