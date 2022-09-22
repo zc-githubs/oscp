@@ -1,9 +1,10 @@
-# netdiscover
+# Network scanning
+## netdiscover
 Ref: <https://manpages.debian.org/bullseye/netdiscover/netdiscover.8.en.html>
 ```console
 sudo netdiscover -r $TARGET_RANGE
 ```
-# nmap
+## nmap
 Ref: <https://manpages.debian.org/bullseye/nmap/nmap.1.en.html>
 
 - `-sn` : Ping Scan - disable port scan
@@ -14,7 +15,7 @@ Ref: <https://manpages.debian.org/bullseye/nmap/nmap.1.en.html>
 - `-sU` : UDP Scan
 - `-sN` / `-sF` / `-sX` : TCP Null / FIN / Xmas scans
 - `-A` : Enables OS detection `-O`, version scanning `-sV`, script scanning `-sC` and traceroute `--traceroute`
-- `-T<0-5>` : Set timing template (higher is faster) <paranoid (0) | sneaky (1) | polite (2) | normal (3) | aggressive (4) | insane (5)>
+- `-T<0-5>` : Set timing template (higher is faster) <paranoid (0), sneaky (1), polite (2), normal (3), aggressive (4), insane (5)>
 
 ## Examples
 Initial network sweep
