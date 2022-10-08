@@ -5,6 +5,8 @@
 - <https://joetanx.github.io/oscp/connect-transfer>
 ## SSH Port Forwarding
 - <https://joetanx.github.io/oscp/ssh-port-forwarding>
+## SQLi Labs
+- <https://joetanx.github.io/oscp/sqli-labs>
 ## Attacking Active Directory
 - <https://joetanx.github.io/oscp/attacking-active-directory>
 ## Miscellaneous Commands
