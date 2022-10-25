@@ -764,7 +764,7 @@ sudo apt -y install kerberoast
 |---|---|
 | 10,000 | 0m4.974s |
 | 100,000 | 0m47.707s |
-| 1000,000 | 8m14.453s |
+| 1,000,000 | 8m14.453s |
 
 #### Crack the ticket
 
