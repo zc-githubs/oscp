@@ -8,6 +8,70 @@
 |svr.lab.vx|192.168.17.151|Windows Server 2016|Domain Member Server, SQL Server|
 |client.lab.vx|192.168.17.161|Windows 10 1607|Domain Member Workstation, SQL Server Management Studio|
 
+## Nmap Scan
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ nmap -p- -sV -Pn 192.168.17.11-13
+Starting Nmap 7.92 ( https://nmap.org ) at 2022-10-25 12:29 +08
+Nmap scan report for 192.168.17.11
+Host is up (0.00090s latency).
+Not shown: 65513 filtered tcp ports (no-response)
+PORT      STATE SERVICE       VERSION
+53/tcp    open  domain        Simple DNS Plus
+88/tcp    open  kerberos-sec  Microsoft Windows Kerberos (server time: 2022-10-25 04:32:29Z)
+135/tcp   open  msrpc         Microsoft Windows RPC
+139/tcp   open  netbios-ssn   Microsoft Windows netbios-ssn
+389/tcp   open  ldap          Microsoft Windows Active Directory LDAP (Domain: lab.vx0., Site: Default-First-Site-Name)
+445/tcp   open  microsoft-ds?
+464/tcp   open  kpasswd5?
+593/tcp   open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+636/tcp   open  tcpwrapped
+3268/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: lab.vx0., Site: Default-First-Site-Name)
+3269/tcp  open  tcpwrapped
+3389/tcp  open  ms-wbt-server Microsoft Terminal Services
+5357/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+5985/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+9389/tcp  open  mc-nmf        .NET Message Framing
+49664/tcp open  msrpc         Microsoft Windows RPC
+49668/tcp open  msrpc         Microsoft Windows RPC
+57911/tcp open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+57912/tcp open  msrpc         Microsoft Windows RPC
+57924/tcp open  msrpc         Microsoft Windows RPC
+57929/tcp open  msrpc         Microsoft Windows RPC
+57960/tcp open  msrpc         Microsoft Windows RPC
+Service Info: Host: DC; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Nmap scan report for 192.168.17.12
+Host is up (0.0011s latency).
+Not shown: 65528 filtered tcp ports (no-response)
+PORT      STATE SERVICE       VERSION
+135/tcp   open  msrpc         Microsoft Windows RPC
+139/tcp   open  netbios-ssn   Microsoft Windows netbios-ssn
+445/tcp   open  microsoft-ds?
+1433/tcp  open  ms-sql-s      Microsoft SQL Server 2019 15.00.2000
+3389/tcp  open  ms-wbt-server Microsoft Terminal Services
+5985/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+49670/tcp open  msrpc         Microsoft Windows RPC
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Nmap scan report for 192.168.17.13
+Host is up (0.0013s latency).
+Not shown: 65528 filtered tcp ports (no-response)
+PORT      STATE SERVICE            VERSION
+135/tcp   open  msrpc              Microsoft Windows RPC
+139/tcp   open  netbios-ssn        Microsoft Windows netbios-ssn
+445/tcp   open  microsoft-ds?
+3389/tcp  open  ssl/ms-wbt-server?
+5040/tcp  open  unknown
+7680/tcp  open  pando-pub?
+49670/tcp open  msrpc              Microsoft Windows RPC
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 3 IP addresses (3 hosts up) scanned in 342.02 seconds
+```
+
 # 1. Cached Credential Storage and Retrieval
 **On Kali**: Setup web server to host `mimikatz`
 
