@@ -1,8 +1,11 @@
 # DVWA - SQL Injection
+
 Based on <https://github.com/digininja/DVWA>
+
 With reference to <https://github.com/mrudnitsky/dvwa-guide-2019>
 
 ## Methodology:
+
 1. Identity query vulnerability
 2. Identify injection vector
 3. Identify number of columns (range) using `ORDER BY`
