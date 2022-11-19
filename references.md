@@ -63,6 +63,8 @@ Vulnhub-CTF-Writeups:
 
 <https://github.com/Ignitetechnologies/Vulnhub-CTF-Writeups>
 
+### Vulnhub boxes:
+
 |Name|Link|Walkthrough|
 |---|---|---|
 |hackme1|<https://www.vulnhub.com/entry/hackme-1,330/>|<https://www.hackingarticles.in/hackme-1-vulnhub-walkthrough/>|
@@ -73,6 +75,24 @@ Vulnhub-CTF-Writeups:
 |DarkHole2|<https://www.vulnhub.com/entry/darkhole-2,740/>||
 |Corrosion1|<https://www.vulnhub.com/entry/corrosion-1,730/>||
 |Corrosion2|<https://www.vulnhub.com/entry/corrosion-2,745/>|<https://05t3.github.io/posts/Corrosion/>|
+
+### TryHackMe Rooms:
+
+|Room|Link|
+|---|---|
+|Crack the hash|<https://tryhackme.com/room/crackthehash>|
+|Windows PrivEsc|<https://tryhackme.com/room/windows10privesc>|
+|Linux PrivEsc|<https://tryhackme.com/room/linuxprivesc>|
+|Buffer Overflow Prep|<https://tryhackme.com/room/bufferoverflowprep>|
+
+### Tib3rius References:
+
+|Page|Link|
+|---|---|
+|Windows-PrivEsc-Setup|<https://github.com/Tib3rius/Windows-PrivEsc-Setup/blob/master/setup.bat>|
+|Active Directory Exploitation Cheat Sheet|<https://github.com/Tib3rius/Active-Directory-Exploitation-Cheat-Sheet>|
+|windowsprivchecker|<https://github.com/Tib3rius/windowsprivchecker>|
+|linuxprivchecker|<https://github.com/Tib3rius/linuxprivchecker>|
 
 # 5. Misc
 
