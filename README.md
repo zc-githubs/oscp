@@ -1,31 +1,12 @@
 # Repository for my OSCP preparation
 
-## Network Scanning
-
-- <https://joetanx.github.io/oscp/network-scanning>
-
-## Commands for establishing connections and transfering files
-
-- <https://joetanx.github.io/oscp/connect-transfer>
-
-## SSH Port Forwarding
-
-- <https://joetanx.github.io/oscp/ssh-port-forwarding>
-
-## SQLi Labs
-
-- <https://joetanx.github.io/oscp/sqli-labs>
-
-## DVWA
-
-### DVWA - SQL Injection
-
-- <https://joetanx.github.io/oscp/dvwa-sqli>
-
-## Attacking Active Directory
-
-- <https://joetanx.github.io/oscp/attacking-active-directory>
-
-## Miscellaneous Commands
-
-- <https://joetanx.github.io/oscp/misc-commands>
+|Topic|Link|
+|---|---|
+|Network Scanning|<https://github.com/joetanx/oscp/blob/main/network-scanning.md>|
+|Commands for establishing connections and transfering files|<https://github.com/joetanx/oscp/blob/main/connect-transfer.md>|
+|SSH Port Forwarding|<https://github.com/joetanx/oscp/blob/main/ssh-port-forwarding.md>|
+|SQLi Labs|<https://github.com/joetanx/oscp/blob/main/sqli-labs.md>|
+|DVWA - SQL Injection|<https://github.com/joetanx/oscp/blob/main/dvwa-sqli.md>|
+|Attacking Active Directory|<https://github.com/joetanx/oscp/blob/main/attacking-active-directory.md>|
+|Miscellaneous Commands|<https://github.com/joetanx/oscp/blob/main/misc-commands.md>|
+|References|<https://github.com/joetanx/oscp/blob/main/references.md>|
