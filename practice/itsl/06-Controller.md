@@ -1,3 +1,9 @@
+# 0. Links
+
+||||
+|---|---|---|
+|[Reddit](https://www.reddit.com/r/oscp/comments/x52uqy/i_made_another_vulnerable_vm_can_you_crack_it_and/)|[YouTube](https://www.youtube.com/watch?v=gT4XuThAlQ4)|[Download](https://drive.google.com/file/d/1uAWR1oZtpxRSAjhAONXCqUqR3wJckKy4/view)|
+
 # 1. nmap scan
 
 ```console
