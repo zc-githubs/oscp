@@ -1,3 +1,9 @@
+# 0. Links
+
+||||
+|---|---|---|
+|[Reddit](https://www.reddit.com/r/oscp/comments/qi25ax/another_free_practice_windows_machine_i_challenge/)|[YouTube](https://www.youtube.com/watch?v=W57Gw5cdV4M)|[Download](https://drive.google.com/file/d/1xxvmgUgL-uftdJ9noOpxDUN3UZeIcTxU/view)|
+
 # 1. nmap scan
 
 ```console
