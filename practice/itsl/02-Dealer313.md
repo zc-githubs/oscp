@@ -1,3 +1,9 @@
+# 0. Links
+
+||||
+|---|---|---|
+|[Reddit](https://www.reddit.com/r/oscp/comments/qd8w9v/need_more_practice_hack_this_windows_practice_box/)|[YouTube](https://www.youtube.com/watch?v=PBlmcWVNBqY)|[Download](https://drive.google.com/file/d/1dRaQ8885JNwsWqYIxBURglkyjtGO3jjZ/view)|
+
 # 1. nmap scan
 
 ```console
