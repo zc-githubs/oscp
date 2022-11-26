@@ -1,3 +1,9 @@
+# 0. Links:
+
+||||
+|---|---|---|
+|[Reddit](https://www.reddit.com/r/oscp/comments/q8ctj5/are_you_ready_want_to_practice_windows_here_is_a/)|[YouTube](https://www.youtube.com/watch?v=fxcGPsq8h2g)|[Download](https://drive.google.com/file/d/1NPCXBDFc7nVmcyApjaqG8EBXrpaqcgBa/view)|
+
 # 1. nmap scan
 
 ```console
