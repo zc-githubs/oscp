@@ -128,7 +128,7 @@ The 46697.py expolits Remote Mouse to launch `calc.exe`; the line `SendString("c
 
 # 3. Getting a shell
 
-Generate reverse shell executable and setup web server endpoint on Kali:
+Generate reverse shell executable and and place in web server root:
 
 (Apache2 is already running with DocumentRoot at `/var/www/html`)
 
