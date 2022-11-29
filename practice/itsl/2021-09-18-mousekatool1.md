@@ -130,7 +130,7 @@ url = "http://{}:8039/op=command".format(ip)
 
 # 4. Getting a shell
 
-Generate reverse shell executable and setup web server endpoint on Kali:
+Generate reverse shell executable and place in web server root:
 
 (Apache2 is already running with DocumentRoot at `/var/www/html`)
 
