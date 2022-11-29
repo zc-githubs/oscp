@@ -15,7 +15,9 @@ nc -nlvp 4444
 
 Prepare files to web server root
 
-(Apache2 is already running with DocumentRoot at `/var/www/html`)
+☝️ Apache2 is already running with DocumentRoot at `/var/www/html`
+
+If Kali isn't setup as web server, use `python3 -m http.server 80 &> /dev/null &` to run a web server endpoint, the web server root will be the `pwd` where the command was run
 
 ### Mimikatz:
 
