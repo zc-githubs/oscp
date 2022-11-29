@@ -122,6 +122,7 @@ All looks lost: it doesn't seem like there are any other exploits available, and
 ☝️ **Important learning point from this box:**
 - Be sure to check out the banner information (if any) returned from the scan
 - Port 1978 returned a gibberish banner `SIN 15win nop nop 300`, which upon googling, leads you to the [Remote Mouse exploit](https://www.exploit-db.com/raw/46697)
+- Another method is to google for `1978 site:www.exploit-db.com`, which will also return the Remote Mouse exploit as a result
 
 The 46697.py expolits Remote Mouse to launch `calc.exe`; the line `SendString("calc.exe",ip)` can be modified to run other commands.
 
