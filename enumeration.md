@@ -4,7 +4,10 @@ The motto of OffSec is **try harder**, but this practicially means **enumerate h
 
 ❗Try harder ≠ brute force❗
 
-Try harder means you missed something that was not enumerated, and this can sometimes mean to run the same [web scan](#2-web-scanning) with a bigger wordlist
+Try harder means you missed something that was not enumerated, and this can sometimes mean:
+
+1. There a a port in nmap result that is not checked, just `nc` to the port and see what it says
+2. Run the same [web scan](#2-web-scanning) with a bigger wordlist - there will never be an empty web server with default web page, there must be something in it
 
 # 1. Network scanning
 
