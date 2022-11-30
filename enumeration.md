@@ -1,3 +1,11 @@
+# ❗ENUMERATE HARDER❗
+
+The motto of OffSec is **try harder**, but this practicially means **enumerate harder**
+
+❗Try harder ≠ brute force❗
+
+Try harder means you missed something that was not enumerated, and this can sometimes mean to run the same [web scan](#2-web-scanning) with a bigger wordlist
+
 # 1. Network scanning
 
 ## 1.1. netdiscover
@@ -109,8 +117,9 @@ gobuster <command> -u <URL> -w <wordlist> -t <concurrent-threads> -o <output-fil
 ```
 
 Example:
-(using default threads of 10)
 
 ```console
-gobuster dir -u http://10.0.88.39:2390 -w /usr/share/seclists/Discovery/Web-Content/combined_words.txt -o 10.0.88.39-2390-combined_words.txt
+gobuster dir -u http://10.0.88.39:2390 -w /usr/share/seclists/Discovery/Web-Content/combined_words.txt
 ```
+
+☝️ `gobuster` is observed to be significantly faster than `dirb` thanks to the threaded scan (default: 10 threads)
