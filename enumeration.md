@@ -61,7 +61,7 @@ Web discovery wordlists from [SecLists](https://github.com/danielmiessler/SecLis
 
 Install [SecLists](https://www.kali.org/tools/seclists/) in Kali with `sudo apt -y install SecList`
 
-`combined_words.txt` - 128k entries, use for discovering files, is a combination of the following wordlists:
+`combined_words.txt` - 128k entries, is a combination of the following wordlists:
 - big.txt
 - common.txt
 - raft-large-words-lowercase.txt
@@ -71,7 +71,7 @@ Install [SecLists](https://www.kali.org/tools/seclists/) in Kali with `sudo apt 
 - raft-small-words-lowercase.txt
 - raft-small-words.txt
 
-`combined_directories.txt` - 1.37m entries, use for discovering files and directories, is a combination of the following wordlists:
+`combined_directories.txt` - 1.37m entries, is a combination of the following wordlists:
 
 - apache.txt
 - combined_words.txt
@@ -85,6 +85,8 @@ Install [SecLists](https://www.kali.org/tools/seclists/) in Kali with `sudo apt 
 - raft-medium-directories.txt
 - raft-small-directories-lowercase.txt
 - raft-small-directories.txt
+
+☝️ The description for `combined_words.txt` says it's use for files, but it is commonly useful for directories as well
 
 ## 2.2. dirb
 
