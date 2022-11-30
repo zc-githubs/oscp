@@ -105,12 +105,12 @@ dirb https://10.0.88.39:2390 /usr/share/seclists/Discovery/Web-Content/combined_
 Syntax:
 
 ```console
-gobuster <command> -u <URL> -w <wordlist> -t <concurrent-threads>
+gobuster <command> -u <URL> -w <wordlist> -t <concurrent-threads> -o <output-file>
 ```
 
 Example:
 (using default threads of 10)
 
 ```console
-gobuster dir -u http://10.0.88.39:2390 -w /usr/share/seciists/Discovery/Web-Content/combined_words.txt
+gobuster dir -u http://10.0.88.39:2390 -w /usr/share/seclists/Discovery/Web-Content/combined_words.txt -o 10.0.88.39-2390-combined_words.txt
 ```
