@@ -1,6 +1,6 @@
-# Network scanning
+# 1. Network scanning
 
-## netdiscover
+## 1.1. netdiscover
 
 netdiscover uses ARP to scan the network i.e. the scanner needs to be in the same subnet to work
 
@@ -9,7 +9,7 @@ Ref: <https://manpages.debian.org/bullseye/netdiscover/netdiscover.8.en.html>
 ```console
 sudo netdiscover -r $TARGET_RANGE
 ```
-## nmap
+## 1.2. nmap
 
 Ref: <https://manpages.debian.org/bullseye/nmap/nmap.1.en.html>
 
@@ -43,9 +43,9 @@ Scan with more details (note that using `-p-` with `-A` will take a long time)
 nmap -A $TARGET_IP
 ```
 
-# Web Scanning
+# 2. Web scanning
 
-## Wordlist
+## 2.1. Wordlists
 
 Default dirb wordlist: `/usr/share/dirb/wordlists/common.txt`
 
@@ -78,7 +78,7 @@ Install [SecLists](https://www.kali.org/tools/seclists/) in Kali with `sudo apt 
 - raft-small-directories-lowercase.txt
 - raft-small-directories.txt
 
-## dirb
+## 2.2. dirb
 
 Syntax:
 
@@ -100,7 +100,7 @@ dirb https://10.0.88.39:2390
 dirb https://10.0.88.39:2390 /usr/share/seclists/Discovery/Web-Content/combined_words.txt
 ```
 
-## gobuster
+## 2.3. gobuster
 
 Syntax:
 
