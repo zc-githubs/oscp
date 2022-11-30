@@ -71,6 +71,8 @@ Install [SecLists](https://www.kali.org/tools/seclists/) in Kali with `sudo apt 
 - raft-small-words-lowercase.txt
 - raft-small-words.txt
 
+☝️ The description for `combined_words.txt` says it's use for files, but it is commonly useful for directories as well
+
 `combined_directories.txt` - 1.37m entries, is a combination of the following wordlists:
 
 - apache.txt
@@ -86,7 +88,7 @@ Install [SecLists](https://www.kali.org/tools/seclists/) in Kali with `sudo apt 
 - raft-small-directories-lowercase.txt
 - raft-small-directories.txt
 
-☝️ The description for `combined_words.txt` says it's use for files, but it is commonly useful for directories as well
+☝️ `combined_directories.txt` is such a huge list that you either end up crashing the web server or having to reduce the scan rate; either ways use caution and keep in mind that it may not be effective to use this list
 
 ## 2.2. dirb
 
