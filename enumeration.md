@@ -148,4 +148,10 @@ Example:
 gobuster dir -u http://10.0.88.39:2390 -w /usr/share/seclists/Discovery/Web-Content/combined_words.txt
 ```
 
-☝️ `gobuster` is observed to be significantly faster than `dirb` thanks to the threaded scan (default: 10 threads)
+## ☝️ dirb vs gobuster
+
+`gobuster` is observed to be significantly faster than `dirb` thanks to the threaded scan (default: 10 threads)
+
+However, `dirb` does recursive enumeration (i.e. `\word\word\...`), `gobuster` does not
+
+Recursive + single-thread means that `dirb` can be crawling slow with large wordlists
