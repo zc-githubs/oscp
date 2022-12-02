@@ -71,15 +71,17 @@ Vulnhub-CTF-Writeups:
 |hackme2|<https://www.vulnhub.com/entry/hackme-2,618/>||
 |From SQL injection to Shell|<https://www.vulnhub.com/entry/pentester-lab-from-sql-injection-to-shell,80/>|<https://www.hackingarticles.in/hack-pentester-lab-sql-injection-shell-vm/>|
 |From SQL injection to Shell II|<https://www.vulnhub.com/entry/pentester-lab-from-sql-injection-to-shell-ii,69/>|<https://www.hackingarticles.in/hack-pentester-lab-sql-injection-shell-ii-blind-sql-injection/>|
-|DarkHole1|<https://www.vulnhub.com/entry/darkhole-1,724/>||
-|DarkHole2|<https://www.vulnhub.com/entry/darkhole-2,740/>||
-|Corrosion1|<https://www.vulnhub.com/entry/corrosion-1,730/>||
+|DarkHole1|<https://www.vulnhub.com/entry/darkhole-1,724/>|<https://resources.infosecinstitute.com/topic/darkhole-1-vulnhub-ctf-walkthrough/><br><https://nepcodex.com/2021/08/darkhole-walkthrough-vulnhub-writeup/>|
+|DarkHole2|<https://www.vulnhub.com/entry/darkhole-2,740/>|<https://nepcodex.com/2021/09/darkhole_2-walkthrough-vulnhub-writeup/>|
+|Corrosion1|<https://www.vulnhub.com/entry/corrosion-1,730/>|<https://grumpygeekwrites.wordpress.com/2021/08/26/vulnhub-corrosion-walk-through-tutorial-writeup/>|
 |Corrosion2|<https://www.vulnhub.com/entry/corrosion-2,745/>|<https://05t3.github.io/posts/Corrosion/>|
-|Victim1|<https://www.vulnhub.com/entry/victim-1,469/>||
-|CewlKid|<https://www.vulnhub.com/entry/cewlkid-1,559/>||
-|FirstBlood|<https://www.vulnhub.com/entry/firstblood-1,564/>||
+|Victim1|<https://www.vulnhub.com/entry/victim-1,469/>|<https://resources.infosecinstitute.com/topic/victim-1-vulnhub-ctf-walkthrough/><br><https://www.hackingarticles.in/victim1-vulnhub-walkthrough/><br><https://constantinoallexus.medium.com/victim-1-vulnhub-walkthrough-a92c363eca62><br><https://www.alickgardiner.com/victim1/>|
+|CewlKid|<https://www.vulnhub.com/entry/cewlkid-1,559/>|<https://shubham-singh.medium.com/cewlkid-1-walkthrough-vulnhub-e2943f5a7e99>|
+|FirstBlood|<https://www.vulnhub.com/entry/firstblood-1,564/>|<https://www.infosecarticles.com/first-blood-vulnhub-walkthrough/>|
 |Relevant|<https://www.vulnhub.com/entry/firstblood-1,564/>|<https://www.doyler.net/security-not-included/vulnhub-relevant-walkthrough>|
-|Praying|<https://www.vulnhub.com/entry/praying-1,575/>||
+|Praying|<https://www.vulnhub.com/entry/praying-1,575/>|<https://grumpygeekwrites.wordpress.com/2020/10/27/praying-1-vulnhub-walk-through/>|
+|Blogger|<https://www.vulnhub.com/entry/blogger-1,675/>|<https://infosecwriteups.com/vulnhub-blogger-1-walkthrough-ac7374f338f4><br><https://grumpygeekwrites.wordpress.com/2021/04/26/blogger-vulnhub-walk-through-tutorial/>|
+|VulnCMS|<https://www.vulnhub.com/entry/vulncms-1,710/>|<https://infosecwriteups.com/vulnhub-vulncms-1-walkthrough-d4f8a071e61>|
 
 ### TryHackMe Rooms:
 
