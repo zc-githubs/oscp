@@ -75,6 +75,11 @@ Vulnhub-CTF-Writeups:
 |DarkHole2|<https://www.vulnhub.com/entry/darkhole-2,740/>||
 |Corrosion1|<https://www.vulnhub.com/entry/corrosion-1,730/>||
 |Corrosion2|<https://www.vulnhub.com/entry/corrosion-2,745/>|<https://05t3.github.io/posts/Corrosion/>|
+|Victim1|<https://www.vulnhub.com/entry/victim-1,469/>||
+|CewlKid|<https://www.vulnhub.com/entry/cewlkid-1,559/>||
+|FirstBlood|<https://www.vulnhub.com/entry/firstblood-1,564/>||
+|Relevant|<https://www.vulnhub.com/entry/firstblood-1,564/>|<https://www.doyler.net/security-not-included/vulnhub-relevant-walkthrough>|
+|Praying|<https://www.vulnhub.com/entry/praying-1,575/>||
 
 ### TryHackMe Rooms:
 
