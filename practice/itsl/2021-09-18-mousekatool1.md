@@ -54,26 +54,6 @@ PORT      STATE SERVICE       VERSION
 49669/tcp open  msrpc         Microsoft Windows RPC
 49689/tcp open  msrpc         Microsoft Windows RPC
 ⋮
-Host script results:
-| smb2-time:
-|   date: 2022-11-27T02:42:42
-|_  start_date: 2022-11-27T02:39:44
-| smb-security-mode:
-|   account_used: guest
-|   authentication_level: user
-|   challenge_response: supported
-|_  message_signing: disabled (dangerous, but default)
-| smb2-security-mode:
-|   311:
-|_    Message signing enabled but not required
-|_clock-skew: mean: 1h36m00s, deviation: 3h34m41s, median: 0s
-| smb-os-discovery:
-|   OS: Windows 10 Pro 14393 (Windows 10 Pro 6.3)
-|   OS CPE: cpe:/o:microsoft:windows_10::-
-|   Computer name: mousekatoo
-|   NetBIOS computer name: MOUSEKATOO\x00
-|   Workgroup: WORKGROUP\x00
-|_  System time: 2022-11-26T18:42:43-08:00
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 145.22 seconds
