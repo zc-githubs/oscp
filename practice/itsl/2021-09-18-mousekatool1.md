@@ -54,9 +54,6 @@ PORT      STATE SERVICE       VERSION
 49669/tcp open  msrpc         Microsoft Windows RPC
 49689/tcp open  msrpc         Microsoft Windows RPC
 ⋮
-
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-Nmap done: 1 IP address (1 host up) scanned in 145.22 seconds
 ```
 
 # 2. Checking for exploits
