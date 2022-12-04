@@ -577,7 +577,7 @@ nt authority\system
 
 Excellent, we now have SYSTEM-level shell on the target
 
-# 6. Getting the proof
+# 5. Getting the proof
 
 Now all that's left is to search and retrieve the flag:
 
