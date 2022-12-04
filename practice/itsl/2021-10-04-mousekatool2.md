@@ -183,7 +183,7 @@ NT AUTHORITY\NTLM Authentication                              Well-known group S
 Mandatory Label\High Mandatory Level                          Label            S-1-16-12288
 ```
 
-Excellent, we now have shell on the target, and it is an admin shell (High Mandatory Level)
+Excellent, we now have shell on the target, and the user is member of `BUILTIN\Administrators`
 
 # 4. Getting the proof
 
