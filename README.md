@@ -4,7 +4,7 @@
 |---|---|
 |Enumerating target|<https://github.com/joetanx/oscp/blob/main/enumeration.md>|
 |Getting shells and transferring files to/from target|<https://github.com/joetanx/oscp/blob/main/connect-transfer.md>|
-|Port forwarding|<https://github.com/joetanx/oscp/blob/main/ssh-port-forwarding.md>|
+|Port forwarding|<https://github.com/joetanx/oscp/blob/main/port-forwarding.md>|
 |SQLi labs|<https://github.com/joetanx/oscp/blob/main/sqli-labs.md>|
 |DVWA - SQL injection|<https://github.com/joetanx/oscp/blob/main/dvwa-sqli.md>|
 |Attacking Active Directory|<https://github.com/joetanx/oscp/blob/main/attacking-active-directory.md>|
