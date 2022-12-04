@@ -185,7 +185,7 @@ Mandatory Label\High Mandatory Level                          Label            S
 
 Excellent, we now have shell on the target, and it is an admin shell (High Mandatory Level)
 
-# 5. Getting the proof
+# 4. Getting the proof
 
 Since we know that the proof is a file on the user's desktop, let's get straight to it
 
