@@ -92,7 +92,7 @@ Nmap done: 3 IP addresses (3 hosts up) scanned in 342.02 seconds
 
 # 1. AS-REP Roasting
 
-AS-REP is a quick way to scan for entry into the domain when you do not know much about the domain yet
+AS-REP Roasting is a quick way to scan for entry into the domain when you do not know much about the domain yet
 
 ## 1.1. The theory
 
