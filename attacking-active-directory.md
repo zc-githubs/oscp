@@ -98,7 +98,7 @@ AS-REP Roasting is a quick way to scan for entry into the domain when you do not
 
 AS-REP Roasting is a technique that allows retrieving password hashes for users that have Kerberos preauthentication disabled
 
-![image](https://user-images.githubusercontent.com/90442032/206058102-6eb7dd07-d78e-4ab0-b83e-4c93f8a7ffb0.png)
+![image](https://user-images.githubusercontent.com/90442032/206067672-427d6cda-a34a-4220-875d-a0288ea3c42d.png)
 
 When preauthentication is **enabled**:
 - A user sends an Authentication Server Request (`AS-REQ`) message to the DC
