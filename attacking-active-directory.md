@@ -494,22 +494,15 @@ SVR
 ```cmd
 C:\Users\mike>setspn -Q */*
 Checking domain DC=lab,DC=vx
-CN=krbtgt,CN=Users,DC=lab,DC=vx
-        ⋮
-CN=SVR,CN=Computers,DC=lab,DC=vx
-        ⋮
-CN=CLIENT,CN=Computers,DC=lab,DC=vx
-        ⋮
-CN=DC,OU=Domain Controllers,DC=lab,DC=vx
-        ⋮
+CN=ADFS Service Account,CN=Users,DC=lab,DC=vx
+        host/fs.lab.vx
 CN=MSSQL Service Account,OU=OSCP Lab,DC=lab,DC=vx
         MSSQLSvc/SVR.lab.vx:1433
         MSSQLSvc/SVR.lab.vx
-
-Existing SPN found!
+⋮
 ```
 
-## 4.2. Extract service ticket hashs
+## 4.2. Extract service ticket hashes
 
 ### 4.2.1. Extract on Windows target using Invoke-Kerberoast script from powershell-empire
 
