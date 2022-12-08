@@ -4,7 +4,8 @@
 |---|---|
 |[YouTube](https://www.youtube.com/watch?v=unDGYDe1ljw)|[Download](https://drive.google.com/file/d/1uTJDtFDX9WkhUt-HEuZ5iNS-3CmHMP0m/view)|
 
-# 1. nmap scan
+<details>
+  <summary><h1>1. Nmap Scan</h1></summary>
 
 ```console
 ┌──(root㉿kali)-[~]
@@ -88,6 +89,8 @@ PORT      STATE SERVICE        VERSION
 ⋮
 ```
 
+</details>
+ 
 # 2. Checking for exploits
 
 At first look, it appears that `21/ftp`, `80/http` and `443/https` are easy targets.
