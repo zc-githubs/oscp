@@ -103,10 +103,9 @@ Vulnhub-CTF-Writeups:
 
 # 5. Misc
 
-Totes5706 Cheat Sheet:
-
-<https://github.com/Totes5706/Offensive-Security-Cheat-Sheet>
-
-Totes5706 Reddit:
-
-<https://www.reddit.com/r/oscp/comments/yolq08/oscp_exam_pass_70_points_ad_1_root/>
+|Page|Link|
+|---|---|
+|Totes5706 Cheat Sheet|<https://github.com/Totes5706/Offensive-Security-Cheat-Sheet>|
+|Totes5706 Reddit|<https://www.reddit.com/r/oscp/comments/yolq08/oscp_exam_pass_70_points_ad_1_root/>|
+|Active Directory Attack Cheat Sheet|<https://medium.com/@dw3113r/active-directory-attack-cheat-sheet-ea9e9744028d>|
+|Review by hackin7|<https://dev.to/hackin7/how-to-oscp-labs-part-1-getting-started-480m><br><https://dev.to/hackin7/how-to-oscp-labs-part-2-lab-time-standards-to-meet-231o>|
