@@ -4,7 +4,8 @@
 |---|---|
 |[YouTube](https://www.youtube.com/watch?v=MD5GIbatPg8)|[Download](https://drive.google.com/file/d/1K5_YA76DVtICHst2FlLVjq68dgNkMgRX/view)|
 
-# 1. nmap scan
+<details>
+  <summary><h1>1. Nmap Scan</h1></summary>
 
 ```console
 ┌──(root㉿kali)-[~]
@@ -56,6 +57,8 @@ PORT      STATE SERVICE       VERSION
 ⋮
 ```
 
+</details>
+ 
 # 2. Checking for exploits
 
 Port `8039` returned HTTP data
