@@ -9,7 +9,8 @@
 |svr.lab.vx|192.168.17.12|Windows Server 2022|Domain Member Server, SQL Server|
 |client.lab.vx|192.168.17.13|Windows 11|Domain Member Workstation, SQL Server Management Studio|
 
-## Nmap Scan
+<details>
+  <summary><h1>Nmap Scan</h1></summary>
 
 ```console
 ┌──(root㉿kali)-[~]
@@ -89,6 +90,8 @@ Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 3 IP addresses (3 hosts up) scanned in 342.02 seconds
 ```
+
+</details>
 
 # 1. AS-REP Roasting
 
