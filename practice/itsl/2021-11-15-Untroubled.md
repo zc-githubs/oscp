@@ -4,7 +4,8 @@
 |---|---|---|
 |[Reddit](https://www.reddit.com/r/oscp/comments/qsde6o/oscp_like_windows_vm_untroubled_can_you_crack/)|[YouTube](https://www.youtube.com/watch?v=FhXPLXfbPdo)|[Download](https://drive.google.com/file/d/1j2XB-dRoeaSps_rgov4NUiqnTvig58oL/view)|
 
-# 1. nmap scan
+<details>
+  <summary><h1>1. Nmap Scan</h1></summary>
 
 ```console
 ┌──(kali㉿kali)-[~]
@@ -103,6 +104,8 @@ PORT      STATE SERVICE       VERSION
 49678/tcp open  msrpc         Microsoft Windows RPC
 ⋮
 ```
+
+</details>
 
 # 2. Checking for exploits
 
