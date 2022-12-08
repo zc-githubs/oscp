@@ -146,7 +146,7 @@ Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 [*] No passwords were discovered :'(
 ```
 
-## 1.3. Use GetNPUsers.py to get password hash
+## 1.3. Use GetNPUsers.py to get password hashes
 
 ☝️ All Impacket scripts can be called in Kali with `impacket-<script name>`, there's no need to do `python3 /usr/share/doc/python3-impacket/examples/<script name>.py`
 
@@ -166,7 +166,7 @@ Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 $krb5asrep$23$mike@LAB.VX:16b0315eceaf3c550a69927d62456d9d$821259e1e9980ad1d2fe42f2278c09ebec3aa95cfb361df26ea424d544a79a0f01ee594a13f486086976f469671319da5b60fd334ce103c87d3ac57082820063bad67799e3670e8774594d7a7138caa8892e0cfaec067c19aaf8b32be13f92d302ba0f3b1875a4b030002e447579d3950a9843012c53687ce1342d1a2da0de3dad94b54f56bcfc7d3e07a09b91d81ca94d80690f9db7e0921c20d223f4b6db66ad94b3aa5a89b392fedd8e69428ea27359f80b7c00df0c8075f7fa1543c9f27956e5d5950e14b4405d7c5aeec255d3df1ecabdc05e5a0a892c00cb2e415e8cf7
 ```
 
-## 1.4. User hashcat to crack the hashes
+## 1.4. Use hashcat to crack the hashes
 
 ```console
 ┌──(root㉿kali)-[~]
