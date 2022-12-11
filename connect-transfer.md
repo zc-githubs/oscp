@@ -5,11 +5,12 @@
 ```console
 nc -nlvp 4444
 ```
-
-- `-n` : numeric-only IP addresses, no DNS
-- `-l` : listen mode, for inbound connects
-- `-v` : verbose [use twice to be more verbose]
-- `-p` : local port number (port numbers can be individual or ranges: lo-hi [inclusive])
+|   |   |
+|---|---|
+|`-n`|numeric-only IP addresses, no DNS|
+|`-l`|listen mode, for inbound connects|
+|`-v`|verbose [use twice to be more verbose]|
+|`-p`|local port number (port numbers can be individual or ranges: lo-hi [inclusive])|
 
 ## 1.2. Prepare payload transfer
 
