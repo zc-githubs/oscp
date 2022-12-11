@@ -2,7 +2,7 @@
 |   |   |
 |---|---|
 |`-L, --location`|Redo the request on the new location if the server reports that the requested page has moved to a different location (i.e. follow redirection)|
-|`-k, --insecure`|Proceed even if connection is insecure (i.e. ignore certificate errors|
+|`-k, --insecure`|Proceed even if connection is insecure (i.e. ignore certificate errors)|
 |`-o, --output <file>`|Write output to <file> instead of stdout|
 |`-O, --remote-name`|Write output to a local file named like the remote file we get|
 |`-H, --header <header/@file>`|Header to include in the request when sending HTTP to a server<br>e.g. `-H 'Content-Type:application/x-www-form-urlencoded'`, `-H 'Content-Type:multipart/form-data'`|
