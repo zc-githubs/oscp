@@ -83,7 +83,7 @@ But cURL-ing it gives `404`
 <HTML><HEAD><TITLE>404 Not Found</TITLE></HEAD><BODY><H1>404 Not Found</H1>The requested URL ThinVNC.ini was not found on this server.<P></BODY></HTML>
 ```
 
-☝️ cURL and browsers collapses `../` traversals, always double-quote the URL and escape the '/' characters 
+☝️ cURL and browsers collapses `../` traversals, **always double-quote the URL and escape the `/` characters**
 
 The user/password found using a successful cURL:
 
