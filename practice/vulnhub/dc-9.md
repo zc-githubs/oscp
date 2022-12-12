@@ -457,7 +457,9 @@ Bingo! The port knock sequence is `7469 8475 9842`
 
 # 6. Looking for SSH login
 
-Combined use of `knock` and `hydra` found 3 functional logins to SSH
+Store the lists of usernames and passwords in `usernames.txt` and `passwords.txt` respectively
+
+The combined use of `knock` and `hydra` found 3 functional logins to SSH
 
 ```console
 ┌──(root㉿kali)-[~]
