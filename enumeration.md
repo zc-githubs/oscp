@@ -27,7 +27,7 @@ Ref: <https://manpages.debian.org/bullseye/nmap/nmap.1.en.html>
 - `-sn` : Ping Scan - disable port scan
 - `-Pn` : Treat all hosts as online -- skip host discovery
 - `-p $PORT_RANGE` : Only scan specified ports; `-p-` scans all ports
-  - By default, Nmap scans the top **1,000 ports** for each scan protocol requested (<https://nmap.org/book/performance-port-selection.html>)
+  - By default, Nmap scans the top **1,000 ports** for each scan protocol requested ([Ref: Port Selection Data and Strategies](https://nmap.org/book/performance-port-selection.html))
 - `-sV` : Probe open ports to determine service/version info
 - `-sS` / `-sT` / `-sA` / `-sW` / `-sM` : TCP SYN / Connect() / ACK / Window / Maimon scans
 - `-sU` : UDP Scan
