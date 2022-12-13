@@ -24,36 +24,27 @@ sudo netdiscover -r $TARGET_RANGE
 
 Ref: <https://manpages.debian.org/bullseye/nmap/nmap.1.en.html>
 
-- `-sn` : Ping Scan - disable port scan
-- `-Pn` : Treat all hosts as online -- skip host discovery
-- `-p $PORT_RANGE` : Only scan specified ports; `-p-` scans all ports
-  - By default, Nmap scans the top **1,000 ports** for each scan protocol requested ([Ref: Port Selection Data and Strategies](https://nmap.org/book/performance-port-selection.html))
-- `-sV` : Probe open ports to determine service/version info
-- `-sS` / `-sT` / `-sA` / `-sW` / `-sM` : TCP SYN / Connect() / ACK / Window / Maimon scans
-- `-sU` : UDP Scan
-- `-sN` / `-sF` / `-sX` : TCP Null / FIN / Xmas scans
-- `-A` : Enables OS detection `-O`, version scanning `-sV`, script scanning `-sC` and traceroute `--traceroute`
-- `-T<0-5>` : Set timing template (higher is faster) <paranoid (0), sneaky (1), polite (2), normal (3), aggressive (4), insane (5)>
+|Option|Description|
+|---|---|
+|`-sn`|Ping Scan - disable port scan|
+|`-Pn`|Treat all hosts as online -- skip host discovery|
+|`-p $PORT_RANGE`|Only scan specified ports; `-p-` scans all ports<br>[By default](https://nmap.org/book/performance-port-selection.html), Nmap scans the **top 1,000 ports** for each scan protocol requested|
+|`-F`|Fast mode - Scan fewer ports than the default scan<br>(scans the **most common 100 ports** for each scanned protocol)|
+|`-sV`|Probe open ports to determine service/version info|
+|`-sS` / `-sT` / `-sA` / `-sW` / `-sM`|TCP SYN / Connect() / ACK / Window / Maimon scans|
+|`-sU`|UDP Scan|
+|`-sN` / `-sF` / `-sX`|TCP Null / FIN / Xmas scans|
+|`-A`|Enables OS detection `-O`, version scanning `-sV`, script scanning `-sC` and traceroute `--traceroute`|
+|`-T<0-5>`|Set timing template (higher is faster) <paranoid (0), sneaky (1), polite (2), normal (3), aggressive (4), insane (5)>|
 
 ### Examples
 
-Initial network sweep
-
-```console
-nmap -sn $TARGET_RANGE
-```
-
-Scan all ports with service detection
-
-```console
-nmap -p- -sV $TARGET_IP
-```
-
-Scan with more details (note that using `-p-` with `-A` will take a long time)
-
-```console
-nmap -A $TARGET_IP
-```
+|Command|Usage|
+|---|---|
+|`nmap -sn $TARGET_RANGE`|Initial network sweep|
+|`nmap -p- -sV $TARGET_IP`|Scan all ports with service detection|
+|`nmap -A $TARGET_IP`|Scan with more details<br>(note that using `-p-` with `-A` can take a long time)|
+|`nmap -sU -A -F $TARGET_IP`|Scan most common 100 ports on UDP<br>(UDP scans take a long time because of the wait time to confirm if a port is open,<br>scanning just the top 100 ports with `-F` should balance between speed and coverage)|
 
 # 2. Web scanning
 
@@ -71,47 +62,14 @@ Web discovery wordlists from [SecLists](https://github.com/danielmiessler/SecLis
 
 Install [SecLists](https://www.kali.org/tools/seclists/) in Kali with `sudo apt -y install SecList`
 
-#### combined_words.txt
+|`/usr/share/seclists/Discovery/Web-Content/combined_words.txt`|`/usr/share/seclists/Discovery/Web-Content/combined_directories.txt`|
+|---|---|
+|128k entries, is a combination of the following wordlists:<ul><li>big.txt</li><li>common.txt</li><li>raft-large-words-lowercase.txt</li><li>raft-large-words.txt</li><li>raft-medium-words-lowercase.txt</li><li>raft-medium-words.txt</li><li>raft-small-words-lowercase.txt</li><li>raft-small-words.txt</li></ul>|1.37m entries, is a combination of the following wordlists:<ul><li>apache.txt</li><li>combined_words.txt</li><li>directory-list-1.0.txt</li><li>directory-list-2.3-big.txt</li><li>directory-list-2.3-medium.txt</li><li>directory-list-2.3-small.txt</li><li>raft-large-directories-lowercase.txt</li><li>raft-large-directories.txt</li><li>raft-medium-directories-lowercase.txt</li><li>raft-medium-directories.txt</li><li>raft-small-directories-lowercase.txt</li><li>raft-small-directories.txt</li></ul>|
 
-```console
-/usr/share/seclists/Discovery/Web-Content/combined_words.txt
-```
+☝️ **Note:**
+- The description for `combined_words.txt` says it's use for files, but it is commonly useful for directories as well
+- `combined_directories.txt` is such a huge list that you either end up crashing the web server or having to reduce the scan rate; either ways use caution and keep in mind that it may not be effective to use this list
 
-128k entries, is a combination of the following wordlists:
-
-- big.txt
-- common.txt
-- raft-large-words-lowercase.txt
-- raft-large-words.txt
-- raft-medium-words-lowercase.txt
-- raft-medium-words.txt
-- raft-small-words-lowercase.txt
-- raft-small-words.txt
-
-☝️ The description for `combined_words.txt` says it's use for files, but it is commonly useful for directories as well
-
-#### combined_directories.txt
-
-```console
-/usr/share/seclists/Discovery/Web-Content/combined_directories.txt
-```
-
-1.37m entries, is a combination of the following wordlists:
-
-- apache.txt
-- combined_words.txt
-- directory-list-1.0.txt
-- directory-list-2.3-big.txt
-- directory-list-2.3-medium.txt
-- directory-list-2.3-small.txt
-- raft-large-directories-lowercase.txt
-- raft-large-directories.txt
-- raft-medium-directories-lowercase.txt
-- raft-medium-directories.txt
-- raft-small-directories-lowercase.txt
-- raft-small-directories.txt
-
-☝️ `combined_directories.txt` is such a huge list that you either end up crashing the web server or having to reduce the scan rate; either ways use caution and keep in mind that it may not be effective to use this list
 
 ## 2.2. dirb
 
