@@ -295,28 +295,396 @@ There appears to be nothing much else to look at now, so let's **try harder** el
 
 ```console
 ┌──(root㉿kali)-[~]
-└─# nmap -sU -A --top-ports 20 10.0.88.34
-Starting Nmap 7.93 ( https://nmap.org ) at 2022-12-14 08:01 +08
+└─# nmap -sU -A --top-ports 100 10.0.88.34
+Starting Nmap 7.93 ( https://nmap.org ) at 2022-12-14 08:07 +08
 Nmap scan report for 10.0.88.34
 Host is up (0.0011s latency).
-
-PORT      STATE         SERVICE      VERSION
-53/udp    closed        domain
-67/udp    closed        dhcps
-68/udp    open|filtered dhcpc
-69/udp    closed        tftp
-123/udp   open          ntp          NTP v4 (unsynchronized)
+Not shown: 94 closed udp ports (port-unreach)
+PORT     STATE         SERVICE     VERSION
+68/udp   open|filtered dhcpc
+123/udp  open          ntp         NTP v4 (secondary server)
 | ntp-info:
 |_
-135/udp   closed        msrpc
-137/udp   open          netbios-ns   Samba nmbd netbios-ns (workgroup: WORKGROUP)
+137/udp  open          netbios-ns  Samba nmbd netbios-ns (workgroup: WORKGROUP)
 | nbns-interfaces:
 |   hostname: JOY
 |   interfaces:
 |_    10.0.88.34
-138/udp   open|filtered netbios-dgm
-139/udp   closed        netbios-ssn
-161/udp   open          snmp         SNMPv1 server; net-snmp SNMPv3 server (public)
+138/udp  open|filtered netbios-dgm
+161/udp  open          snmp        SNMPv1 server; net-snmp SNMPv3 server (public)
+| snmp-interfaces:
+|   lo
+|     IP address: 127.0.0.1  Netmask: 255.0.0.0
+|     Type: softwareLoopback  Speed: 10 Mbps
+|     Traffic stats: 3.43 Kb sent, 3.43 Kb received
+|   Microsoft Corporation Device 0003
+|     IP address: 10.0.88.34  Netmask: 255.255.255.0
+|     MAC address: 00155d4ba992 (Microsoft)
+|     Type: ethernetCsmacd  Speed: 4 Gbps
+|_    Traffic stats: 4.12 Mb sent, 357.40 Mb received
+| snmp-processes:
+|   1:
+|     Name: systemd
+|     Path: /lib/systemd/systemd
+|     Params: --system --deserialize 23
+|   2:
+|     Name: kthreadd
+|   3:
+|     Name: ksoftirqd/0
+|   5:
+|     Name: kworker/0:0H
+|   7:
+|     Name: rcu_sched
+|   8:
+|     Name: rcu_bh
+|   9:
+|     Name: migration/0
+|   10:
+|     Name: lru-add-drain
+|   11:
+|     Name: watchdog/0
+|   12:
+|     Name: cpuhp/0
+|   13:
+|     Name: kdevtmpfs
+|   14:
+|     Name: netns
+|   15:
+|     Name: khungtaskd
+|   16:
+|     Name: oom_reaper
+|   17:
+|     Name: writeback
+|   18:
+|     Name: kcompactd0
+|   19:
+|     Name: ksmd
+|   21:
+|     Name: khugepaged
+|   22:
+|     Name: crypto
+|   23:
+|     Name: kintegrityd
+|   24:
+|     Name: bioset
+|   25:
+|     Name: kblockd
+|   26:
+|     Name: devfreq_wq
+|   27:
+|     Name: watchdogd
+|   28:
+|     Name: kswapd0
+|   29:
+|     Name: vmstat
+|   41:
+|     Name: kthrotld
+|   43:
+|     Name: ipv6_addrconf
+|   86:
+|     Name: bioset
+|   87:
+|     Name: hv_vmbus_con
+|   88:
+|     Name: bioset
+|   89:
+|     Name: bioset
+|   90:
+|     Name: bioset
+|   91:
+|     Name: ata_sff
+|   92:
+|     Name: bioset
+|   94:
+|     Name: scsi_eh_0
+|   95:
+|     Name: bioset
+|   97:
+|     Name: scsi_tmf_0
+|   98:
+|     Name: bioset
+|   99:
+|     Name: scsi_eh_1
+|   101:
+|     Name: scsi_tmf_1
+|   102:
+|     Name: bioset
+|   104:
+|     Name: scsi_eh_2
+|   105:
+|     Name: kworker/u2:1
+|   107:
+|     Name: scsi_tmf_2
+|   108:
+|     Name: kworker/u2:2
+|   115:
+|     Name: bioset
+|   133:
+|     Name: kworker/0:1H
+|   161:
+|     Name: kworker/u3:0
+|   170:
+|     Name: jbd2/sda1-8
+|   171:
+|     Name: ext4-rsv-conver
+|   201:
+|     Name: systemd-journal
+|     Path: /lib/systemd/systemd-journald
+|   206:
+|     Name: kauditd
+|   272:
+|     Name: hv_balloon
+|   377:
+|     Name: ModemManager
+|     Path: /usr/sbin/ModemManager
+|   378:
+|     Name: systemd-logind
+|     Path: /lib/systemd/systemd-logind
+|   379:
+|     Name: accounts-daemon
+|     Path: /usr/lib/accountsservice/accounts-daemon
+|   382:
+|     Name: dbus-daemon
+|     Path: /usr/bin/dbus-daemon
+|     Params: --system --address=systemd: --nofork --nopidfile --systemd-activation
+|   403:
+|     Name: NetworkManager
+|     Path: /usr/sbin/NetworkManager
+|     Params: --no-daemon
+|   407:
+|     Name: rtkit-daemon
+|     Path: /usr/lib/rtkit/rtkit-daemon
+|   593:
+|     Name: dhclient
+|     Path: /sbin/dhclient
+|     Params: -d -q -sf /usr/lib/NetworkManager/nm-dhcp-helper -pf /var/run/dhclient-eth0.pid -lf /var/lib/NetworkManager/dhclient-784d0bd9-f4
+|   751:
+|     Name: in.tftpd
+|     Path: /usr/sbin/in.tftpd
+|     Params: --listen --user tftp --address 0.0.0.0:36969 --secure /home/patrick
+|   755:
+|     Name: proftpd
+|     Path: proftpd: (accepting connections)
+|   760:
+|     Name: dropbear
+|     Path: dropbear
+|   771:
+|     Name: gdm3
+|     Path: /usr/sbin/gdm3
+|   779:
+|     Name: ntpd
+|     Path: /usr/sbin/ntpd
+|     Params: -p /var/run/ntpd.pid -g -u 121:126
+|   864:
+|     Name: ossec-execd
+|     Path: /var/ossec/bin/ossec-execd
+|   874:
+|     Name: ossec-analysisd
+|     Path: /var/ossec/bin/ossec-analysisd
+|   888:
+|     Name: ossec-logcollec
+|     Path: /var/ossec/bin/ossec-logcollector
+|   906:
+|     Name: ossec-syscheckd
+|     Path: /var/ossec/bin/ossec-syscheckd
+|   918:
+|     Name: ossec-monitord
+|     Path: /var/ossec/bin/ossec-monitord
+|   1058:
+|     Name: master
+|     Path: /usr/lib/postfix/sbin/master
+|     Params: -w
+|   1061:
+|     Name: pickup
+|     Path: pickup
+|     Params: -l -t unix -u -c
+|   1062:
+|     Name: qmgr
+|     Path: qmgr
+|     Params: -l -t unix -u
+|   1092:
+|     Name: gdm-session-wor
+|     Path: gdm-session-worker [pam/gdm-launch-environment]
+|   1113:
+|     Name: systemd
+|     Path: /lib/systemd/systemd
+|     Params: --user
+|   1115:
+|     Name: (sd-pam)
+|     Path: (sd-pam)
+|   1122:
+|     Name: gdm-x-session
+|     Path: /usr/lib/gdm3/gdm-x-session
+|     Params: gnome-session --autostart /usr/share/gdm/greeter/autostart
+|   1125:
+|     Name: Xorg
+|     Path: /usr/lib/xorg/Xorg
+|     Params: vt1 -displayfd 3 -auth /run/user/116/gdm/Xauthority -background none -noreset -keeptty -verbose 3
+|   1152:
+|     Name: dbus-daemon
+|     Path: /usr/bin/dbus-daemon
+|     Params: --session --address=systemd: --nofork --nopidfile --systemd-activation
+|   1158:
+|     Name: gnome-session-b
+|     Path: /usr/lib/gnome-session/gnome-session-binary
+|     Params: --autostart /usr/share/gdm/greeter/autostart
+|   1168:
+|     Name: at-spi-bus-laun
+|     Path: /usr/lib/at-spi2-core/at-spi-bus-launcher
+|   1173:
+|     Name: dbus-daemon
+|     Path: /usr/bin/dbus-daemon
+|     Params: --config-file=/usr/share/defaults/at-spi2/accessibility.conf --nofork --print-address 3
+|   1176:
+|     Name: at-spi2-registr
+|     Path: /usr/lib/at-spi2-core/at-spi2-registryd
+|     Params: --use-gnome-session
+|   1185:
+|     Name: gnome-shell
+|     Path: /usr/bin/gnome-shell
+|   1190:
+|     Name: upowerd
+|     Path: /usr/lib/upower/upowerd
+|   1196:
+|     Name: pulseaudio
+|     Path: /usr/bin/pulseaudio
+|     Params: --daemonize=no
+|   1269:
+|     Name: gnome-settings-
+|     Path: /usr/lib/gnome-settings-daemon/gnome-settings-daemon
+|   1276:
+|     Name: wpa_supplicant
+|     Path: /sbin/wpa_supplicant
+|     Params: -u -s -O /run/wpa_supplicant
+|   1283:
+|     Name: colord
+|     Path: /usr/lib/colord/colord
+|   4203:
+|     Name: cron
+|     Path: /usr/sbin/cron
+|     Params: -f
+|   4249:
+|     Name: rsyslogd
+|     Path: /usr/sbin/rsyslogd
+|     Params: -n
+|   7462:
+|     Name: snmpd
+|     Path: /usr/sbin/snmpd
+|     Params: -Lsd -Lf /dev/null -u Debian-snmp -g Debian-snmp -I -smux mteTrigger mteTriggerConf -f
+|   8220:
+|     Name: mysqld
+|     Path: /usr/sbin/mysqld
+|   8405:
+|     Name: polkitd
+|     Path: /usr/lib/policykit-1/polkitd
+|     Params: --no-debug
+|   9558:
+|     Name: apache2
+|     Path: /usr/sbin/apache2
+|     Params: -k start
+|   9575:
+|     Name: apache2
+|     Path: /usr/sbin/apache2
+|     Params: -k start
+|   9576:
+|     Name: apache2
+|     Path: /usr/sbin/apache2
+|     Params: -k start
+|   9577:
+|     Name: apache2
+|     Path: /usr/sbin/apache2
+|     Params: -k start
+|   9578:
+|     Name: apache2
+|     Path: /usr/sbin/apache2
+|     Params: -k start
+|   9579:
+|     Name: apache2
+|     Path: /usr/sbin/apache2
+|     Params: -k start
+|   10519:
+|     Name: avahi-daemon
+|     Path: avahi-daemon: running [JOY.local]
+|   10520:
+|     Name: avahi-daemon
+|     Path: avahi-daemon: chroot helper
+|   10606:
+|     Name: smbd
+|     Path: /usr/sbin/smbd
+|   10607:
+|     Name: smbd-notifyd
+|     Path: /usr/sbin/smbd
+|   10608:
+|     Name: cleanupd
+|     Path: /usr/sbin/smbd
+|   10611:
+|     Name: lpqd
+|     Path: /usr/sbin/smbd
+|   10651:
+|     Name: nmbd
+|     Path: /usr/sbin/nmbd
+|   14688:
+|     Name: dovecot
+|     Path: /usr/sbin/dovecot
+|   14690:
+|     Name: anvil
+|     Path: dovecot/anvil
+|   14691:
+|     Name: log
+|     Path: dovecot/log
+|   14693:
+|     Name: config
+|     Path: dovecot/config
+|   14716:
+|     Name: packagekitd
+|     Path: /usr/lib/packagekit/packagekitd
+|   16248:
+|     Name: kworker/0:2
+|   16934:
+|     Name: kworker/0:0
+|   16954:
+|     Name: systemd-udevd
+|     Path: /lib/systemd/systemd-udevd
+|   17005:
+|     Name: kworker/0:1
+|   17062:
+|_    Name: kworker/u2:0
+| snmp-sysdescr: Linux JOY 4.9.0-8-amd64 #1 SMP Debian 4.9.130-2 (2018-10-27) x86_64
+|_  System uptime: 53m33.25s (321325 timeticks)
+| snmp-netstat:
+|   TCP  0.0.0.0:21           0.0.0.0:0
+|   TCP  0.0.0.0:22           0.0.0.0:0
+|   TCP  0.0.0.0:25           0.0.0.0:0
+|   TCP  0.0.0.0:110          0.0.0.0:0
+|   TCP  0.0.0.0:139          0.0.0.0:0
+|   TCP  0.0.0.0:143          0.0.0.0:0
+|   TCP  0.0.0.0:445          0.0.0.0:0
+|   TCP  0.0.0.0:465          0.0.0.0:0
+|   TCP  0.0.0.0:587          0.0.0.0:0
+|   TCP  0.0.0.0:993          0.0.0.0:0
+|   TCP  0.0.0.0:995          0.0.0.0:0
+|   TCP  127.0.0.1:3306       0.0.0.0:0
+|   UDP  0.0.0.0:68           *:*
+|   UDP  0.0.0.0:123          *:*
+|   UDP  0.0.0.0:137          *:*
+|   UDP  0.0.0.0:138          *:*
+|   UDP  0.0.0.0:161          *:*
+|   UDP  0.0.0.0:5353         *:*
+|   UDP  0.0.0.0:33199        *:*
+|   UDP  0.0.0.0:36969        *:*
+|   UDP  0.0.0.0:59086        *:*
+|   UDP  10.0.88.34:123       *:*
+|   UDP  10.0.88.34:137       *:*
+|   UDP  10.0.88.34:138       *:*
+|   UDP  10.0.88.255:137      *:*
+|   UDP  10.0.88.255:138      *:*
+|_  UDP  127.0.0.1:123        *:*
+| snmp-info:
+|   enterprise: net-snmp
+|   engineIDFormat: unknown
+|   engineIDData: d1785e76ec962f5c00000000
+|   snmpEngineBoots: 30
+|_  snmpEngineTime: 53m33s
 | snmp-win32-software:
 |   accountsservice-0.6.43-1; 0-01-01T00:00:00
 |   acl-2.2.52-3+b1; 0-01-01T00:00:00
@@ -1842,402 +2210,22 @@ PORT      STATE         SERVICE      VERSION
 |   zenity-common-3.22.0-1; 0-01-01T00:00:00
 |   zlib1g-1:1.2.8.dfsg-5+deb9u1; 0-01-01T00:00:00
 |_  zlibc-0.9k-4.3; 0-01-01T00:00:00
-| snmp-interfaces:
-|   lo
-|     IP address: 127.0.0.1  Netmask: 255.0.0.0
-|     Type: softwareLoopback  Speed: 10 Mbps
-|     Traffic stats: 3.19 Kb sent, 3.19 Kb received
-|   Microsoft Corporation Device 0003
-|     IP address: 10.0.88.34  Netmask: 255.255.255.0
-|     MAC address: 00155d4ba992 (Microsoft)
-|     Type: ethernetCsmacd  Speed: 4 Gbps
-|_    Traffic stats: 3.30 Mb sent, 356.62 Mb received
-| snmp-processes:
-|   1:
-|     Name: systemd
-|     Path: /lib/systemd/systemd
-|     Params: --system --deserialize 23
-|   2:
-|     Name: kthreadd
-|   3:
-|     Name: ksoftirqd/0
-|   5:
-|     Name: kworker/0:0H
-|   7:
-|     Name: rcu_sched
-|   8:
-|     Name: rcu_bh
-|   9:
-|     Name: migration/0
-|   10:
-|     Name: lru-add-drain
-|   11:
-|     Name: watchdog/0
-|   12:
-|     Name: cpuhp/0
-|   13:
-|     Name: kdevtmpfs
-|   14:
-|     Name: netns
-|   15:
-|     Name: khungtaskd
-|   16:
-|     Name: oom_reaper
-|   17:
-|     Name: writeback
-|   18:
-|     Name: kcompactd0
-|   19:
-|     Name: ksmd
-|   21:
-|     Name: khugepaged
-|   22:
-|     Name: crypto
-|   23:
-|     Name: kintegrityd
-|   24:
-|     Name: bioset
-|   25:
-|     Name: kblockd
-|   26:
-|     Name: devfreq_wq
-|   27:
-|     Name: watchdogd
-|   28:
-|     Name: kswapd0
-|   29:
-|     Name: vmstat
-|   41:
-|     Name: kthrotld
-|   43:
-|     Name: ipv6_addrconf
-|   86:
-|     Name: bioset
-|   87:
-|     Name: hv_vmbus_con
-|   88:
-|     Name: bioset
-|   89:
-|     Name: bioset
-|   90:
-|     Name: bioset
-|   91:
-|     Name: ata_sff
-|   92:
-|     Name: bioset
-|   94:
-|     Name: scsi_eh_0
-|   95:
-|     Name: bioset
-|   97:
-|     Name: scsi_tmf_0
-|   98:
-|     Name: bioset
-|   99:
-|     Name: scsi_eh_1
-|   101:
-|     Name: scsi_tmf_1
-|   102:
-|     Name: bioset
-|   104:
-|     Name: scsi_eh_2
-|   105:
-|     Name: kworker/u2:1
-|   107:
-|     Name: scsi_tmf_2
-|   108:
-|     Name: kworker/u2:2
-|   115:
-|     Name: bioset
-|   133:
-|     Name: kworker/0:1H
-|   161:
-|     Name: kworker/u3:0
-|   170:
-|     Name: jbd2/sda1-8
-|   171:
-|     Name: ext4-rsv-conver
-|   201:
-|     Name: systemd-journal
-|     Path: /lib/systemd/systemd-journald
-|   206:
-|     Name: kauditd
-|   272:
-|     Name: hv_balloon
-|   377:
-|     Name: ModemManager
-|     Path: /usr/sbin/ModemManager
-|   378:
-|     Name: systemd-logind
-|     Path: /lib/systemd/systemd-logind
-|   379:
-|     Name: accounts-daemon
-|     Path: /usr/lib/accountsservice/accounts-daemon
-|   382:
-|     Name: dbus-daemon
-|     Path: /usr/bin/dbus-daemon
-|     Params: --system --address=systemd: --nofork --nopidfile --systemd-activation
-|   403:
-|     Name: NetworkManager
-|     Path: /usr/sbin/NetworkManager
-|     Params: --no-daemon
-|   407:
-|     Name: rtkit-daemon
-|     Path: /usr/lib/rtkit/rtkit-daemon
-|   593:
-|     Name: dhclient
-|     Path: /sbin/dhclient
-|     Params: -d -q -sf /usr/lib/NetworkManager/nm-dhcp-helper -pf /var/run/dhclient-eth0.pid -lf /var/lib/NetworkManager/dhclient-784d0bd9-f4
-|   751:
-|     Name: in.tftpd
-|     Path: /usr/sbin/in.tftpd
-|     Params: --listen --user tftp --address 0.0.0.0:36969 --secure /home/patrick
-|   755:
-|     Name: proftpd
-|     Path: proftpd: (accepting connections)
-|   760:
-|     Name: dropbear
-|     Path: dropbear
-|   771:
-|     Name: gdm3
-|     Path: /usr/sbin/gdm3
-|   779:
-|     Name: ntpd
-|     Path: /usr/sbin/ntpd
-|     Params: -p /var/run/ntpd.pid -g -u 121:126
-|   864:
-|     Name: ossec-execd
-|     Path: /var/ossec/bin/ossec-execd
-|   874:
-|     Name: ossec-analysisd
-|     Path: /var/ossec/bin/ossec-analysisd
-|   888:
-|     Name: ossec-logcollec
-|     Path: /var/ossec/bin/ossec-logcollector
-|   906:
-|     Name: ossec-syscheckd
-|     Path: /var/ossec/bin/ossec-syscheckd
-|   918:
-|     Name: ossec-monitord
-|     Path: /var/ossec/bin/ossec-monitord
-|   1058:
-|     Name: master
-|     Path: /usr/lib/postfix/sbin/master
-|     Params: -w
-|   1061:
-|     Name: pickup
-|     Path: pickup
-|     Params: -l -t unix -u -c
-|   1062:
-|     Name: qmgr
-|     Path: qmgr
-|     Params: -l -t unix -u
-|   1092:
-|     Name: gdm-session-wor
-|     Path: gdm-session-worker [pam/gdm-launch-environment]
-|   1113:
-|     Name: systemd
-|     Path: /lib/systemd/systemd
-|     Params: --user
-|   1115:
-|     Name: (sd-pam)
-|     Path: (sd-pam)
-|   1122:
-|     Name: gdm-x-session
-|     Path: /usr/lib/gdm3/gdm-x-session
-|     Params: gnome-session --autostart /usr/share/gdm/greeter/autostart
-|   1125:
-|     Name: Xorg
-|     Path: /usr/lib/xorg/Xorg
-|     Params: vt1 -displayfd 3 -auth /run/user/116/gdm/Xauthority -background none -noreset -keeptty -verbose 3
-|   1152:
-|     Name: dbus-daemon
-|     Path: /usr/bin/dbus-daemon
-|     Params: --session --address=systemd: --nofork --nopidfile --systemd-activation
-|   1158:
-|     Name: gnome-session-b
-|     Path: /usr/lib/gnome-session/gnome-session-binary
-|     Params: --autostart /usr/share/gdm/greeter/autostart
-|   1168:
-|     Name: at-spi-bus-laun
-|     Path: /usr/lib/at-spi2-core/at-spi-bus-launcher
-|   1173:
-|     Name: dbus-daemon
-|     Path: /usr/bin/dbus-daemon
-|     Params: --config-file=/usr/share/defaults/at-spi2/accessibility.conf --nofork --print-address 3
-|   1176:
-|     Name: at-spi2-registr
-|     Path: /usr/lib/at-spi2-core/at-spi2-registryd
-|     Params: --use-gnome-session
-|   1185:
-|     Name: gnome-shell
-|     Path: /usr/bin/gnome-shell
-|   1190:
-|     Name: upowerd
-|     Path: /usr/lib/upower/upowerd
-|   1196:
-|     Name: pulseaudio
-|     Path: /usr/bin/pulseaudio
-|     Params: --daemonize=no
-|   1269:
-|     Name: gnome-settings-
-|     Path: /usr/lib/gnome-settings-daemon/gnome-settings-daemon
-|   1276:
-|     Name: wpa_supplicant
-|     Path: /sbin/wpa_supplicant
-|     Params: -u -s -O /run/wpa_supplicant
-|   1283:
-|     Name: colord
-|     Path: /usr/lib/colord/colord
-|   4203:
-|     Name: cron
-|     Path: /usr/sbin/cron
-|     Params: -f
-|   4249:
-|     Name: rsyslogd
-|     Path: /usr/sbin/rsyslogd
-|     Params: -n
-|   7462:
-|     Name: snmpd
-|     Path: /usr/sbin/snmpd
-|     Params: -Lsd -Lf /dev/null -u Debian-snmp -g Debian-snmp -I -smux mteTrigger mteTriggerConf -f
-|   8220:
-|     Name: mysqld
-|     Path: /usr/sbin/mysqld
-|   8405:
-|     Name: polkitd
-|     Path: /usr/lib/policykit-1/polkitd
-|     Params: --no-debug
-|   9558:
-|     Name: apache2
-|     Path: /usr/sbin/apache2
-|     Params: -k start
-|   9575:
-|     Name: apache2
-|     Path: /usr/sbin/apache2
-|     Params: -k start
-|   9576:
-|     Name: apache2
-|     Path: /usr/sbin/apache2
-|     Params: -k start
-|   9577:
-|     Name: apache2
-|     Path: /usr/sbin/apache2
-|     Params: -k start
-|   9578:
-|     Name: apache2
-|     Path: /usr/sbin/apache2
-|     Params: -k start
-|   9579:
-|     Name: apache2
-|     Path: /usr/sbin/apache2
-|     Params: -k start
-|   10519:
-|     Name: avahi-daemon
-|     Path: avahi-daemon: running [JOY.local]
-|   10520:
-|     Name: avahi-daemon
-|     Path: avahi-daemon: chroot helper
-|   10606:
-|     Name: smbd
-|     Path: /usr/sbin/smbd
-|   10607:
-|     Name: smbd-notifyd
-|     Path: /usr/sbin/smbd
-|   10608:
-|     Name: cleanupd
-|     Path: /usr/sbin/smbd
-|   10611:
-|     Name: lpqd
-|     Path: /usr/sbin/smbd
-|   10651:
-|     Name: nmbd
-|     Path: /usr/sbin/nmbd
-|   14688:
-|     Name: dovecot
-|     Path: /usr/sbin/dovecot
-|   14690:
-|     Name: anvil
-|     Path: dovecot/anvil
-|   14691:
-|     Name: log
-|     Path: dovecot/log
-|   14693:
-|     Name: config
-|     Path: dovecot/config
-|   14716:
-|     Name: packagekitd
-|     Path: /usr/lib/packagekit/packagekitd
-|   16248:
-|     Name: kworker/0:2
-|   16716:
-|     Name: kworker/0:1
-|   16934:
-|     Name: kworker/0:0
-|   16954:
-|     Name: systemd-udevd
-|_    Path: /lib/systemd/systemd-udevd
-| snmp-info:
-|   enterprise: net-snmp
-|   engineIDFormat: unknown
-|   engineIDData: d1785e76ec962f5c00000000
-|   snmpEngineBoots: 30
-|_  snmpEngineTime: 45m35s
-| snmp-sysdescr: Linux JOY 4.9.0-8-amd64 #1 SMP Debian 4.9.130-2 (2018-10-27) x86_64
-|_  System uptime: 45m35.46s (273546 timeticks)
-| snmp-netstat:
-|   TCP  0.0.0.0:21           0.0.0.0:0
-|   TCP  0.0.0.0:22           0.0.0.0:0
-|   TCP  0.0.0.0:25           0.0.0.0:0
-|   TCP  0.0.0.0:110          0.0.0.0:0
-|   TCP  0.0.0.0:139          0.0.0.0:0
-|   TCP  0.0.0.0:143          0.0.0.0:0
-|   TCP  0.0.0.0:445          0.0.0.0:0
-|   TCP  0.0.0.0:465          0.0.0.0:0
-|   TCP  0.0.0.0:587          0.0.0.0:0
-|   TCP  0.0.0.0:993          0.0.0.0:0
-|   TCP  0.0.0.0:995          0.0.0.0:0
-|   TCP  127.0.0.1:3306       0.0.0.0:0
-|   UDP  0.0.0.0:68           *:*
-|   UDP  0.0.0.0:123          *:*
-|   UDP  0.0.0.0:137          *:*
-|   UDP  0.0.0.0:138          *:*
-|   UDP  0.0.0.0:161          *:*
-|   UDP  0.0.0.0:5353         *:*
-|   UDP  0.0.0.0:33199        *:*
-|   UDP  0.0.0.0:36969        *:*
-|   UDP  0.0.0.0:59086        *:*
-|   UDP  10.0.88.34:123       *:*
-|   UDP  10.0.88.34:137       *:*
-|   UDP  10.0.88.34:138       *:*
-|   UDP  10.0.88.255:137      *:*
-|   UDP  10.0.88.255:138      *:*
-|_  UDP  127.0.0.1:123        *:*
-162/udp   closed        snmptrap
-445/udp   closed        microsoft-ds
-500/udp   closed        isakmp
-514/udp   closed        syslog
-520/udp   closed        route
-631/udp   closed        ipp
-1434/udp  closed        ms-sql-m
-1900/udp  closed        upnp
-4500/udp  closed        nat-t-ike
-49152/udp closed        unknown
+5353/udp open|filtered zeroconf
 Too many fingerprints match this host to give specific OS details
 Network Distance: 2 hops
 Service Info: Host: JOY
 
 Host script results:
-|_clock-skew: 6s
+|_clock-skew: 2s
 |_nbstat: NetBIOS name: JOY, NetBIOS user: <unknown>, NetBIOS MAC: 000000000000 (Xerox)
 
-TRACEROUTE (using port 135/udp)
+TRACEROUTE (using port 1023/udp)
 HOP RTT     ADDRESS
-1   0.32 ms 192.168.17.1
-2   0.88 ms 10.0.88.34
+1   0.43 ms 192.168.17.1
+2   0.97 ms 10.0.88.34
 
 OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-Nmap done: 1 IP address (1 host up) scanned in 143.75 seconds
+Nmap done: 1 IP address (1 host up) scanned in 275.61 seconds
 ```
 
 </details>
