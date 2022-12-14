@@ -2229,3 +2229,36 @@ Nmap done: 1 IP address (1 host up) scanned in 275.61 seconds
 ```
 
 </details>
+
+# 4. TFTP
+
+The public SNMP results from nmap revealed that there is a TFTP service on `36969` that is mapped to `/home/patrick`
+
+```console
+|   751:
+|     Name: in.tftpd
+|     Path: /usr/sbin/in.tftpd
+|     Params: --listen --user tftp --address 0.0.0.0:36969 --secure /home/patrick
+```
+
+Unlike FTP, we cannot list directory with TFTP, but we conveniently found a directory listing of Patrick's home directory previously; let's retrieve the `version_control` file
+
+```console
+┌──(root㉿kali)-[~]
+└─# tftp 10.0.88.34 36969
+tftp> get version_control
+┌──(root㉿kali)-[~]
+└─# cat version_control
+Version Control of External-Facing Services:
+
+Apache: 2.4.25
+Dropbear SSH: 0.34
+ProFTPd: 1.3.5
+Samba: 4.5.12
+
+We should switch to OpenSSH and upgrade ProFTPd.
+
+Note that we have some other configurations in this machine.
+1. The webroot is no longer /var/www/html. We have changed it to /var/www/tryingharderisjoy.
+2. I am trying to perform some simple bash scripting tutorials. Let me see how it turns out.
+```
