@@ -29,7 +29,7 @@ Ref: <https://manpages.debian.org/bullseye/nmap/nmap.1.en.html>
 |`-sn`|Ping Scan - disable port scan|
 |`-Pn`|Treat all hosts as online -- skip host discovery|
 |`-p $PORT_RANGE`|Only scan specified ports; `-p-` scans all ports<br>[By default](https://nmap.org/book/performance-port-selection.html), Nmap scans the **top 1,000 ports** for each scan protocol requested|
-|`-F`|Fast mode - Scan fewer ports than the default scan<br>(scans the **most common 100 ports** for each scanned protocol)|
+|`--top-ports <number>`| Scan `<number>` most common ports|
 |`-sV`|Probe open ports to determine service/version info|
 |`-sS` / `-sT` / `-sA` / `-sW` / `-sM`|TCP SYN / Connect() / ACK / Window / Maimon scans|
 |`-sU`|UDP Scan|
@@ -44,7 +44,7 @@ Ref: <https://manpages.debian.org/bullseye/nmap/nmap.1.en.html>
 |`nmap -sn $TARGET_RANGE`|Initial network sweep|
 |`nmap -p- -sV $TARGET_IP`|Scan all ports with service detection|
 |`nmap -A $TARGET_IP`|Scan with more details<br>(note that using `-p-` with `-A` can take a long time)|
-|`nmap -sU -A -F $TARGET_IP`|Scan most common 100 ports on UDP<br>(UDP scans take a long time because of the wait time to confirm if a port is open,<br>scanning just the top 100 ports with `-F` should balance between speed and coverage)|
+|`nmap -sU -A --top-ports 100 $TARGET_IP`|Scan most common 100 ports on UDP<br>(UDP scans take a long time because of the wait time to confirm if a port is open,<br>scanning just the top 100 ports should balance between speed and coverage)|
 
 # 2. Web scanning
 
