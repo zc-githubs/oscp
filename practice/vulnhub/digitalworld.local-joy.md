@@ -112,7 +112,6 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 59.13 seconds
 ```
 
-
 </details>
 
 # 2. Checking out the FTP
@@ -2435,7 +2434,7 @@ su patrick
 Password: apollo098765
 ```
 
-We got in as Patrick, again it may be tempting to start running PrivEsc scripts, but let's check what `sudo` right does Patrick have
+We got in as Patrick, again it may be tempting to go down the rabbit hole of PrivEsc scripts, but let's check what `sudo` rights does Patrick have
 
 ```console
 patrick@JOY:/var/www/tryingharderisjoy$ sudo -l
