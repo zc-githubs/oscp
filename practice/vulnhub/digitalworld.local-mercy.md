@@ -1,5 +1,7 @@
+# 1. Nmap Scan
+
 <details>
-  <summary><h1>1. Nmap Scan</h1></summary>
+  <summary>TCP Scan</summary>
 
 ```console
 ┌──(root㉿kali)-[~]
@@ -90,6 +92,54 @@ HOP RTT     ADDRESS
 
 OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 37.91 seconds
+```
+
+</details>
+
+<details>
+  <summary>UDP Scan</summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# nmap -sU -A --top-ports 100 10.0.88.35
+Starting Nmap 7.93 ( https://nmap.org ) at 2022-12-15 07:28 +08
+Nmap scan report for 10.0.88.35
+Host is up (0.0019s latency).
+Not shown: 93 closed udp ports (port-unreach)
+PORT     STATE         SERVICE     VERSION
+53/udp   open          domain      ISC BIND 9.9.5-3ubuntu0.17 (Ubuntu Linux)
+| dns-nsid:
+|_  bind.version: 9.9.5-3ubuntu0.17-Ubuntu
+68/udp   open|filtered dhcpc
+123/udp  open          ntp         NTP v3
+| ntp-info:
+|_
+137/udp  open          netbios-ns  Samba nmbd netbios-ns (workgroup: WORKGROUP)
+| nbns-interfaces:
+|   hostname: MERCY
+|   interfaces:
+|_    10.0.88.35
+138/udp  open|filtered netbios-dgm
+631/udp  open|filtered ipp
+5353/udp open          mdns        DNS-based service discovery
+| dns-service-discovery:
+|   9/tcp workstation
+|_    Address=10.0.88.35 fe80::215:5dff:fe4b:a993
+Too many fingerprints match this host to give specific OS details
+Network Distance: 2 hops
+Service Info: Host: MERCY; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+|_clock-skew: 10s
+|_nbstat: NetBIOS name: MERCY, NetBIOS user: <unknown>, NetBIOS MAC: 000000000000 (Xerox)
+
+TRACEROUTE (using port 49153/udp)
+HOP RTT     ADDRESS
+1   0.86 ms 192.168.17.1
+2   2.04 ms 10.0.88.35
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 253.20 seconds
 ```
 
 </details>
