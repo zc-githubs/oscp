@@ -9,6 +9,7 @@
 |SQLi labs|<https://github.com/joetanx/oscp/blob/main/sqli-labs.md>|
 |DVWA - SQL injection|<https://github.com/joetanx/oscp/blob/main/dvwa-sqli.md>|
 |Attacking Active Directory|<https://github.com/joetanx/oscp/blob/main/attacking-active-directory.md>|
+|Windows Privilege Escalation|<https://github.com/joetanx/oscp/blob/main/winprivesc.md>|
 |References|<https://github.com/joetanx/oscp/blob/main/references.md>|
 
 # Experience Tracking
