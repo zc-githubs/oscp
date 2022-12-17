@@ -55,6 +55,10 @@ SecLists (`/usr/share/seclists/Discovery/Web-Content/`):
 
 ### 2.4. LDAP `389`
 
+```console
+ldapsearch -b 'DC=lab,DC=vx' -H ldap://192.168.17.11 -D 'CN=Bind Account,CN=Users,DC=lab,DC=vx' -W
+```
+
 ### 2.5. Brute force (Hydra)
 
 #### RDP/SSH/FTP/SMB/MySQL
