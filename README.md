@@ -61,8 +61,8 @@ SecLists (`/usr/share/seclists/Discovery/Web-Content/`):
 
 |   |   |
 |---|---|
-|Specify username|`hydra -l $USERNAME -P passwords.txt $TARGET <rdp|ssh|ftp|smb>`|
-|Use username list|`hydra -L usernames.txt -P passwords.txt $TARGET <rdp|ssh|ftp|smb>`|
+|Specify username|`hydra -l $USERNAME -P passwords.txt $TARGET <rdp/ssh/ftp/smb>`|
+|Use username list|`hydra -L usernames.txt -P passwords.txt $TARGET <rdp/ssh/ftp/smb>`|
 
 #### Web
 
