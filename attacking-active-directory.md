@@ -407,6 +407,8 @@ SID               : S-1-5-21-1470288461-3401294743-676794760-1104
 
 # 3. Pass the Hash
 
+- LM hashes are not used from Windows 10 onwards, use either `00000000000000000000000000000000` (32 zeros) or `aad3b435b51404eeaad3b435b51404ee` (LM hash of `NULL`) to fill the LM hash portion for `impacket-psexec` or `pth-winexe`
+
 # 3.1. Using evil-winrm
 
 - WinRM `5985` must be enabled on the target
@@ -448,7 +450,6 @@ Microsoft Windows [Version 10.0.20348.1129]
 <details>
   <summary><h2>3.3. Using  pth-winexe</h2></summary>
 
-- LM hashes are not used from Windows 10 onwards, use either `00000000000000000000000000000000` (32 zeros) or `aad3b435b51404eeaad3b435b51404ee` (LM hash of `NULL`) to fill the LM hash portion of the pth-winexe command
 - **Requires SMB1** to be enabled on target, otherwise `ERROR: Failed to open connection - NT_STATUS_CONNECTION_RESET`
 
 ### 3.3.1. Domain account
