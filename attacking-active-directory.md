@@ -448,7 +448,7 @@ Microsoft Windows [Version 10.0.20348.1129]
 <details>
   <summary><h2>3.3. Using  pth-winexe</h2></summary>
 
-- LM hashes are not used from Windows 10 onwards, a string of `32 zeros` can used to fill the LM hash portion of the pth-winexe command
+- LM hashes are not used from Windows 10 onwards, use either `00000000000000000000000000000000` (32 zeros) or `aad3b435b51404eeaad3b435b51404ee` (LM hash of `NULL`) to fill the LM hash portion of the pth-winexe command
 - **Requires SMB1** to be enabled on target, otherwise `ERROR: Failed to open connection - NT_STATUS_CONNECTION_RESET`
 
 ### 3.3.1. Domain account
