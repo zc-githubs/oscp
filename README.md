@@ -12,15 +12,31 @@
 
 ### 2.1. FTP `21`
 
-lftp find
+```console
+lftp anonymous:anonymous@$TARGET -e 'find;quit'
+lftp $USERNAME:$PASSWORD@$TARGET -e 'find;quit'
+```
 
 ### 2.2. HTTP/HTTPS `80`/`443`/`8080`
 
-dirb
+|   |   |
+|---|---|
+|Nikto|`nikto -host http://$TARGET:$PORT`|
+|dirb|`dirb http://$TARGET:$PORT /usr/share/wordlists/dirb/big.txt`|
+|gobuster|`gobuster dir -u http://$TARGET:$PORT -w /usr/share/seclists/Discovery/Web-Content/combined_words.txt`|
 
-gobuster
+#### Wordlists:
 
-worldlists
+dirb:
+
+1. `/usr/share/dirb/wordlists/common.txt` (Default)
+2. `/usr/share/wordlists/dirb/big.txt`
+3. `/usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt`
+
+SecLists (`/usr/share/seclists/Discovery/Web-Content/`):
+
+1. `/usr/share/seclists/Discovery/Web-Content/combined_words.txt`
+2. `/usr/share/seclists/Discovery/Web-Content/combined_directories.txt`
 
 ### 2.3. SMB `139`/`445`
 
