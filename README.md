@@ -514,16 +514,9 @@ PsExec.exe \\$TARGET cmd.exe
 
 ## 9. Exam proofs
 
-Finding:
-
-|OS|Command|
-|---|---|
-|Linux|`dir /S *proof.txt`|
-|Windows|`find / -name proof.txt`|
-
-|OS|Command|
-|---|---|
-|Linux|`hostname`<br>`cat /path/to/flag/proof.txt`<br>`ifconfig`|
-|Windows|`hostname`<br>`type C:\path\to\flag\proof.txt`<br>`ipconfig`|
+|OS|Finding|Printing|
+|---|---|---|
+|Linux|`dir /S *proof.txt`|`hostname`<br>`cat /path/to/flag/proof.txt`<br>`ifconfig`|
+|Windows|`find / -name proof.txt`|`hostname`<br>`type C:\path\to\flag\proof.txt`<br>`ipconfig`|
 
 ## 10. References
