@@ -30,7 +30,7 @@ If Google doesn't work, there’s probably no public exploit for it; look for fi
 Example:
 
 - Clear text password in directory: [digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
-- Base64 encoded secrets (which can be reversible): [digitalworld.local:MERCYv2](/practice/vulnhub/digitalworld.local-mercy.md)
+- Base64 encoded secrets that are reversible: [digitalworld.local:MERCYv2](/practice/vulnhub/digitalworld.local-mercy.md)
 
 ### 2.1. FTP `21`
 
