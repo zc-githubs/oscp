@@ -74,6 +74,7 @@ SecLists (`/usr/share/seclists/Discovery/Web-Content/`):
 |Connect to share using NULL|`smbclient -N //$TARGET/$SHARE`|
 |Connect to share using username/password|`smbclient -U '$USERNAME%$PASSWORD' //$TARGET/$SHARE`|
 |Connect to share using username/hash|`smbclient -U $USERNAME --pw-nt-hash //$TARGET/$SHARE`|
+|Mount a share|`mount -t cifs -o username=$USERNAME,password=$PASSWORD //$TARGET/$SHARE /mnt`|
 
 ### 2.4. LDAP `389`
 
