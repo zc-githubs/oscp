@@ -23,7 +23,14 @@ Try harder means you missed something that was not enumerated, and this can some
 
 If `searchsploit` doesn't work, try Google - examples that Googling worked: [ITSL:Mousekatool2](/practice/itsl/2021-10-04-mousekatool2.md), [ITSL:Checks](/practice/itsl/2021-11-22-Checks.md), [digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
 
-If Google doesn't work, there’s probably no public exploit for it; perhaps the answer is under your nose, e.g. secrets in the pwd of your shell (or 1 level above/below) - example: [digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
+If Google doesn't work, there’s probably no public exploit for it; look for files with secrets in clear or encoded
+
+`dir /S *secret*` or `find / -name *secret*`
+
+Example:
+
+- Clear text password in directory: [digitalworld.local:JOY](/practice/vulnhub/digitalworld.local-joy.md)
+- Base64 encoded secrets (which can be reversible): [digitalworld.local:MERCYv2](/practice/vulnhub/digitalworld.local-mercy.md)
 
 ### 2.1. FTP `21`
 
