@@ -113,11 +113,32 @@ hydra -L users.txt -P rockyou.txt dvwa.local http-get-form '/vulnerabilities/bru
 
 ## 3. Web Penetration
 
-|Name|Link|
-|---|---|
-|DVWA Guide 2019|<https://github.com/mrudnitsky/dvwa-guide-2019>|
-|DVWA LFI/RFI|<https://medium.com/@manjuteju008/understanding-file-inclusion-attack-using-dvwa-web-application-30d06846c269>|
-|SQL injection examples|[DC-9](/practice/vulnhub/dc-9.md), [DVWA SQL Injection](/dvwa-sqli.md), [SQLi Labs](/sqli-labs.md)|
+### DVWA Guide 2019
+
+<https://github.com/mrudnitsky/dvwa-guide-2019>
+
+### File Inclusions
+
+DVWA LFI/RFI: <https://medium.com/@manjuteju008/understanding-file-inclusion-attack-using-dvwa-web-application-30d06846c269>
+
+☝️ if a LFI exists, try to append `../` until you can read the `/etc/passwd` file
+
+cURL and browsers collapses `../` automatically, escape the `/` with `\` to ensure traversal
+
+### SQL injection
+
+#### Methodology:
+
+1. Identity query vulnerability
+2. Identify injection vector
+3. Identify number of columns (range) using `ORDER BY`
+4. Identify data display positions in the page
+5. Retrieve database/version/user information
+6. Enumerate tables
+7. Enumerate columns
+8. Retrieve data
+
+Examples: [DC-9](/practice/vulnhub/dc-9.md), [DVWA SQL Injection](/dvwa-sqli.md), [SQLi Labs](/sqli-labs.md)
 
 ## 4. Shells
 
