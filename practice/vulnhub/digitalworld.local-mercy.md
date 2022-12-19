@@ -685,3 +685,12 @@ uid=116(tomcat7) gid=126(tomcat7) groups=126(tomcat7)
 python -c 'import pty;pty.spawn("/bin/bash")'
 tomcat7@MERCY:/var/lib/tomcat7$
 ```
+
+Got the `/local.txt`:
+
+```console
+tomcat7@MERCY:/var/lib/tomcat7$ cat /local.txt
+cat /local.txt
+Plz have mercy on me! :-( :-(
+```
+
