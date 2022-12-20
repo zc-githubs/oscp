@@ -60,7 +60,16 @@ SecLists (`/usr/share/seclists/Discovery/Web-Content/`):
 1. `/usr/share/seclists/Discovery/Web-Content/combined_words.txt`
 2. `/usr/share/seclists/Discovery/Web-Content/combined_directories.txt`
 
-### 2.3. SMB `139`/`445`
+### 2.3. NFS/RPC `111`/`2049`
+
+|   |   |
+|---|---|
+|Identity if NFS is in use<br>If `111` and `2049` are listed, shares are enabled and we can mount them|`rpcinfo -p $TARGET`|
+|Show all mounts|`showmount -e $TARGET`|
+|Mount a NFS share|`mount -t nfs $TARGET:/$SHARE/mnt`|
+|Nmap scan with all NFS related scripts|`nmap -p 111 --script nfs*`|
+
+### 2.4. SMB `139`/`445`
 
 |   |   |
 |---|---|
@@ -76,7 +85,7 @@ SecLists (`/usr/share/seclists/Discovery/Web-Content/`):
 |Connect to share using username/hash|`smbclient -U $USERNAME --pw-nt-hash //$TARGET/$SHARE`|
 |Mount a share|`mount -t cifs -o username=$USERNAME,password=$PASSWORD //$TARGET/$SHARE /mnt`|
 
-### 2.4. LDAP `389`
+### 2.5. LDAP `389`
 
 ```console
 ldapsearch -b 'DC=lab,DC=vx' -H ldap://192.168.17.11 -D 'CN=Bind Account,CN=Users,DC=lab,DC=vx' -W
