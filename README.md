@@ -460,6 +460,16 @@ proxychains nmap -p- -A $TARGET_INTERNAL_NETWORK
 
 ## 7. Linux privilege escalation
 
+First checks - always run:
+
+|   |   |
+|---|---|
+|Check current user|`whoami`|
+|Check current user's group membership|`id`|
+|Check current user's sudo abilities (requires password)|`sudo -l`|
+|Check other users in the box|`cat /etc/passwd`|
+|Enumerate current user's home directory|`ls -lRa ~`|
+
 #### [linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 
 [Releases](https://github.com/carlospolop/PEASS-ng/releases)
