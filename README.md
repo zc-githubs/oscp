@@ -66,8 +66,8 @@ SecLists (`/usr/share/seclists/Discovery/Web-Content/`):
 |---|---|
 |Identity if NFS is in use<br>If `111` and `2049` are listed, shares are enabled and we can mount them|`rpcinfo -p $TARGET`|
 |Show all mounts|`showmount -e $TARGET`|
-|Mount a NFS share|`mount -t nfs $TARGET:/$SHARE/mnt`|
 |Nmap scan with all NFS related scripts|`nmap -p 111 --script nfs* $TARGET`|
+|Mount a NFS share|`mount -t nfs $TARGET:/$SHARE/mnt`|
 
 ### 2.4. SMB `139`/`445`
 
