@@ -197,7 +197,39 @@ Nmap done: 1 IP address (1 host up) scanned in 336.69 seconds
   <summary>HTTP <code>80</code></summary>
 
 ```console
-
+┌──(root㉿kali)-[~]
+└─# gobuster dir -u http://10.0.88.36 -b 403,404 -w /usr/share/seclists/Discovery/Web-Content/combined_words.txt
+===============================================================
+Gobuster v3.3
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.0.88.36
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/seclists/Discovery/Web-Content/combined_words.txt
+[+] Negative Status codes:   403,404
+[+] User Agent:              gobuster/3.3
+[+] Timeout:                 10s
+===============================================================
+2022/12/20 21:13:23 Starting gobuster in directory enumeration mode
+===============================================================
+/0                    (Status: 200) [Size: 2]
+/1                    (Status: 200) [Size: 2]
+/2                    (Status: 200) [Size: 2]
+/3                    (Status: 200) [Size: 2]
+/4                    (Status: 200) [Size: 2]
+/5                    (Status: 200) [Size: 2]
+/7                    (Status: 200) [Size: 2]
+/8                    (Status: 200) [Size: 30]
+/6                    (Status: 200) [Size: 2]
+/9                    (Status: 200) [Size: 2]
+/about                (Status: 200) [Size: 79]
+/contactus            (Status: 200) [Size: 27]
+/phpinfo.php          (Status: 200) [Size: 1]
+/uploads              (Status: 301) [Size: 234] [--> http://10.0.88.36/uploads/]
+Progress: 128278 / 128338 (99.95%)===============================================================
+2022/12/20 21:14:07 Finished
+===============================================================
 ```
 
 </details>
@@ -236,7 +268,7 @@ Progress: 128265 / 128338 (99.94%)==============================================
 </details>
 
 <details>
-  <summary>NFS <code>111</code>,<code>2049</code></summary>
+  <summary>NFS <code>111</code>, <code>2049</code></summary>
 
 ```console
 ┌──(root㉿kali)-[~]
